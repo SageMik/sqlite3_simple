@@ -1,7 +1,7 @@
 name: sqlite3_simple
 description: "基于 [Simple](https://github.com/wangfenjin/simple) (SQLite Fts5扩展) 和 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 的 Dart/Flutter 库，用于 SQLite 数据库中文和拼音的全文搜索。"
 version: 1.0.0
-homepage: https://github.com/SageMik
+homepage: https://github.com/SageMik/sqlite3_simple
 
 environment:
   sdk: '>=3.4.0 <4.0.0'
@@ -17,7 +17,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^5.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -2,7 +2,7 @@
 
 基于 [Simple](https://github.com/wangfenjin/simple) (SQLite Fts5扩展) 和 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 的 Dart/Flutter 库，用于 SQLite 数据库中文和拼音的全文搜索。
 
-![示例](example.png)
+![示例](example.jpg)
 
 ## 平台支持
 
@@ -30,7 +30,7 @@ Dart 提供 FFI 以调用 SQLite、Simple 等 C/C++ 库；
 flutter pub add sqlite3 sqlite3_flutter_libs
 ```
 
-其中 `sqlite3_flutter_libs` 包含了 SQLite 的本地库(Native Library)。若需自定义和自行编译SQLite，或环境中已存在 SQLite (可通过 `DynamicLibrary` 加载)，请参阅 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3)、[sqlite3_flutter_libs](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3_flutter_libs) 相关说明。
+其中 `sqlite3_flutter_libs` 包含了 SQLite 的原生库(Native Library)。若需 自定义和自行编译SQLite 或 环境中已存在SQLite ，可通过 `DynamicLibrary` 加载，具体请参考 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3#manually-providing-sqlite3-libraries)、[sqlite3_flutter_libs](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3_flutter_libs) 的做法。
 
 ### 2. 添加本库并导入依赖
 
@@ -49,13 +49,15 @@ import 'package:sqlite3_simple/sqlite3_simple.dart';
 sqlite3.loadSimpleExtension();
 ```
 
-如需启用结巴分词(Jieba)，请调用 `sqlite3.writeJiebaDict()` 将字典保存到可访问的路径，例如：
+如需启用结巴分词(Jieba)，请调用 `sqlite3.saveJiebaDict()` 将字典保存到可访问的路径，例如：
 
 ```dart
+import 'package:path_provider/path_provider.dart';
+
 final docDir = await getApplicationDocumentsDirectory();
 final jiebaDictPath = join(docDir.path, "cpp_jieba");
 
-final jiebaDictSql = await sqlite3.writeJiebaDict(jiebaDictPath);
+final jiebaDictSql = await sqlite3.saveJiebaDict(jiebaDictPath);
 ```
 
 返回值 `jiebaDictSql` 是 `"SELECT jieba_dict('$jiebaDictPath')"`。
@@ -116,8 +118,8 @@ List<MainTableRow> selectJieba(String value) {
 
 ## 致谢
 
-[Simple](https://github.com/wangfenjin/simple)：支持中文和拼音的 SQLite fts5 全文搜索扩展。
+[Simple](https://github.com/wangfenjin/simple)：支持中文和拼音的 SQLite FTS5 全文搜索扩展。
 
-[sqlite3.dart](https://github.com/simolus3/sqlite3.dart)：Dart 的 SQLite3 绑定。
+[sqlite3.dart](https://github.com/simolus3/sqlite3.dart)：SQLite3 的 Dart FFI 绑定。
 
-[extended_text](https://github.com/fluttercandies/extended_text/)：官方Text扩展组件，支持特殊文本效果。
+[extended_text](https://github.com/fluttercandies/extended_text/)：Flutter Text 的扩展组件，支持特殊文本效果。

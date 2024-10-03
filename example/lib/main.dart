@@ -1,10 +1,10 @@
-import 'package:extended_text/extended_text.dart';
-import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'dart:async';
 
-import 'package:sqlite3/sqlite3.dart' hide Row;
+import 'package:extended_text/extended_text.dart';
+import 'package:flutter/material.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:sqlite3/sqlite3.dart' hide Row;
 import 'package:sqlite3_simple_example/util/custom_text.dart';
 import 'package:sqlite3_simple_example/util/zero_width_text.dart';
 
@@ -58,21 +58,9 @@ class _MyAppState extends State<MyApp> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                TapRegion(
-                  onTapOutside: (_) =>
-                      FocusManager.instance.primaryFocus?.unfocus(),
-                  child: SearchBar(
-                    leading: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4),
-                      child: Icon(Icons.search),
-                    ),
-                    elevation: const WidgetStatePropertyAll(0),
-                    shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8))),
-                    onChanged: onSearchChanged,
-                  ),
-                ),
-                const SizedBox(height: 16),
+                buildSearchBar(),
+                buildSearchFilter(),
+                const SizedBox(height: 8),
                 Expanded(
                   child: AnimatedSwitcher(
                     duration: kThemeChangeDuration,
@@ -89,12 +77,126 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+  static const tokenizerMap = {"jieba": "结巴", "simple": "Simple"};
+  String tokenizer = tokenizerMap.keys.first;
+
+  void onSearchChanged(String value) {
+    value = value.trim();
+    setState(() {
+      showClearButton = value.isNotEmpty;
+      if (!showClearButton) {
+        results = dao.selectAll();
+        return;
+      }
+      results = dao.search(value, tokenizer);
+    });
+  }
+
+  void onUpdatePressed() {
+    dao.updateAll();
+    onSearchChanged(searchController.text);
+  }
+
+  final searchController = SearchController();
+  var showClearButton = false;
+
+  Widget buildSearchBar() {
+    return TapRegion(
+      onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+      child: SearchBar(
+        controller: searchController,
+        leading: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4),
+          child: Icon(Icons.search),
+        ),
+        trailing: [
+          if (showClearButton)
+            IconButton(
+                onPressed: () {
+                  searchController.text = "";
+                  onSearchChanged("");
+                },
+                icon: const Icon(Icons.clear))
+        ],
+        elevation: const WidgetStatePropertyAll(0),
+        shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+        onChanged: onSearchChanged,
+      ),
+    );
+  }
+
+  bool isHighlight = true;
+
+  Widget buildSearchFilter() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            const Text(
+              "分词器：",
+              style: TextStyle(fontSize: 16),
+            ),
+            DropdownButton<String>(
+              value: tokenizer,
+              items: tokenizerMap.entries
+                  .map((e) => DropdownMenuItem(
+                        value: e.key,
+                        child: Text(e.value),
+                      ))
+                  .toList(),
+              onChanged: (value) {
+                setState(() {
+                  tokenizer = value!;
+                  onSearchChanged(searchController.text);
+                });
+              },
+            ),
+          ],
+        ),
+        const SizedBox(width: 8),
+        InkWell(
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onTap: () {
+            setState(() {
+              isHighlight = !isHighlight;
+              onSearchChanged(searchController.text);
+            });
+          },
+          child: Row(
+            children: [
+              IgnorePointer(
+                child: Checkbox(value: isHighlight, onChanged: (_) {}),
+              ),
+              const Text("是否高亮", style: TextStyle(fontSize: 16))
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        const Expanded(child: SizedBox()),
+        IconButton(
+          style: ButtonStyle(
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)))),
+          onPressed: onUpdatePressed,
+          icon: const Icon(Icons.refresh),
+        )
+      ],
+    );
+  }
+
   Widget buildListView() {
-    final highlightTextBuilder = CustomTextBuilder([
-      ZeroWidthText(
-        const TextStyle(color: Colors.red),
-      )
-    ]);
+    final highlightTextBuilder = isHighlight
+        ? CustomTextBuilder([
+            ZeroWidthText(
+              const TextStyle(color: Colors.red),
+            )
+          ])
+        : null;
     return ListView.builder(
       itemCount: results!.length,
       itemBuilder: (context, index) {
@@ -111,38 +213,47 @@ class _MyAppState extends State<MyApp> {
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ExtendedText(
-                      r.title,
-                      style: const TextStyle(fontSize: 20),
-                      specialTextSpanBuilder: highlightTextBuilder,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            ExtendedText(
+                              r.title,
+                              style: const TextStyle(fontSize: 20),
+                              specialTextSpanBuilder: highlightTextBuilder,
+                            ),
+                          ],
+                        ),
+                        ExtendedText(
+                          r.content,
+                          specialTextSpanBuilder: highlightTextBuilder,
+                        ),
+                      ],
                     ),
-                    ExtendedText(
-                      r.content,
-                      specialTextSpanBuilder: highlightTextBuilder,
-                    ),
-                  ],
-                ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        r.insertDate.toString(),
+                        textAlign: TextAlign.end,
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ],
+                  )
+                ],
               ),
             ),
           ],
         );
       },
     );
-  }
-
-  void onSearchChanged(String value) {
-    value = value.trim();
-    setState(() {
-      if (value.isEmpty) {
-        results = dao.selectAll();
-        return;
-      }
-      results = dao.selectJieba(value);
-    });
   }
 }
