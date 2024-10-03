@@ -57,6 +57,7 @@ class _MyAppState extends State<MyApp> {
           child: Container(
             padding: const EdgeInsets.all(16),
             child: Column(
+              mainAxisSize: MainAxisSize.max,
               children: [
                 buildSearchBar(),
                 buildSearchFilter(),

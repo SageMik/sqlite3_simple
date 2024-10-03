@@ -2,13 +2,13 @@
 
 基于 [Simple](https://github.com/wangfenjin/simple) (SQLite Fts5扩展) 和 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 的 Dart/Flutter 库，用于 SQLite 数据库中文和拼音的全文搜索。
 
-![示例](example.jpg)
+![示例](example/example.jpg)
 
 ## 平台支持
 
-| Android | iOS    |
-| ------- | ------ |
-| ✔      | 开发中 |
+| Android | iOS |
+| ------- | --- |
+| ✔      | ✔  |
 
 ## 前置准备
 
@@ -92,25 +92,24 @@ print(init);
 请参阅 [SQLite FTS5 Extension](https://sqlite.org/fts5.html) 和 [Simple](https://github.com/wangfenjin/simple) 的说明，根据需要调用相应函数如 `jieba_query`、`simple_query`、`highlight`、  `simple_highlight` 等，执行所需的查询，例如 (  `./expample/lib/dao.dart` )：
 
 ```dart
-List<MainTableRow> selectJieba(String value) {
-  const wrapperSql = "'${ZeroWidth.start}', '${ZeroWidth.end}'";
-  final resultSet = db.select(
-      "SELECT "
-      "simple_highlight($fts5Table, 0, $wrapperSql) AS $title, "
-      "simple_highlight($fts5Table, 1, $wrapperSql) AS $content, "
-      "$mainTable.$id "
-      "FROM $fts5Table "
-      "JOIN $mainTable ON $fts5Table.rowid = $mainTable.$id "
-      "WHERE $fts5Table MATCH jieba_query(?);",
-      [value]);
-  return _toMainTableRows(resultSet);
-}
+  List<MainTableRow> searchByJieba(String value) {
+    const wrapperSql = "'${ZeroWidth.start}', '${ZeroWidth.end}'";
+    final resultSet = db.select(
+        "SELECT "
+        "rowid AS $id, "
+        "simple_highlight($fts5Table, 0, $wrapperSql) AS $title, "
+        "simple_highlight($fts5Table, 1, $wrapperSql) AS $content, "
+        "$insertDate "
+        "FROM $fts5Table "
+        "WHERE $fts5Table MATCH jieba_query(?);",
+        [value]);
+    return _toMainTableRows(resultSet);
+  }
 ```
 
 ## 待办
 
 - [ ] 添加其他平台的适配。
-  - [ ] iOS
   - [ ] Windows
   - [ ] Linux
   - [ ] MacOS
