@@ -37,7 +37,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.sagemik.sqlite3_simple
+        package: io.github.sagemik.sqlite3_simple
         pluginClass: Sqlite3SimplePlugin
       ios:
         pluginClass: Sqlite3SimplePlugin

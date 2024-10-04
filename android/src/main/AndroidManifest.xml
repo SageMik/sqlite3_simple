@@ -1,3 +1,3 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.sagemik.sqlite3_simple">
+  package="io.github.sagemik.sqlite3_simple">
 </manifest>

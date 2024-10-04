@@ -1,4 +1,4 @@
-package com.sagemik.sqlite3_simple_example
+package io.github.sagemik.sqlite3_simple_example
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,4 +1,4 @@
-package com.sagemik.sqlite3_simple
+package io.github.sagemik.sqlite3_simple
 
 import androidx.annotation.NonNull
 
