@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'sqlite3_simple'
-  s.version          = '0.0.1'
+  s.version          = '1.0.0'
   s.summary          = '基于 Simple (支持中文和拼音的 sqlite3 fts5 拓展) 的 Flutter 库。'
   s.description      = <<-DESC
 基于 Simple (支持中文和拼音的 sqlite3 fts5 拓展) 的 Flutter 库。

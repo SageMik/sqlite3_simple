@@ -16,7 +16,7 @@ SQLite 通过 [SQLite FTS5 Extension](https://sqlite.org/fts5.html) 提供全文
 
 Dart 提供 FFI 以调用 SQLite、Simple 等 C/C++ 库；
 
-本库通过 [Simple](https://github.com/wangfenjin/simple) 实现中文拼音全文搜索，通过 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 连接数据库。
+本库通过 [Simple](https://github.com/wangfenjin/simple) 实现中文拼音全文搜索，通过 [sqlite3.dart/sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 连接数据库。
 
 请参阅相关文档，或 `example` 的具体示例，以构建和操作数据库。
 
@@ -30,7 +30,7 @@ Dart 提供 FFI 以调用 SQLite、Simple 等 C/C++ 库；
 flutter pub add sqlite3 sqlite3_flutter_libs
 ```
 
-其中 `sqlite3_flutter_libs` 包含了 SQLite 的原生库(Native Library)。若需 自定义和自行编译SQLite 或 环境中已存在SQLite ，可通过 `DynamicLibrary` 加载，具体请参考 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3#manually-providing-sqlite3-libraries)、[sqlite3_flutter_libs](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3_flutter_libs) 的做法。
+其中 `sqlite3_flutter_libs` 包含了 SQLite 的原生库(Native Library)。若需 自定义和自行编译SQLite 或 环境中已存在SQLite ，可通过 `DynamicLibrary` 加载，具体请参考 [sqlite3.dart/sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3#manually-providing-sqlite3-libraries)、[sqlite3.dart/sqlite3_flutter_libs](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3_flutter_libs) 的做法。
 
 ### 2. 添加本库并导入依赖
 
@@ -64,7 +64,7 @@ final jiebaDictSql = await sqlite3.saveJiebaDict(jiebaDictPath);
 
 ### 4. 打开数据库
 
-参阅 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 相关说明，通过 `sqlite3.open()` 或 `sqlite3.openInMemory()` 打开数据库。
+参阅 [sqlite3.dart/sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 相关说明，通过 `sqlite3.open()` 或 `sqlite3.openInMemory()` 打开数据库。
 
 ```dart
 final db = sqlite3.open('$filename');
