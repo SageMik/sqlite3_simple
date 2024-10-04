@@ -1,14 +1,14 @@
 # sqlite3_simple
 
-基于 [Simple](https://github.com/wangfenjin/simple) (SQLite Fts5扩展) 和 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 的 Dart/Flutter 库，用于 SQLite 数据库中文和拼音的全文搜索。
+基于 [Simple](https://github.com/wangfenjin/simple) (支持中文和拼音的 SQLite fts5 全文搜索扩展) 和 [sqlite3.dart](https://github.com/simolus3/sqlite3.dart) 的 Flutter 库，用于 SQLite 中文和拼音全文搜索。
 
 ![示例](example/example.jpg)
 
 ## 平台支持
 
 | Android | iOS |
-| ------- | --- |
-| ✔      | ✔  |
+|---------|-----|
+| ✔       | ✔   |
 
 ## 前置准备
 
