@@ -25,9 +25,15 @@ class Dao {
   /// 初始化 Simple 分词器，并将结巴分词字典文件保存到本地
   Future<void> init(String jiebaDictPath) async {
     sqlite3.loadSimpleExtension();
+    // 如果没有引入 sqlite3 依赖，可以用如下语句：
+    // Simple.loadExtension();
 
     final jiebaDictSql =
         await sqlite3.saveJiebaDict(jiebaDictPath, overwriteWhenExist: true);
+    // 如果没有引入 sqlite3 依赖，可以用如下语句：
+    // final jiebaDictSql =
+    //     await Simple.saveJiebaDict(jiebaDictPath, overwriteWhenExist: true);
+
     print("用于设置结巴分词字典路径：$jiebaDictSql");
 
     db = dbBuilder();

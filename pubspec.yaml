@@ -38,9 +38,11 @@ flutter:
     platforms:
       android:
         package: io.github.sagemik.sqlite3_simple
-        pluginClass: Sqlite3SimplePlugin
+        ffiPlugin: true
       ios:
         pluginClass: Sqlite3SimplePlugin
+      windows:
+        ffiPlugin: true
 
   # To add assets to your plugin package, add an assets section, like this:
   assets:

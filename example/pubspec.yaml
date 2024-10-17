@@ -34,6 +34,9 @@ dependencies:
   sqlite3_flutter_libs: ^0.5.24
   infinite_listview: ^1.1.0
   extended_text: ^14.1.0
+  flutter_localizations:
+    sdk: flutter
+  intl: any
 
 dev_dependencies:
   integration_test:

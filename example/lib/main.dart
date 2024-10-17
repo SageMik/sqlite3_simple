@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart' hide Row;
@@ -47,6 +48,14 @@ class _MyAppState extends State<MyApp> {
     final colorScheme = Theme.of(context).colorScheme;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('zh', 'CN'), // 通过国际化设置中文环境以让 Flutter 使用正确的中文字体
+      ],
       home: Scaffold(
         appBar: AppBar(
           title: const Text('测试'),
@@ -93,7 +102,11 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  void onUpdatePressed() {
+  Future<void> onUpdatePressed() async {
+    setState(() {
+      results = null;
+    });
+    await Future.delayed(const Duration(milliseconds: 200));
     dao.updateAll();
     onSearchChanged(searchController.text);
   }
@@ -102,28 +115,35 @@ class _MyAppState extends State<MyApp> {
   var showClearButton = false;
 
   Widget buildSearchBar() {
-    return TapRegion(
-      onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-      child: SearchBar(
-        controller: searchController,
-        leading: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4),
-          child: Icon(Icons.search),
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Expanded(
+          child: TapRegion(
+            onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+            child: SearchBar(
+              controller: searchController,
+              leading: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4),
+                child: Icon(Icons.search),
+              ),
+              trailing: [
+                if (showClearButton)
+                  IconButton(
+                      onPressed: () {
+                        searchController.text = "";
+                        onSearchChanged("");
+                      },
+                      icon: const Icon(Icons.clear))
+              ],
+              elevation: const WidgetStatePropertyAll(0),
+              shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8))),
+              onChanged: onSearchChanged,
+            ),
+          ),
         ),
-        trailing: [
-          if (showClearButton)
-            IconButton(
-                onPressed: () {
-                  searchController.text = "";
-                  onSearchChanged("");
-                },
-                icon: const Icon(Icons.clear))
-        ],
-        elevation: const WidgetStatePropertyAll(0),
-        shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-        onChanged: onSearchChanged,
-      ),
+      ],
     );
   }
 
