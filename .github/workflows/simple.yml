@@ -1,0 +1,45 @@
+name: 编译 Simple 原生库
+
+on:
+  push:
+    branches: [ "simple-native" ]
+  pull_request:
+    branches: [ "simple-native" ]
+  workflow_dispatch:
+
+jobs:
+  Windows-CMake-DLL:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Flutter 不支持 32位 Windows，所以只编译 x64 即可，不需要 x86
+      - name: '设置构建类型和构建目录'
+        id: preset
+        run: |
+          echo "BUILD_TYPE=Release" >> $env:GITHUB_OUTPUT
+          echo "BUILD_ARCH=X64" >> $env:GITHUB_OUTPUT
+          echo "BUILD_DIR=${{ github.workspace }}/windows_build" >> $env:GITHUB_OUTPUT
+      
+      - name: 'CMake 编译，通过 VS16 生成器'
+        uses: lukka/run-cmake@v3
+        with:
+          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+          cmakeListsTxtPath: "${{ github.workspace }}/CMakeLists.txt"
+          buildDirectory: ${{ steps.preset.outputs.BUILD_DIR }}
+          useVcpkgToolchainFile: true
+          cmakeBuildType: ${{ steps.preset.outputs.BUILD_TYPE }}
+          buildWithCMake: true
+          cmakeGenerator: VS16Win64
+          cmakeAppendedArgs: -A ${{ steps.preset.outputs.BUILD_ARCH }}
+          buildWithCMakeArgs: --config ${{ steps.preset.outputs.BUILD_TYPE }}
+        
+      - name: '上传编译产物'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: "${{ steps.preset.outputs.BUILD_DIR }}/_deps/simple-build/src/${{ steps.preset.outputs.BUILD_TYPE }}/simple.dll"
+          retention-days: 90
+          compression-level: 0
+          overwrite: true
