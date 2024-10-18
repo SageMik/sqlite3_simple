@@ -23,11 +23,11 @@ Pod::Spec.new do |s|
   # 推测是因为 Dart FFI 直接调用，iOS 原生没有调用，而被优化，
   # 因此通过 force_load 强制加载
   # Simple git_tag 473fc893e4c537a560c3109ca81e24187e920e2d
-  s.pod_target_xcconfig = { 
-    'DEFINES_MODULE' => 'YES', 
+  s.pod_target_xcconfig = {
+    'DEFINES_MODULE' => 'YES',
     'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386',
-    "OTHER_LDFLAGS[sdk=iphonesimulator*]" => "-force_load $(PODS_TARGET_SRCROOT)/Libs/Release-iphonesimulator/libsimple.a",
-    "OTHER_LDFLAGS" => "-force_load $(PODS_TARGET_SRCROOT)/Libs/Release-iphoneos/libsimple.a" ,
+    "OTHER_LDFLAGS[sdk=iphonesimulator*]" => "-force_load $(PODS_TARGET_SRCROOT)/iphone_simulator/libsimple.a",
+    "OTHER_LDFLAGS" => "-force_load $(PODS_TARGET_SRCROOT)/iphone_os/libsimple.a" ,
   }
   s.swift_version = '5.0'
 end
