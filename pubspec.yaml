@@ -29,6 +29,9 @@ flutter:
         pluginClass: Sqlite3SimplePlugin
       windows:
         ffiPlugin: true
+      macos:
+        ffiPlugin: true
+#        pluginClass: Sqlite3SimplePlugin
 
   assets:
     - assets/cpp_jieba_dict/
