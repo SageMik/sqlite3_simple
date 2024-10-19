@@ -1,15 +1,14 @@
 # sqlite3_simple
 
-[![Pub Package](https://img.shields.io/pub/v/sqlite3_simple)](https://pub.dev/packages/sqlite3_simple)
+[![Pub Package](https://img.shields.io/pub/v/sqlite3_simple)](https://pub.dev/packages/sqlite3_simple)  [![simple-native-android](https://img.shields.io/maven-central/v/io.github.sagemik/simple-native-android?label=simple-native-android)](https://central.sonatype.com/artifact/io.github.sagemik/simple-native-android)  [![simple-native](https://img.shields.io/github/actions/workflow/status/SageMik/sqlite3_simple/simple.yml?branch=simple-native&label=simple-native)](https://github.com/SageMik/sqlite3_simple/tree/simple-native)
 
 基于 [Simple](https://github.com/wangfenjin/simple) (支持中文和拼音的 SQLite fts5 全文搜索扩展) 和 [sqlite3.dart](https://github.com/simolus3/sqlite3.dart) 的 Flutter 库，用于 SQLite 中文和拼音全文搜索。
 
-| 支持平台                                                                                                            | 示例                                   |
-| ------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| **Android<br />([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v1.1.0/example.apk))** | ![Android 示例](img/example-android.jpg) |
-| **iOS**                                                                                                       | ![iOS 示例](img/example-ios.png)         |
-| **Windows**                                                                                                   | ![Windows 示例](img/example-windows.jpg) |
-| **MacOS**                                                                                                     | ![MacOS 示例](img/example-macos.png)     |
+| 支持平台                                                                                                                           | 示例                                            |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| **Android<br />([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v1.0.1/example.apk))<br /><br />iOS** | ![Android, iOS 示例](img/example-android-ios.jpg) |
+| **Windows**                                                                                                                  | ![Windows 示例](img/example-windows.jpg)          |
+| **MacOS**                                                                                                                    | ![MacOS 示例](img/example-macos.png)              |
 
 ## 前置准备
 
@@ -76,7 +75,7 @@ final jiebaDictSql = await sqlite3.saveJiebaDict(jiebaDictPath);
 
 > [!TIP]
 >
-> [sqlite3.dart/sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 本身只是对 SQLite 的 Dart FFI 绑定，底层还是 SQLite 原生库实现的一系列操作。理论上，如果能通过其他方式操作数据库，使用本依赖是可以不引入 `sqlite3` 的，因此，提供了 `Simple` 和 `sqlite3` 两种方式进行调用，根据实际情况任选其一即可。
+> [sqlite3.dart/sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 本身只是对 SQLite 的 Dart FFI 绑定，底层还是 SQLite 原生库实现的一系列操作。理论上，如果能通过其他方式操作数据库，使用本依赖是可以不引入 `sqlite3` 的（尚未验证）。本库提供了 `Simple` 和 `sqlite3` 两种方式进行调用，根据实际情况任选其一即可。
 
 ### 4. 打开数据库
 
@@ -86,7 +85,7 @@ final jiebaDictSql = await sqlite3.saveJiebaDict(jiebaDictPath);
 final db = sqlite3.open('$filename');
 ```
 
-如需启用结巴分词，请让数据库执行上一步的 `jiebaDictSql` 语句，以修改 Simple 扩展中结巴分词字典的位置：
+如需启用结巴分词，请让数据库执行上一步的 `jiebaDictSql` 语句，以修改 Simple 扩展读取结巴分词字典的路径：
 
 ```dart
 db.execute(jiebaDictSql);
@@ -95,8 +94,7 @@ db.execute(jiebaDictSql);
 推荐在正式查询前执行一次查询，提前加载，例如：
 
 ```dart
-final init = db.select("SELECT jieba_query('Jieba分词初始化（提前加载避免后续等待）')");
-print(init);
+db.select("SELECT jieba_query('Jieba分词初始化（提前加载避免后续等待）')");
 ```
 
 ### 5. 查询
@@ -122,7 +120,8 @@ print(init);
 ## 待办
 
 - [ ] 添加其他平台的适配。
-  - [ ] MacOS
+  - [X] Windows
+  - [X] MacOS
   - [ ] Linux
 - [ ] 添加用户自定义字典。
 

@@ -1,5 +1,5 @@
 group = "io.github.sagemik.sqlite3_simple"
-version = "1.0.0"
+version = "1.0.1"
 
 buildscript {
     ext.kotlin_version = "1.7.10"
@@ -14,6 +14,22 @@ buildscript {
     }
 }
 
+// 发布前 Maven
+//rootProject.allprojects {
+//    repositories {
+////        mavenLocal()
+//
+//        // 发布前测试
+//        maven {
+//            name = "centralManualTesting"
+//            url "https://central.sonatype.com/api/v1/publisher/deployments/download/"
+//            credentials(HttpHeaderCredentials)
+//            authentication {
+//                header(HttpHeaderAuthentication)
+//            }
+//        }
+//    }
+//}
 
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
@@ -45,5 +61,6 @@ android {
 }
 
 dependencies {
-    implementation("io.github.sagemik:simple-android-native:0.0.1")
+//    api("io.github.sagemik:simple-native-android:1.0.1") // 本地 Maven
+    implementation("io.github.sagemik:simple-native-android:1.0.1")
 }
