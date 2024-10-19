@@ -7,39 +7,72 @@ on:
     branches: [ "simple-native" ]
   workflow_dispatch:
 
+env:
+  BUILD_TYPE: Release
+  BUILD_DIR: ${{ github.workspace }}/build
+
 jobs:
-  Windows-CMake-DLL:
+  Windows-dll:
     runs-on: windows-latest
+    env:
+      BUILD_ARCH: X64
 
     steps:
       - uses: actions/checkout@v4
 
-      # Flutter 不支持 32位 Windows，所以只编译 x64 即可，不需要 x86
-      - name: '设置构建类型和构建目录'
-        id: preset
-        run: |
-          echo "BUILD_TYPE=Release" >> $env:GITHUB_OUTPUT
-          echo "BUILD_ARCH=X64" >> $env:GITHUB_OUTPUT
-          echo "BUILD_DIR=${{ github.workspace }}/windows_build" >> $env:GITHUB_OUTPUT
-      
       - name: 'CMake 编译，通过 VS16 生成器'
         uses: lukka/run-cmake@v3
         with:
           cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
           cmakeListsTxtPath: "${{ github.workspace }}/CMakeLists.txt"
-          buildDirectory: ${{ steps.preset.outputs.BUILD_DIR }}
+          buildDirectory: ${{ env.BUILD_DIR }}
           useVcpkgToolchainFile: true
-          cmakeBuildType: ${{ steps.preset.outputs.BUILD_TYPE }}
+          cmakeBuildType: ${{ env.BUILD_TYPE }}
           buildWithCMake: true
           cmakeGenerator: VS16Win64
-          cmakeAppendedArgs: -A ${{ steps.preset.outputs.BUILD_ARCH }}
-          buildWithCMakeArgs: --config ${{ steps.preset.outputs.BUILD_TYPE }}
+          cmakeAppendedArgs: -A ${{ env.BUILD_ARCH }}
+          buildWithCMakeArgs: --config ${{ env.BUILD_TYPE }}
         
       - name: '上传编译产物'
         uses: actions/upload-artifact@v4
         with:
           name: windows
-          path: "${{ steps.preset.outputs.BUILD_DIR }}/_deps/simple-build/src/${{ steps.preset.outputs.BUILD_TYPE }}/simple.dll"
+          path: "${{ env.BUILD_DIR }}/_deps/simple-build/src/${{ env.BUILD_TYPE }}/simple.dll"
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 0
+          overwrite: true
+
+
+  MacOS-dylib:
+    runs-on: macos-latest
+    env:
+      BUILD_FILE_PATH: _deps/simple-build/src/libsimple.dylib
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 'CMake 编译'
+        uses: lukka/run-cmake@v3
+        with:
+          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+          cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+          buildDirectory: ${{ env.BUILD_DIR }}
+          cmakeBuildType: ${{ env.BUILD_TYPE }}
+          buildWithCMake: true
+          buildWithCMakeArgs: --config ${{ env.BUILD_TYPE }}
+
+      - name: '查看架构'
+        run: |
+          file ${{ env.BUILD_FILE_PATH }}
+        working-directory: ${{ env.BUILD_DIR }}
+        
+      - name: '上传编译产物'
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          if-no-files-found: error
+          path: "${{ env.BUILD_DIR }}/${{ env.BUILD_FILE_PATH }}"
           retention-days: 90
           compression-level: 0
           overwrite: true

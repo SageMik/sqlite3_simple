@@ -1,14 +1,14 @@
 # simple-native
 
-该分支用于编译和维护不含 SQLite 的 Simple 原生库，以供主分支使用。
+该分支编译和维护用于主分支的 Simple 原生库。
 
 通过 Github Actions 进行持续集成（CI），详见 [`.github/workflow/simple.yaml`](.github/workflows/simple.yml) 。
 
-| 平台              | 持续集成                                                                                                                                         |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Android** | 否，通过 Gradle & CMake 编译：[simple-android-native](https://github.com/SageMik/simple-android-native)，<br />Android 项目可从 Maven Central 引入 |
-| **iOS**     | 待集成，手动编译产物在主分支                                                                                                                     |
-| **Windows** | ✔                                                                                                                                               |
-| **MacOS**   | 待集成                                                                                                                                           |
-| **Linux**   | 待定                                                                                                                                             |
-| **Web**     | 待定                                                                                                                                             |
+| 平台              | 持续集成                                                                                                          | 架构                                      | 备注                        |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | --------------------------- |
+| **Android** | 无，通过 Gradle mavenCentral() 导入：<br />[simple-android-native](https://github.com/SageMik/simple-android-native) | armeabi-v7a, arm64-v8a,<br />x86, x86_64 | Flutter Android 不支持 x86 |
+| **iOS**     | 待集成，手动编译产物在主分支                                                                                      | x86_64, arm64 (模拟器)                    |                             |
+| **Windows** | simple.dll                                                                                                        | x64                                       | Flutter Windows 仅支持 x64 |
+| **MacOS**   | libsimple.dylib                                                                                                   | x86_64, arm64                             |                             |
+| **Linux**   | 待定                                                                                                              |                                           |                             |
+| **Web**     | 待定                                                                                                              |                                           |                             |
