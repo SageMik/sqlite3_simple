@@ -56,3 +56,8 @@ android {
 flutter {
     source = "../.."
 }
+
+//dependencies {
+//    // [Android SQLite 覆盖] 不使用 sqlite3_flutter_libs 的 libsqlite.so，转而使用如下实现的 libsqlite3x.so
+//    implementation('com.github.requery:sqlite-android:3.45.0')
+//}

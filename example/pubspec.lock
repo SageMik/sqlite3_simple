@@ -219,10 +219,10 @@ packages:
     dependency: transitive
     description:
       name: path_provider_android
-      sha256: "6f01f8e37ec30b07bc424b4deabac37cacb1bc7e2e515ad74486039918a37eb7"
+      sha256: c464428172cb986b758c6d1724c603097febb8fb855aa265aeecc9280c294d4a
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "2.2.10"
+    version: "2.2.12"
   path_provider_foundation:
     dependency: transitive
     description:
@@ -304,10 +304,10 @@ packages:
     dependency: "direct main"
     description:
       name: sqlite3_flutter_libs
-      sha256: "62bbb4073edbcdf53f40c80775f33eea01d301b7b81417e5b3fb7395416258c1"
+      sha256: ccd29dd6cf6fb9351fa07cd6f92895809adbf0779c1d986acf5e3d53b3250e33
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "0.5.24"
+    version: "0.5.25"
   sqlite3_simple:
     dependency: "direct main"
     description:
@@ -399,10 +399,10 @@ packages:
     dependency: transitive
     description:
       name: xdg_directories
-      sha256: faea9dee56b520b55a566385b84f2e8de55e7496104adada9962e0bd11bcff1d
+      sha256: "7a3f37b05d989967cdddcbb571f1ea834867ae2faa29725fd085180e0883aa15"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "1.0.4"
+    version: "1.1.0"
 sdks:
   dart: ">=3.5.0 <4.0.0"
   flutter: ">=3.24.0"

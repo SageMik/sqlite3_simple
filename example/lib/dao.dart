@@ -1,5 +1,7 @@
+import 'dart:ffi';
 import 'dart:math';
 
+import 'package:sqlite3/open.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:sqlite3_simple/sqlite3_simple.dart';
 import 'package:sqlite3_simple_example/util/random_words.dart';
@@ -24,6 +26,8 @@ class Dao {
 
   /// 初始化 Simple 分词器，并将结巴分词字典文件保存到本地
   Future<void> init(String jiebaDictPath) async {
+    // _overrideForAndroid();
+
     sqlite3.loadSimpleExtension();
 
     final jiebaDictSql =
@@ -87,6 +91,14 @@ class Dao {
         "$newInsert"
         "END;");
   }
+
+  // /// 自定义 SQLite Android 示例，请全局搜索 Android SQLite 覆盖 来查看与此相关的配置。
+  // /// 如果你想自定义 SQLite 原生库，可以参考 本方法 或 sqlite3 的文档说明。
+  // /// 本方法将原来 sqlite3_flutter_libs 的 [libsqlite.so]，替换为了 sqlite-android 的 [libsqlite3x.so]
+  // void _overrideForAndroid() {
+  //   open.overrideFor(
+  //       OperatingSystem.android, () => DynamicLibrary.open("libsqlite3x.so"));
+  // }
 
   /// 将查询结果转为实体类
   List<MainTableRow> _toMainTableRows(ResultSet resultSet) {

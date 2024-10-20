@@ -34,7 +34,7 @@ flutter pub add sqlite3 sqlite3_flutter_libs
 
 > [!TIP]
 >
-> 若需要自定义和自行编译 SQLite 原生库，或环境已存在 SQLite 原生库，可不引入 `sqlite3_flutter_libs` ，自行通过 `DynamicLibrary` 加载，具体请参考 [sqlite3.dart/sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3#manually-providing-sqlite3-libraries)、[sqlite3.dart/sqlite3_flutter_libs](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3_flutter_libs) 的做法。
+> 若需要自定义和自行编译 SQLite 原生库，或环境已存在 SQLite 原生库，可不引入 `sqlite3_flutter_libs` ，自行通过 `DynamicLibrary`、`open.overrideFor` 加载和覆盖，具体请参考 [sqlite3.dart/sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3#manually-providing-sqlite3-libraries) 的说明，或 `example` 中带有 *Android SQLite 覆盖* 标识的简单示例（可以全局搜索该标识）。
 
 ### 2. 添加本库并导入依赖
 
