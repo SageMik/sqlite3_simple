@@ -59,7 +59,7 @@ class Dao {
         "$insertDate INTEGER"
         ");");
 
-    /// Fts5虚表
+    /// FTS5虚表
     db.execute("CREATE VIRTUAL TABLE $fts5Table USING fts5("
         "$title, $content, $insertDate UNINDEXED, "
         "tokenize = '$tokenizer',"
