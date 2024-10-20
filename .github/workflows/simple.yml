@@ -43,16 +43,16 @@ jobs:
           compression-level: 0
           overwrite: true
 
-
-  MacOS-dylib:
+  MacOS-dylib_iOS-a:
     runs-on: macos-latest
     env:
       BUILD_FILE_PATH: _deps/simple-build/src/libsimple.dylib
+      BUILD_RESULT_DIR_IOS: ${{ github.workspace }}/build-ios/_deps/simple-build/src
     
     steps:
       - uses: actions/checkout@v4
 
-      - name: 'CMake 编译'
+      - name: '[MacOS] CMake 编译'
         uses: lukka/run-cmake@v3
         with:
           cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
@@ -62,17 +62,39 @@ jobs:
           buildWithCMake: true
           buildWithCMakeArgs: --config ${{ env.BUILD_TYPE }}
 
-      - name: '查看架构'
-        run: |
-          file ${{ env.BUILD_FILE_PATH }}
+      - name: '[MacOS] 查看架构'
+        run: file ${{ env.BUILD_FILE_PATH }}
         working-directory: ${{ env.BUILD_DIR }}
         
-      - name: '上传编译产物'
+      - name: '[MacOS] 上传编译产物'
         uses: actions/upload-artifact@v4
         with:
           name: macos
           if-no-files-found: error
           path: "${{ env.BUILD_DIR }}/${{ env.BUILD_FILE_PATH }}"
+          retention-days: 90
+          compression-level: 0
+          overwrite: true
+      
+      - name: '[iOS] CMake 编译'
+        run: |
+          ./build-ios.sh ${{ env.BUILD_DIR }}/_deps/simple-src/contrib/ios.toolchain.cmake
+        working-directory: ${{ github.workspace }}
+
+      - name: '[iOS] 打包'
+        run: |
+          mv Release-iphoneos iphone_os
+          mv Release-iphonesimulator iphone_simulator
+        working-directory: ${{ env.BUILD_RESULT_DIR_IOS }}/
+
+      - name: '[iOS] 上传编译产物'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios
+          if-no-files-found: error
+          path: |
+            ${{ env.BUILD_RESULT_DIR_IOS }}/iphone_os
+            ${{ env.BUILD_RESULT_DIR_IOS }}/iphone_simulator
           retention-days: 90
           compression-level: 0
           overwrite: true
