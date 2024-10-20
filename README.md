@@ -4,11 +4,11 @@
 
 基于 [Simple](https://github.com/wangfenjin/simple) (支持中文和拼音的 SQLite fts5 全文搜索扩展) 和 [sqlite3.dart](https://github.com/simolus3/sqlite3.dart) 的 Flutter 库，用于 SQLite 中文和拼音全文搜索。
 
-| 支持平台                                                                                                                           | 示例                                            |
-| ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| **Android<br />([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v1.0.1/example.apk))<br /><br />iOS** | ![Android, iOS 示例](img/example-android-ios.jpg) |
-| **Windows**                                                                                                                  | ![Windows 示例](img/example-windows.jpg)          |
-| **MacOS**                                                                                                                    | ![MacOS 示例](img/example-macos.png)              |
+| 支持平台                                                                                                                                     | 示例                                            |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| **Android<br />([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v1.0.1/example.apk))<br />—————<br />iOS** | ![Android, iOS 示例](img/example-android-ios.jpg) |
+| **Windows**                                                                                                                            | ![Windows 示例](img/example-windows.jpg)          |
+| **MacOS**                                                                                                                              | ![MacOS 示例](img/example-macos.png)              |
 
 ## 前置准备
 
@@ -19,6 +19,8 @@ Dart 提供 FFI 以调用 SQLite、Simple 等 C/C++ 库；
 本库通过 [Simple](https://github.com/wangfenjin/simple) 实现中文拼音全文搜索，通过 [sqlite3.dart/sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 加载数据库扩展。
 
 请参阅相关文档，或 `example` 的具体示例，以构建和操作数据库。
+
+本库通过 Github Actions 构建 Simple 原生库，具体请参阅 [simple-native](https://github.com/SageMik/sqlite3_simple/tree/simple-native) 分支。
 
 ## 快速开始
 
