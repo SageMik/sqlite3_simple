@@ -22,7 +22,7 @@ Dart 提供 FFI 以调用 SQLite、Simple 等 C/C++ 库；
 
 ## 快速开始
 
-### 1. 添加 SQLite 依赖（可选）
+### 1. 添加 SQLite 依赖
 
 执行如下命令行：
 
@@ -34,10 +34,7 @@ flutter pub add sqlite3 sqlite3_flutter_libs
 
 > [!TIP]
 >
-> 根据不同的情况，你可以考虑这两个依赖是否都要引入，例如：
->
-> 1. 需要自定义和自行编译 SQLite 原生库，或环境已存在 SQLite 原生库，可不引入 `sqlite3_flutter_libs` ，自行通过 `DynamicLibrary` 加载，具体请参考 [sqlite3.dart/sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3#manually-providing-sqlite3-libraries)、[sqlite3.dart/sqlite3_flutter_libs](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3_flutter_libs) 的做法。
-> 2. 代码中已经通过其他方法操作 SQLite 数据库，可以跳过这一步的依赖添加，后续依照提示操作即可。
+> 若需要自定义和自行编译 SQLite 原生库，或环境已存在 SQLite 原生库，可不引入 `sqlite3_flutter_libs` ，自行通过 `DynamicLibrary` 加载，具体请参考 [sqlite3.dart/sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3#manually-providing-sqlite3-libraries)、[sqlite3.dart/sqlite3_flutter_libs](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3_flutter_libs) 的做法。
 
 ### 2. 添加本库并导入依赖
 
@@ -54,8 +51,6 @@ import 'package:sqlite3_simple/sqlite3_simple.dart';
 
 ```dart
 sqlite3.loadSimpleExtension();
-// 如果没有引入 sqlite3 依赖，可以用如下语句：
-// Simple.loadExtension();
 ```
 
 如需启用结巴分词(Jieba)，请调用 `sqlite3.saveJiebaDict()` 将字典保存到可访问的路径，例如：
@@ -67,15 +62,9 @@ final docDir = await getApplicationDocumentsDirectory();
 final jiebaDictPath = join(docDir.path, "cpp_jieba");
 
 final jiebaDictSql = await sqlite3.saveJiebaDict(jiebaDictPath);
-// 如果没有引入 sqlite3 依赖，可以用如下语句：
-// final jiebaDictSql = await Simple.saveJiebaDict(jiebaDictPath);
 ```
 
-返回值 `jiebaDictSql` 是 `"SELECT jieba_dict('$jiebaDictPath')"`。
-
-> [!TIP]
->
-> [sqlite3.dart/sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 本身只是对 SQLite 的 Dart FFI 绑定，底层还是 SQLite 原生库实现的一系列操作。理论上，如果能通过其他方式操作数据库，使用本依赖是可以不引入 `sqlite3` 的（尚未验证）。本库提供了 `Simple` 和 `sqlite3` 两种方式进行调用，根据实际情况任选其一即可。
+返回值 `jiebaDictSql` 是 `"SELECT jieba_dict('$jiebaDictPath')"` 。
 
 ### 4. 打开数据库
 

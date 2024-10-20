@@ -6,19 +6,18 @@ import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-class Simple {
-  Simple._();
+/// https://github.com/wangfenjin/simple/blob/ffc78ec4d5ac962d889cb68ea3691e83a699fe2c/src/simple_tokenizer.cc#L65
+const _jiebaDictFileSet = {
+  "jieba.dict.utf8",
+  "hmm_model.utf8",
+  "user.dict.utf8",
+  "idf.utf8",
+  "stop_words.utf8",
+};
 
-  /// https://github.com/wangfenjin/simple/blob/ffc78ec4d5ac962d889cb68ea3691e83a699fe2c/src/simple_tokenizer.cc#L65
-  static const _jiebaDictFileSet = {
-    "jieba.dict.utf8",
-    "hmm_model.utf8",
-    "user.dict.utf8",
-    "idf.utf8",
-    "stop_words.utf8",
-  };
-
-  static void _loadExtension(Sqlite3 sqlite3) {
+extension Sqlite3SimpleEx on Sqlite3 {
+  /// 加载Simple扩展，请在打开数据库前调用。如果需要结巴分词功能，调用 [saveJiebaDict]
+  void loadSimpleExtension() {
     String libSimple = "";
     if (Platform.isAndroid) {
       libSimple = "libsimple.so";
@@ -28,22 +27,17 @@ class Simple {
 
     // sqlite3库如何加载自定义扩展：
     // https://github.com/simolus3/sqlite3.dart/blob/a9a379494c6b8d58a3c31cf04fe16e83b49130f1/sqlite3/test/ffi/sqlite3_test.dart#L35
-    sqlite3.ensureExtensionLoaded(SqliteExtension.inLibrary(
+    ensureExtensionLoaded(SqliteExtension.inLibrary(
         libSimple.isNotEmpty
             ? DynamicLibrary.open(libSimple)
             : DynamicLibrary.process(),
         "sqlite3_simple_init"));
   }
 
-  /// 加载Simple扩展，请在打开数据库前调用。如果需要结巴分词功能，调用 [Simple.saveJiebaDict]
-  static void loadExtension() {
-    _loadExtension(sqlite3);
-  }
-
   /// 将结巴分词所需字典文件保存到指定目录 [dir] ，
   /// 当字典文件存在时，通过 [overwriteWhenExist] 控制是否覆盖，默认不覆盖。
   /// 使用结巴分词功能务必调用该函数，并执行本方法返回的SQL语句
-  static Future<String> saveJiebaDict(
+  Future<String> saveJiebaDict(
     String dir, {
     bool overwriteWhenExist = false,
   }) async {
@@ -69,22 +63,5 @@ class Simple {
     }));
 
     return "SELECT jieba_dict('$dir');";
-  }
-}
-
-extension Sqlite3SimpleEx on Sqlite3 {
-  /// 加载Simple扩展，请在打开数据库前调用。如果需要结巴分词功能，调用 [saveJiebaDict]
-  void loadSimpleExtension() {
-    Simple._loadExtension(this);
-  }
-
-  /// 将结巴分词所需字典文件保存到指定目录 [dir] ，
-  /// 当字典文件存在时，通过 [overwriteWhenExist] 控制是否覆盖，默认不覆盖。
-  /// 使用结巴分词功能务必调用该函数，并执行本方法返回的SQL语句
-  Future<String> saveJiebaDict(
-    String dir, {
-    bool overwriteWhenExist = false,
-  }) {
-    return Simple.saveJiebaDict(dir, overwriteWhenExist: overwriteWhenExist);
   }
 }
