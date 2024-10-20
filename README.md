@@ -1,6 +1,6 @@
 # simple-native
 
-[![simple-native](https://img.shields.io/github/actions/workflow/status/SageMik/sqlite3_simple/simple.yml?branch=simple-native&label=simple-native)](https://github.com/SageMik/sqlite3_simple/tree/simple-native)
+[![simple-native](https://img.shields.io/github/actions/workflow/status/SageMik/sqlite3_simple/simple.yml?branch=simple-native&label=simple-native)](https://github.com/SageMik/sqlite3_simple/actions/workflows/simple.yml)
 
 该分支编译和维护用于主分支的 Simple 原生库。
 
