@@ -23,7 +23,7 @@ PODS:
     - sqlite3/fts5
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
-  - sqlite3_simple (1.0.1):
+  - sqlite3_simple (1.0.2):
     - Flutter
 
 DEPENDENCIES:
@@ -34,7 +34,7 @@ DEPENDENCIES:
   - sqlite3_simple (from `.symlinks/plugins/sqlite3_simple/ios`)
 
 SPEC REPOS:
-  trunk:
+  https://mirrors.tuna.tsinghua.edu.cn/git/CocoaPods/Specs.git:
     - sqlite3
 
 EXTERNAL SOURCES:
@@ -55,8 +55,8 @@ SPEC CHECKSUMS:
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   sqlite3: 0bb0e6389d824e40296f531b858a2a0b71c0d2fb
   sqlite3_flutter_libs: c00457ebd31e59fa6bb830380ddba24d44fbcd3b
-  sqlite3_simple: 88fa8313154879d9f7a448e19ace0f2a9547b558
+  sqlite3_simple: 2235f1ed760dd17694fd6e72fca6d1ab89168835
 
-PODFILE CHECKSUM: 819463e6a0290f5a72f145ba7cde16e8b6ef0796
+PODFILE CHECKSUM: 8bf07c9a68c26d0e0c40a3d9e3fea3aa6c79d4b7
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2

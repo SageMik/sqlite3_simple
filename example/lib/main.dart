@@ -106,7 +106,6 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       results = null;
     });
-    await Future.delayed(const Duration(milliseconds: 200));
     dao.updateAll();
     onSearchChanged(searchController.text);
   }
