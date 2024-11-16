@@ -12,7 +12,9 @@ env:
   BUILD_DIR: ${{ github.workspace }}/build
 
 jobs:
-  Windows-dll:
+
+
+  Windows:
     runs-on: windows-latest
     env:
       BUILD_ARCH: X64
@@ -43,12 +45,12 @@ jobs:
           compression-level: 0
           overwrite: true
 
-  MacOS-dylib_iOS-a:
+
+  MacOS:
     runs-on: macos-latest
     env:
       BUILD_FILE_PATH: _deps/simple-build/src/libsimple.dylib
-      BUILD_RESULT_DIR_IOS: ${{ github.workspace }}/build-ios/_deps/simple-build/src
-    
+
     steps:
       - uses: actions/checkout@v4
 
@@ -65,7 +67,7 @@ jobs:
       - name: '[MacOS] 查看架构'
         run: file ${{ env.BUILD_FILE_PATH }}
         working-directory: ${{ env.BUILD_DIR }}
-        
+
       - name: '[MacOS] 上传编译产物'
         uses: actions/upload-artifact@v4
         with:
@@ -75,26 +77,41 @@ jobs:
           retention-days: 90
           compression-level: 0
           overwrite: true
-      
-      - name: '[iOS] CMake 编译'
+
+
+  iOS:
+    runs-on: macos-latest
+    env:
+      BUILD_NAME: ios
+      BUILD_FILE_PATH: libsimple.a
+    strategy:
+      matrix:
+        cfg:
+          - { label: "iOS", simulator: "" }      
+          - { label: "iOS 模拟器", simulator: "-simulator" }
+
+    steps:
+      - uses: actions/checkout@v4
+              
+      - name: '[${{ matrix.cfg.label }}] CMake 编译'
         run: |
-          ./build-ios.sh ${{ env.BUILD_DIR }}/_deps/simple-src/contrib/ios.toolchain.cmake
+          ./build-ios.sh ${{ matrix.cfg.simulator }}
+          echo "BUILD_NAME=ios${{ matrix.cfg.simulator }}" >> $GITHUB_ENV
+          echo "BUILD_FILE_PATH=libsimple${{ matrix.cfg.simulator }}.a" >> $GITHUB_ENV
         working-directory: ${{ github.workspace }}
 
-      - name: '[iOS] 打包'
+      - name: '[${{ matrix.cfg.label }}] 查看架构'
         run: |
-          mv Release-iphoneos iphone_os
-          mv Release-iphonesimulator iphone_simulator
-        working-directory: ${{ env.BUILD_RESULT_DIR_IOS }}/
+          mv ${{ env.BUILD_NAME }}-output/bin/libsimple.a ${{ env.BUILD_FILE_PATH }}
+          file ${{ env.BUILD_FILE_PATH }}
+        working-directory: ${{ github.workspace }}
 
-      - name: '[iOS] 上传编译产物'
+      - name: '[${{ matrix.cfg.label }}] 上传编译产物'
         uses: actions/upload-artifact@v4
         with:
-          name: ios
+          name: ${{ env.BUILD_NAME }}
           if-no-files-found: error
-          path: |
-            ${{ env.BUILD_RESULT_DIR_IOS }}/iphone_os
-            ${{ env.BUILD_RESULT_DIR_IOS }}/iphone_simulator
+          path: ${{ github.workspace }}/${{ env.BUILD_FILE_PATH }}
           retention-days: 90
           compression-level: 0
           overwrite: true

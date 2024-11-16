@@ -6,11 +6,11 @@
 
 通过 Github Actions 进行持续集成（CI），详见 [`.github/workflow/simple.yml`](.github/workflows/simple.yml) 。
 
-| 平台              | 持续集成                                                                                                          | 架构                                      | 备注                        |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | --------------------------- |
-| **Android** | 无，通过 Gradle mavenCentral() 导入：<br />[simple-native-android](https://github.com/SageMik/simple-native-android) | armeabi-v7a, arm64-v8a,<br />x86, x86_64 | Flutter Android 不支持 x86 |
-| **iOS**     | `libsimple.a`                                                                                                   | x86_64, arm64 (模拟器)                    |                             |
-| **Windows** | `simple.dll`                                                                                                    | x64                                       | Flutter Windows 仅支持 x64 |
-| **MacOS**   | `libsimple.dylib`                                                                                               | x86_64, arm64                             |                             |
-| **Linux**   | 待定                                                                                                              |                                           |                             |
-| **Web**     | 待定                                                                                                              |                                           |                             |
+| 平台                 | 持续集成                                                                                                      | 架构                                      | 备注                                  |
+| -------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | ------------------------------------- |
+| **Android**    | 通过 Gradle mavenCentral() 导入：<br />[simple-native-android](https://github.com/SageMik/simple-native-android) | armeabi-v7a, arm64-v8a,<br />x86, x86_64 | Flutter Android 不支持 x86           |
+| **iOS**        | `libsimple.a`                                                                                               | arm64                                     |                                       |
+| **iOS 模拟器** | `libsimple-simulator.a`                                                                                     | arm64, x86_64                             | arm64 为 Apple Silicon M 系列芯片架构 |
+| **Windows**    | `simple.dll`                                                                                                | x64                                       | Flutter Windows 仅支持 x64           |
+| **MacOS**      | `libsimple.dylib`                                                                                           | arm64, x86_64                             | arm64 为 Apple Silicon M 系列芯片架构 |
+| **Linux**      | 待定                                                                                                          |                                           |                                       |
