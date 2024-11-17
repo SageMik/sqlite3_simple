@@ -10,3 +10,4 @@
 
 * 更新 iOS 编译工具链。
 * 补充 M芯片 iOS 模拟器 支持 (#3) 。
+* 修复最新版本 Android Studio Ladybug | 2024.2.1 Patch 2 (JDK 21) 无法运行 Android 示例的问题 (#4)。
