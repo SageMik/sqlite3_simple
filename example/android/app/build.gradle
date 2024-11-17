@@ -8,19 +8,23 @@ plugins {
 android {
     namespace = "io.github.sagemik.sqlite3_simple_example"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "25.1.8937393"
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = 17
     }
 
     defaultConfig {
         applicationId = "io.github.sagemik.sqlite3_simple_example"
         minSdk = 24
         targetSdk = flutter.targetSdkVersion
-        versionCode = 2
-        versionName = '1.0.1'
+        versionCode = 3
+        versionName = '1.0.2'
     }
 
     buildTypes {
@@ -35,6 +39,6 @@ flutter {
 }
 
 //dependencies {
-//    // [Android SQLite 覆盖] 不使用 sqlite3_flutter_libs 的 libsqlite.so，转而使用如下实现的 libsqlite3x.so
+//    // [Android SQLite 覆盖] 不使用 sqlite3_flutter_libs 的 libsqlite.so，转而使用如下依赖提供的 libsqlite3x.so
 //    implementation('com.github.requery:sqlite-android:3.45.0')
 //}

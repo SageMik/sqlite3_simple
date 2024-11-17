@@ -26,6 +26,7 @@ class Dao {
 
   /// 初始化 Simple 分词器，并将结巴分词字典文件保存到本地
   Future<void> init(String jiebaDictPath) async {
+    // [Android SQLite 覆盖]
     // _overrideForAndroid();
 
     sqlite3.loadSimpleExtension();
