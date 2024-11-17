@@ -4,23 +4,27 @@
 
 基于 [Simple](https://github.com/wangfenjin/simple) (支持中文和拼音的 SQLite fts5 全文搜索扩展) 和 [sqlite3.dart](https://github.com/simolus3/sqlite3.dart) 的 Flutter 库，用于 SQLite 中文和拼音全文搜索。
 
-| 支持平台                                                                                                                                  | 示例                                            |
-|---------------------------------------------------------------------------------------------------------------------------------------| ----------------------------------------------- |
+| 支持平台                                                                                                                           | 示例                                            |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
 | **Android<br />([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v1.0.2/example.apk))<br /><br />iOS** | ![Android, iOS 示例](img/example-android-ios.jpg) |
-| **Windows**                                                                                                                           | ![Windows 示例](img/example-windows.jpg)          |
-| **MacOS**                                                                                                                             | ![MacOS 示例](img/example-macos.png)              |
+| **Windows**                                                                                                                  | ![Windows 示例](img/example-windows.jpg)          |
+| **MacOS**                                                                                                                    | ![MacOS 示例](img/example-macos.png)              |
 
 ## 前置准备
 
-SQLite 通过 [SQLite FTS5 Extension](https://sqlite.org/fts5.html) 提供全文搜索功能；
+> [!TIP]
+>
+> 本库通过 Github Actions 编译 Simple 原生库，具体请参阅 [simple-native](https://github.com/SageMik/sqlite3_simple/tree/simple-native) 分支。
+
+SQLite 通过 [SQLite FTS5 Extension](https://sqlite.org/fts5.html) 提供 全文搜索 (Full-Text Search) 功能；
 
 Dart 提供 FFI 以调用 SQLite、Simple 等 C/C++ 库；
 
-本库通过 [Simple](https://github.com/wangfenjin/simple) 实现中文拼音全文搜索，通过 [sqlite3.dart/sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 加载数据库扩展。
+本库通过 [Simple](https://github.com/wangfenjin/simple) 实现 中文拼音全文搜索，通过 [sqlite3.dart/sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 操作数据库和加载自定义扩展。
 
-请参阅相关文档，或 `example` 的具体示例，以构建和操作数据库。
+（如果你使用 [drift](https://github.com/simolus3/drift) 操作数据库，由于 [drift](https://github.com/simolus3/drift) 基于 [sqlite3.dart/sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) ，同样可以使用本库实现中文拼音全文搜索）
 
-本库通过 Github Actions 构建 Simple 原生库，具体请参阅 [simple-native](https://github.com/SageMik/sqlite3_simple/tree/simple-native) 分支。
+请参阅相关文档，或 [`example`](./example) 的具体示例，以构建和操作数据库。
 
 ## 快速开始
 
@@ -114,6 +118,7 @@ db.select("SELECT jieba_query('Jieba分词初始化（提前加载避免后续�
   - [X] Windows
   - [X] MacOS
   - [ ] Linux
+  - [ ] HarmonyOS
 - [ ] 添加用户自定义字典。
 
 ## 致谢
