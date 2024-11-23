@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sqlite3/sqlite3.dart' hide Row;
 import 'package:sqlite3_simple_example/util/custom_text.dart';
 import 'package:sqlite3_simple_example/util/zero_width_text.dart';
 
 import 'dao.dart';
+import 'sqlite3.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -29,7 +30,7 @@ class _MyAppState extends State<MyApp> {
     initPlatformState();
   }
 
-  late final Dao dao;
+  late Dao dao;
   List<MainTableRow>? results;
 
   Future<void> initPlatformState() async {
@@ -58,8 +59,7 @@ class _MyAppState extends State<MyApp> {
       ],
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('测试'),
-          backgroundColor: colorScheme.primary,
+          title: const Text('测试'),          backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
         ),
         body: SafeArea(

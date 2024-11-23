@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:sqlite3/sqlite3.dart';
@@ -19,7 +20,7 @@ extension Sqlite3SimpleEx on Sqlite3 {
   /// 加载Simple扩展，请在打开数据库前调用。如果需要结巴分词功能，调用 [saveJiebaDict]
   void loadSimpleExtension() {
     String libSimple = "";
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid || defaultTargetPlatform == TargetPlatform.ohos) {
       libSimple = "libsimple.so";
     } else if (Platform.isWindows) {
       libSimple = "simple.dll";
