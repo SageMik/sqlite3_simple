@@ -1,3 +1,7 @@
+> [!TIP]
+>
+> 基于 [Flutter 鸿蒙适配版](https://gitee.com/harmonycommando_flutter/flutter) 的开发正在努力推进中，目前已经成功在 HarmonyOS 模拟器上正常运行，详见 [ohos](https://github.com/SageMik/sqlite3_simple/tree/ohos) 分支。
+
 # sqlite3_simple
 
 [![Pub Package](https://img.shields.io/pub/v/sqlite3_simple)](https://pub.dev/packages/sqlite3_simple)  [![simple-native-android](https://img.shields.io/maven-central/v/io.github.sagemik/simple-native-android?label=simple-native-android)](https://central.sonatype.com/artifact/io.github.sagemik/simple-native-android)  [![simple-native](https://img.shields.io/github/actions/workflow/status/SageMik/sqlite3_simple/simple.yml?branch=simple-native&label=simple-native)](https://github.com/SageMik/sqlite3_simple/tree/simple-native)
