@@ -39,6 +39,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: any
+  flutter_platform_utils: ^1.0.0
 
 dev_dependencies:
   integration_test:
