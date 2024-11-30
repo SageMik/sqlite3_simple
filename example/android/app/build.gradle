@@ -23,8 +23,8 @@ android {
         applicationId = "io.github.sagemik.sqlite3_simple_example"
         minSdk = 24
         targetSdk = flutter.targetSdkVersion
-        versionCode = 3
-        versionName = '1.0.2'
+        versionCode = 4
+        versionName = '1.0.3'
     }
 
     buildTypes {
