@@ -8,6 +8,7 @@
   "dependencies": {
     "sqlite3_simple": "file:../har/sqlite3_simple.har",
     "integration_test": "file:../har/integration_test.har",
-    "path_provider_ohos": "file:../har/path_provider_ohos.har"
+    "path_provider_ohos": "file:../har/path_provider_ohos.har",
+    "sqlite3_flutter_libs": "file:../har/sqlite3_flutter_libs.har"
   }
 }
