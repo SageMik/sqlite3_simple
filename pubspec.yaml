@@ -13,7 +13,11 @@ dependencies:
   flutter_platform_utils: ^1.0.0
   path: ^1.9.0
   plugin_platform_interface: ^2.0.2
-  sqlite3: ^2.4.3
+  sqlite3:
+    git:
+      url: https://github.com/SageMik/sqlite3-ohos.dart
+      path: sqlite3
+      ref: sqlite3-2.4.7-ohos-beta
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,7 @@
 import { FlutterEngine, Log } from '@ohos/flutter_ohos';
 import IntegrationTestPlugin from 'integration_test';
 import PathProviderPlugin from 'path_provider_ohos';
+import Sqlite3FlutterLibsPlugin from 'sqlite3_flutter_libs';
 import Sqlite3SimplePlugin from 'sqlite3_simple';
 
 /**
@@ -17,6 +18,7 @@ export class GeneratedPluginRegistrant {
     try {
       flutterEngine.getPlugins()?.add(new IntegrationTestPlugin());
       flutterEngine.getPlugins()?.add(new PathProviderPlugin());
+      flutterEngine.getPlugins()?.add(new Sqlite3FlutterLibsPlugin());
       flutterEngine.getPlugins()?.add(new Sqlite3SimplePlugin());
     } catch (e) {
       Log.e(
