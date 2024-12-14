@@ -1,6 +1,6 @@
 > [!TIP]
 >
-> 基于 [Flutter 鸿蒙适配版](https://gitee.com/harmonycommando_flutter/flutter) 的开发正在努力推进中，目前已经成功在 HarmonyOS 模拟器上正常运行，详见 [ohos](https://github.com/SageMik/sqlite3_simple/tree/ohos) 分支。
+> 基于 [鸿蒙先锋队/Flutter](https://gitee.com/harmonycommando_flutter/flutter) 的 HarmonyOS 适配正在努力推进中，目前已经成功在 Mac Arm HarmonyOS 模拟器上正常运行，详见 [ohos](https://github.com/SageMik/sqlite3_simple/tree/ohos) 分支。
 
 # sqlite3_simple
 
@@ -8,11 +8,12 @@
 
 基于 [Simple](https://github.com/wangfenjin/simple) (支持中文和拼音的 SQLite fts5 全文搜索扩展) 和 [sqlite3.dart](https://github.com/simolus3/sqlite3.dart) 的 Flutter 库，用于 SQLite 中文和拼音全文搜索。
 
-| 支持平台                                                                                                                            | 示例                                            |
-|---------------------------------------------------------------------------------------------------------------------------------| ----------------------------------------------- |
-| **Android<br />([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v1.0.3/example.apk))<br /><br />iOS** | ![Android, iOS 示例](img/example/android-ios.jpg) |
-| **Windows**                                                                                                                     | ![Windows 示例](img/example/windows.jpg)          |
-| **MacOS**                                                                                                                       | ![MacOS 示例](img/example/macos.png)              |
+| 支持平台                                                                                                            | 示例                                   |
+| ------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| **Android<br />([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v1.0.3/example.apk))** | ![Android](img/example/android.png)      |
+| **iOS**                                                                                                       | ![iOS](img/example/ios.png)              |
+| **Windows**                                                                                                   | ![Windows 示例](img/example/windows.jpg) |
+| **MacOS**                                                                                                     | ![MacOS 示例](img/example/macos.png)     |
 
 ## 前置准备
 

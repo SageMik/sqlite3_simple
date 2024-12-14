@@ -29,3 +29,5 @@ migrate_working_dir/
 build/
 
 *.psd
+img/example/android/**
+img/example/ios/**
