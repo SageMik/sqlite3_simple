@@ -12,12 +12,12 @@ else()
    set(BUILD_SQLITE3 OFF)
 endif()
 
-project(simple_without_sqlite3)
+project(simple-native)
 
 include(FetchContent)
 
 FetchContent_Declare(simple
     GIT_REPOSITORY https://github.com/wangfenjin/simple.git
-    GIT_TAG 5ed7ca8ea8bb07610b54a0b15476d852c09ce479
+    GIT_TAG 632fd7ba710ff54b8c6de1220bb47253132b94e5
 )
 FetchContent_MakeAvailable(simple)
