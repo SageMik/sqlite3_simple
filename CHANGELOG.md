@@ -16,3 +16,4 @@
 
 * 新增 `overrideOpen` 参数，允许用户自行加载 Simple 原生库。
 * 更新 Simple 原生库至 [最新提交](https://github.com/wangfenjin/simple/tree/632fd7ba710ff54b8c6de1220bb47253132b94e5) 。
+* 更新 `sqlite3` 至 `2.4.7` 。

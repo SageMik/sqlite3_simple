@@ -12,7 +12,7 @@ dependencies:
     sdk: flutter
   path: ^1.9.0
   plugin_platform_interface: ^2.0.2
-  sqlite3: ^2.4.3
+  sqlite3: ^2.4.7
 
 dev_dependencies:
   flutter_test:
