@@ -15,23 +15,29 @@ const _jiebaDictFileSet = {
   "stop_words.utf8",
 };
 
+typedef OpenSimple = DynamicLibrary? Function();
+
 extension Sqlite3SimpleEx on Sqlite3 {
-  /// 加载Simple扩展，请在打开数据库前调用。如果需要结巴分词功能，调用 [saveJiebaDict]
-  void loadSimpleExtension() {
-    String libSimple = "";
-    if (Platform.isAndroid) {
-      libSimple = "libsimple.so";
-    } else if (Platform.isWindows) {
-      libSimple = "simple.dll";
+  /// 加载 Simple 扩展，请在打开数据库前调用。如果需要结巴分词功能，调用 [saveJiebaDict]。
+  /// 若希望自行加载 Simple 原生库，向 [overrideOpen] 传入返回值为 [DynamicLibrary] 或 null 的函数，
+  /// 返回值非 null 时，优先使用返回值加载扩展，反之使用默认的加载逻辑。
+  void loadSimpleExtension({OpenSimple? overrideOpen}) {
+    DynamicLibrary defaultOpen() {
+      String libSimple = "";
+      if (Platform.isAndroid) {
+        libSimple = "libsimple.so";
+      } else if (Platform.isWindows) {
+        libSimple = "simple.dll";
+      }
+      return libSimple.isNotEmpty
+          ? DynamicLibrary.open(libSimple)
+          : DynamicLibrary.process();
     }
 
-    // sqlite3库如何加载自定义扩展：
-    // https://github.com/simolus3/sqlite3.dart/blob/a9a379494c6b8d58a3c31cf04fe16e83b49130f1/sqlite3/test/ffi/sqlite3_test.dart#L35
+    // sqlite3 库 如何加载自定义扩展：
+    // https://github.com/simolus3/sqlite3.dart/blob/855bdc1ff1b6e03b60cded99dd45a107b3588009/sqlite3/test/ffi/sqlite3_test.dart#L37-L104
     ensureExtensionLoaded(SqliteExtension.inLibrary(
-        libSimple.isNotEmpty
-            ? DynamicLibrary.open(libSimple)
-            : DynamicLibrary.process(),
-        "sqlite3_simple_init"));
+        overrideOpen?.call() ?? defaultOpen(), "sqlite3_simple_init"));
   }
 
   /// 将结巴分词所需字典文件保存到指定目录 [dir] ，

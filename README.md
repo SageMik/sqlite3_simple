@@ -1,6 +1,6 @@
 > [!TIP]
 >
-> 基于 [Flutter 鸿蒙适配版](https://gitee.com/harmonycommando_flutter/flutter) 的开发正在努力推进中，目前已经成功在 HarmonyOS 模拟器上正常运行，详见 [ohos](https://github.com/SageMik/sqlite3_simple/tree/ohos) 分支。
+> 基于 [鸿蒙先锋队/Flutter](https://gitee.com/harmonycommando_flutter/flutter) 的 HarmonyOS 适配正在努力推进中，目前已经成功在 Mac Arm HarmonyOS 模拟器上正常运行，详见 [ohos](https://github.com/SageMik/sqlite3_simple/tree/ohos) 分支。
 
 # sqlite3_simple
 
@@ -8,11 +8,12 @@
 
 基于 [Simple](https://github.com/wangfenjin/simple) (支持中文和拼音的 SQLite fts5 全文搜索扩展) 和 [sqlite3.dart](https://github.com/simolus3/sqlite3.dart) 的 Flutter 库，用于 SQLite 中文和拼音全文搜索。
 
-| 支持平台                                                                                                                           | 示例                                            |
-| ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| **Android<br />([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v1.0.2/example.apk))<br /><br />iOS** | ![Android, iOS 示例](img/example-android-ios.jpg) |
-| **Windows**                                                                                                                  | ![Windows 示例](img/example-windows.jpg)          |
-| **MacOS**                                                                                                                    | ![MacOS 示例](img/example-macos.png)              |
+| 支持平台                                                                                                            | 示例                                   |
+| ------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| **Android<br />([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v1.0.3/example.apk))** | ![Android](img/example/android.png)      |
+| **iOS**                                                                                                       | ![iOS](img/example/ios.png)              |
+| **Windows**                                                                                                   | ![Windows 示例](img/example/windows.jpg) |
+| **MacOS**                                                                                                     | ![MacOS 示例](img/example/macos.png)     |
 
 ## 前置准备
 
@@ -101,19 +102,20 @@ db.select("SELECT jieba_query('Jieba分词初始化（提前加载避免后续�
 请参阅 [SQLite FTS5 Extension](https://sqlite.org/fts5.html) 和 [Simple](https://github.com/wangfenjin/simple) 的说明，根据需要调用相应函数如 `jieba_query`、`simple_query`、`highlight`、  `simple_highlight` 等，执行所需的查询，例如 (  `./expample/lib/dao.dart` )：
 
 ```dart
-  List<MainTableRow> searchByJieba(String value) {
-    const wrapperSql = "'${ZeroWidth.start}', '${ZeroWidth.end}'";
-    final resultSet = db.select(
-        "SELECT "
-        "rowid AS $id, "
-        "simple_highlight($fts5Table, 0, $wrapperSql) AS $title, "
-        "simple_highlight($fts5Table, 1, $wrapperSql) AS $content, "
-        "$insertDate "
-        "FROM $fts5Table "
-        "WHERE $fts5Table MATCH jieba_query(?);",
-        [value]);
-    return _toMainTableRows(resultSet);
-  }
+/// 通过指定分词器 [tokenizer] 搜索， [tokenizer] 取值：jieba, simple
+List<MainTableRow> search(String value, String tokenizer) {
+  const wrapperSql = "'${ZeroWidth.start}', '${ZeroWidth.end}'";
+  final resultSet = db.select('''
+      SELECT 
+        rowid AS $id, 
+        simple_highlight($fts5Table, 0, $wrapperSql) AS $title, 
+        simple_highlight($fts5Table, 1, $wrapperSql) AS $content, 
+        $insertDate 
+      FROM $fts5Table 
+      WHERE $fts5Table MATCH ${tokenizer}_query(?);
+    ''', [value]);
+  return _toMainTableRows(resultSet);
+}
 ```
 
 ## 待办
