@@ -136,10 +136,11 @@ class Dao {
 
   /// 插入数据
   void insertRandomData(int length) {
+    final insertStmt = db.prepare("INSERT INTO $mainTable VALUES(?, ?, ?, ?);");
     for (int i = 0; i < length; i++) {
-      db.execute("INSERT INTO $mainTable VALUES(?, ?, ?, ?);",
-          [null, ..._buildData(i)]);
+      insertStmt.execute([null, ..._buildData(i)]);
     }
+    insertStmt.dispose();
   }
 
   /// 查询主表中所有数据
@@ -170,11 +171,11 @@ class Dao {
   /// 修改所有数据，测试触发器
   void updateAll() {
     final mainTableRowList = selectAll();
+    final updateStmt = db.prepare("UPDATE $mainTable SET $title = ?, $content = ?, $insertDate = ? WHERE $id = ?;");
     for (int i = 0; i < mainTableRowList.length; i++) {
       final mainTableRow = mainTableRowList[i];
-      db.execute(
-          "UPDATE $mainTable SET $title = ?, $content = ?, $insertDate = ? WHERE $id = ?;",
-          [..._buildData(i), mainTableRow.id]);
+      updateStmt.execute([..._buildData(i), mainTableRow.id]);
     }
+    updateStmt.dispose();
   }
 }
