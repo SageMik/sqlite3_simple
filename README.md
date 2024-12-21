@@ -41,7 +41,7 @@ Dart 提供 FFI 以调用 SQLite、Simple 等 C/C++ 库；
 flutter pub add sqlite3 sqlite3_flutter_libs
 ```
 
-其中 `sqlite3` 包含了 SQLite 的 Dart FFI 绑定， `sqlite3_flutter_libs` 包含了 SQLite 的 原生库(Native Library)，源码均在 [sqlite3.dart](https://github.com/simolus3/sqlite3.dart) 。
+其中 `sqlite3` 包含了 SQLite 的 Dart FFI 绑定， `sqlite3_flutter_libs` 包含了 SQLite 的 原生库 (Native Library) ，源码均在 [sqlite3.dart](https://github.com/simolus3/sqlite3.dart) 。
 
 > [!TIP]
 >
@@ -64,7 +64,7 @@ import 'package:sqlite3_simple/sqlite3_simple.dart';
 sqlite3.loadSimpleExtension();
 ```
 
-如需启用结巴分词(Jieba)，请调用 `sqlite3.saveJiebaDict()` 将字典保存到可访问的路径，例如：
+如需启用 结巴分词 (Jieba) ，请调用 `sqlite3.saveJiebaDict()` 将字典保存到可访问的路径，例如：
 
 ```dart
 import 'package:path_provider/path_provider.dart';
