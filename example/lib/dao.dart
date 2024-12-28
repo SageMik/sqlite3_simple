@@ -56,40 +56,50 @@ class Dao {
   /// 参考：https://sqlite.org/fts5.html
   void _initFts5() {
     /// 主表
-    db.execute("CREATE TABLE $mainTable ("
-        "$id INTEGER PRIMARY KEY AUTOINCREMENT,"
-        "$title TEXT,"
-        "$content TEXT,"
-        "$insertDate INTEGER"
-        ");");
+    db.execute('''
+      CREATE TABLE $mainTable (
+        $id INTEGER PRIMARY KEY AUTOINCREMENT, 
+        $title TEXT, 
+        $content TEXT, 
+        $insertDate INTEGER
+      );
+    ''');
 
     /// FTS5虚表
-    db.execute("CREATE VIRTUAL TABLE $fts5Table USING fts5("
-        "$title, $content, $insertDate UNINDEXED, "
-        "tokenize = '$tokenizer',"
-        "content = '$mainTable',"
-        "content_rowid = '$id'"
-        ");");
+    db.execute('''
+      CREATE VIRTUAL TABLE $fts5Table USING fts5(
+        $title, $content, $insertDate UNINDEXED, 
+        tokenize = '$tokenizer', 
+        content = '$mainTable', 
+        content_rowid = '$id'
+      );
+    ''');
 
     /// 触发器
-    final newInsert = "INSERT INTO $fts5Table(rowid, $title, $content) "
-        "VALUES (new.$id, new.$title, new.$content);";
-    final deleteInsert =
-        "INSERT INTO $fts5Table($fts5Table, rowid, $title, $content) "
-        "VALUES ('delete', old.$id, old.$title, old.$content);";
-    db.execute(
-        "CREATE TRIGGER ${mainTable}_insert AFTER INSERT ON $mainTable BEGIN "
-        "$newInsert"
-        "END;");
-    db.execute(
-        "CREATE TRIGGER ${mainTable}_delete AFTER DELETE ON $mainTable BEGIN "
-        "$deleteInsert"
-        "END;");
-    db.execute(
-        "CREATE TRIGGER ${mainTable}_update AFTER UPDATE ON $mainTable BEGIN "
-        "$deleteInsert"
-        "$newInsert"
-        "END;");
+    final newInsert = '''
+      INSERT INTO $fts5Table(rowid, $title, $content) 
+        VALUES (new.$id, new.$title, new.$content);
+    ''';
+    final deleteInsert = '''
+      INSERT INTO $fts5Table($fts5Table, rowid, $title, $content) 
+        VALUES ('delete', old.$id, old.$title, old.$content);
+    ''';
+    db.execute('''
+      CREATE TRIGGER ${mainTable}_insert AFTER INSERT ON $mainTable BEGIN 
+        $newInsert
+      END;
+    ''');
+    db.execute('''
+      CREATE TRIGGER ${mainTable}_delete AFTER DELETE ON $mainTable BEGIN 
+        $deleteInsert
+      END;
+    ''');
+    db.execute('''
+      CREATE TRIGGER ${mainTable}_update AFTER UPDATE ON $mainTable BEGIN 
+        $deleteInsert
+        $newInsert
+      END;
+    ''');
   }
 
   // /// 自定义 SQLite Android 示例，请全局搜索 Android SQLite 覆盖 来查看与此相关的配置。
@@ -125,10 +135,11 @@ class Dao {
 
   /// 插入数据
   void insertRandomData(int length) {
+    final insertStmt = db.prepare("INSERT INTO $mainTable VALUES(?, ?, ?, ?);");
     for (int i = 0; i < length; i++) {
-      db.execute("INSERT INTO $mainTable VALUES(?, ?, ?, ?);",
-          [null, ..._buildData(i)]);
+      insertStmt.execute([null, ..._buildData(i)]);
     }
+    insertStmt.dispose();
   }
 
   /// 查询主表中所有数据
@@ -141,29 +152,29 @@ class Dao {
   int selectCount() =>
       db.select("SELECT COUNT(*) as c FROM $mainTable").first['c'];
 
-  /// 通过指定分词器 [tokenizer] 搜索
+  /// 通过指定分词器 [tokenizer] 搜索， [tokenizer] 取值：jieba, simple
   List<MainTableRow> search(String value, String tokenizer) {
     const wrapperSql = "'${ZeroWidth.start}', '${ZeroWidth.end}'";
-    final resultSet = db.select(
-        "SELECT "
-        "rowid AS $id, "
-        "simple_highlight($fts5Table, 0, $wrapperSql) AS $title, "
-        "simple_highlight($fts5Table, 1, $wrapperSql) AS $content, "
-        "$insertDate "
-        "FROM $fts5Table "
-        "WHERE $fts5Table MATCH ${tokenizer}_query(?);",
-        [value]);
+    final resultSet = db.select('''
+      SELECT 
+        rowid AS $id, 
+        simple_highlight($fts5Table, 0, $wrapperSql) AS $title, 
+        simple_highlight($fts5Table, 1, $wrapperSql) AS $content, 
+        $insertDate 
+      FROM $fts5Table 
+      WHERE $fts5Table MATCH ${tokenizer}_query(?);
+    ''', [value]);
     return _toMainTableRows(resultSet);
   }
 
   /// 修改所有数据，测试触发器
   void updateAll() {
     final mainTableRowList = selectAll();
+    final updateStmt = db.prepare("UPDATE $mainTable SET $title = ?, $content = ?, $insertDate = ? WHERE $id = ?;");
     for (int i = 0; i < mainTableRowList.length; i++) {
       final mainTableRow = mainTableRowList[i];
-      db.execute(
-          "UPDATE $mainTable SET $title = ?, $content = ?, $insertDate = ? WHERE $id = ?;",
-          [..._buildData(i), mainTableRow.id]);
+      updateStmt.execute([..._buildData(i), mainTableRow.id]);
     }
+    updateStmt.dispose();
   }
 }
