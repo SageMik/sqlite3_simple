@@ -1,3 +1,7 @@
+## 1.0.4
+
+* 新增 HarmonyOS 支持。
+
 ## 1.0.3
 
 * 新增 `overrideOpen` 参数，允许用户自行加载 Simple 原生库。
