@@ -39,6 +39,12 @@ Dart 提供 FFI 以调用 SQLite、Simple 等 C/C++ 库；
 
 请参阅相关文档，或 [`example`](./example) 的具体示例，以构建和操作数据库。
 
+> [!IMPORTANT]
+> 
+> 为了兼容 HarmonyOS 所使用的 [鸿蒙先锋队 / Flutter 3.22.0](https://gitee.com/harmonycommando_flutter/flutter/tree/oh-3.22.0)，示例项目使用的 `extended_text` 版本是 `^13.1.0` 。
+> 
+> 由于官方的破坏性变更，使用 Flutter 3.24 以及更高版本运行示例时会遇到兼容性问题，请将 [`pubspec.yaml`](example/pubspec.yaml#L52-L56) 文件中 `extended_text` 的版本升级到 `^14.1.0` 以解决不兼容报错。
+
 ## 快速开始
 
 ### 1. 添加 SQLite 依赖
@@ -49,9 +55,9 @@ Dart 提供 FFI 以调用 SQLite、Simple 等 C/C++ 库；
 flutter pub add sqlite3 sqlite3_flutter_libs
 ```
 
-其中 `sqlite3` 包含了 SQLite 的 Dart FFI 绑定， `sqlite3_flutter_libs` 包含了 SQLite 的原生库（Native Library），源码均在 [sqlite3.dart](https://github.com/simolus3/sqlite3.dart) 。
+其中 `sqlite3` 包含了 SQLite 的 Dart FFI 绑定， `sqlite3_flutter_libs` 包含了 SQLite 的原生库 (Native Library) ，源码均在 [sqlite3.dart](https://github.com/simolus3/sqlite3.dart) 。
 
-> ![TIP]
+> [!TIP]
 >  
 > 若希望自行编译 SQLite 原生库，或环境已存在 SQLite 原生库，可不引入 `sqlite3_flutter_libs` ，自行通过 `DynamicLibrary`、`open.overrideFor` 加载和覆盖。您可以从下述位置获取相关信息：
 > 1. [sqlite.dart](https://github.com/simolus3/sqlite3.dart) 中 [Manually providing sqlite3 libraries](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3#manually-providing-sqlite3-libraries) 。
@@ -71,7 +77,7 @@ import 'package:sqlite3_simple/sqlite3_simple.dart';
 
 ### X. 修改依赖版本以启用 HarmonyOS 支持（可选）
 
-本库基于 [鸿蒙先锋队 / Flutter 3.22.0](https://gitee.com/harmonycommando_flutter/flutter/tree/oh-3.22.0/) 实现 HarmonyOS 适配，已在 Mac Arm HarmonyOS 模拟器上经过测试。
+本库基于 [鸿蒙先锋队 / Flutter 3.22.0](https://gitee.com/harmonycommando_flutter/flutter/tree/oh-3.22.0) 实现 HarmonyOS 适配，已在 Mac Arm HarmonyOS 模拟器上经过测试。
 
 若需在 HarmonyOS 上使用，请修改项目 `pubspec.yaml` 文件中 `sqlite3`、`sqlite3_flutter_libs` 的版本：
 
@@ -96,6 +102,11 @@ dependency_overrides:
       url: https://github.com/SageMik/sqlite3-ohos.dart
       path: sqlite3
       ref: sqlite3-2.4.7-ohos
+  sqlite3_flutter_libs:
+    git:
+      url: https://github.com/SageMik/sqlite3-ohos.dart
+      path: sqlite3_flutter_libs
+      ref: sqlite3_flutter_libs-0.5.25-ohos
 ```
 
 ### 3. 加载 Simple 扩展
@@ -119,7 +130,7 @@ final jiebaDictSql = await sqlite3.saveJiebaDict(jiebaDictPath);
 
 ### 4. 打开数据库
 
-参阅 [sqlite3.dart/sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 相关说明，通过 `sqlite3.open()` 或 `sqlite3.openInMemory()` 打开数据库。
+参阅 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 相关说明，通过 `sqlite3.open()` 或 `sqlite3.openInMemory()` 打开数据库。
 
 ```dart
 final db = sqlite3.open('$filename');
@@ -173,4 +184,4 @@ List<MainTableRow> search(String value, String tokenizer) {
 
 [sqlite3.dart](https://github.com/simolus3/sqlite3.dart)：SQLite3 的 Dart FFI 绑定。
 
-[extended_text](https://github.com/fluttercandies/extended_text/)：Flutter Text 的扩展组件，支持特殊文本效果。
+[extended_text](https://github.com/fluttercandies/extended_text)：Flutter Text 的扩展组件，支持特殊文本效果。

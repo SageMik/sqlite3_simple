@@ -34,6 +34,7 @@ dependencies:
   intl: any
   flutter_platform_utils: ^1.0.0
 
+  # HarmonyOS 适配
   path_provider:
     git:
       url: https://gitee.com/openharmony-sig/flutter_packages.git
@@ -48,7 +49,17 @@ dependencies:
       url: https://github.com/SageMik/sqlite3-ohos.dart
       path: sqlite3_flutter_libs
       ref: sqlite3_flutter_libs-0.5.25-ohos
+
+  # Flutter 3.22
   extended_text: ^13.1.0
+#  # https://github.com/fluttercandies/extended_text/issues/166
+#  # 在 Flutter 3.24 及其更高版本运行示例遇到报错，请使用如下版本
+#  extended_text: ^14.1.0
+
+#  # 如果不需要 HarmonyOS 适配，可以使用如下版本
+#  path_provider: ^2.1.5
+#  sqlite3: ^2.4.7
+#  sqlite3_flutter_libs: ^0.5.25
 
 dependency_overrides:
   sqlite3:
@@ -56,6 +67,11 @@ dependency_overrides:
       url: https://github.com/SageMik/sqlite3-ohos.dart
       path: sqlite3
       ref: sqlite3-2.4.7-ohos
+  sqlite3_flutter_libs:
+    git:
+      url: https://github.com/SageMik/sqlite3-ohos.dart
+      path: sqlite3_flutter_libs
+      ref: sqlite3_flutter_libs-0.5.25-ohos
 
 dev_dependencies:
   integration_test:
