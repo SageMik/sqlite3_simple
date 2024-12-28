@@ -41,7 +41,7 @@ Dart 提供 FFI 以调用 SQLite、Simple 等 C/C++ 库；
 flutter pub add sqlite3 sqlite3_flutter_libs
 ```
 
-其中 `sqlite3` 包含了 SQLite 的 Dart FFI 绑定， `sqlite3_flutter_libs` 包含了 SQLite 的 原生库 (Native Library) ，源码均在 [sqlite3.dart](https://github.com/simolus3/sqlite3.dart) 。
+其中 `sqlite3` 包含了 SQLite 的 Dart FFI 绑定， `sqlite3_flutter_libs` 包含了 SQLite 的原生库（Native Library），源码均在 [sqlite3.dart](https://github.com/simolus3/sqlite3.dart) 。
 
 > [!TIP]
 >
