@@ -28,10 +28,12 @@ flutter:
         ffiPlugin: true
       ios:
         pluginClass: Sqlite3SimplePlugin
+        sharedDarwinSource: true # https://docs.flutter.cn/packages-and-plugins/developing-packages#shared-ios-and-macos-implementations
       windows:
         ffiPlugin: true
       macos:
-        ffiPlugin: true
+        pluginClass: Sqlite3SimplePlugin
+        sharedDarwinSource: true
 
   assets:
     - assets/cpp_jieba_dict/
