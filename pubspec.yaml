@@ -34,6 +34,8 @@ flutter:
       macos:
         pluginClass: Sqlite3SimplePlugin
         sharedDarwinSource: true
+      linux:
+        ffiPlugin: true
 
   assets:
     - assets/cpp_jieba_dict/

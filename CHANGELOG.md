@@ -1,6 +1,6 @@
 ## 1.0.4
 
-* 新增 HarmonyOS 支持。
+* 新增 HarmonyOS 和 Linux 支持。
 * 通过 [`sharedDarwinSource`](https://docs.flutter.cn/packages-and-plugins/developing-packages#shared-ios-and-macos-implementations) 共享 iOS 和 MacOS 实现。
 
 ## 1.0.3

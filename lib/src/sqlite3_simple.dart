@@ -28,6 +28,9 @@ extension Sqlite3SimpleEx on Sqlite3 {
         libSimple = "libsimple.so";
       } else if (Platform.isWindows) {
         libSimple = "simple.dll";
+      } else if (Platform.isLinux) {
+        libSimple = "${File(Platform.resolvedExecutable).parent.path}/bin/libsimple.so";
+        // libSimple = "libsimple.so";
       }
       return libSimple.isNotEmpty
           ? DynamicLibrary.open(libSimple)
