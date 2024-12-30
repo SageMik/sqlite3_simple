@@ -50,7 +50,7 @@ SPEC CHECKSUMS:
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   sqlite3: 0bb0e6389d824e40296f531b858a2a0b71c0d2fb
   sqlite3_flutter_libs: 5ca46c1a04eddfbeeb5b16566164aa7ad1616e7b
-  sqlite3_simple: faad2ec78c7327ea013973c64b6cb8dca6ea8059
+  sqlite3_simple: 9219c8c81d79091646d4475c7552bda4a9175381
 
 PODFILE CHECKSUM: 728a4379ea3c06d69c05545b1b9041063a29456f
 

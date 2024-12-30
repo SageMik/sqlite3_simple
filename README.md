@@ -43,7 +43,7 @@ Dart 提供 FFI 以调用 SQLite、Simple 等 C/C++ 库；
 > 
 > 为了兼容 HarmonyOS 所使用的 [鸿蒙先锋队 / Flutter 3.22.0](https://gitee.com/harmonycommando_flutter/flutter/tree/oh-3.22.0)，示例项目使用的 `extended_text` 版本是 `^13.1.0` 。
 > 
-> 由于官方的破坏性变更，使用 Flutter 3.24 以及更高版本运行示例时会遇到兼容性问题，请将 [`pubspec.yaml`](example/pubspec.yaml#L52-L56) 文件中 `extended_text` 的版本升级到 `^14.1.0` 以解决不兼容报错。
+> 由于官方的破坏性变更，使用 Flutter 3.24 以及更高版本运行示例时会遇到兼容性问题，请将 [`pubspec.yaml`](example/pubspec.yaml#L53-L57) 文件中 `extended_text` 的版本升级到 `^14.1.0` 以解决不兼容报错。
 
 ## 快速开始
 

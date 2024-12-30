@@ -228,10 +228,10 @@ packages:
     dependency: transitive
     description:
       name: path_provider_foundation
-      sha256: f234384a3fdd67f989b4d54a5d73ca2a6c422fa55ae694381ae0f4375cd1ea16
+      sha256: "4843174df4d288f5e29185bd6e72a6fbdf5a4a4602717eed565497429f179942"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "2.4.0"
+    version: "2.4.1"
   path_provider_linux:
     dependency: transitive
     description:
@@ -307,7 +307,7 @@ packages:
     description:
       path: sqlite3
       ref: "sqlite3-2.4.7-ohos"
-      resolved-ref: f42c3a0bd5b83ea60aa6939447cd1f25a1af612d
+      resolved-ref: bcb96639ef84d3faf4f8f58ae8ff21c80701af4f
       url: "https://github.com/SageMik/sqlite3-ohos.dart"
     source: git
     version: "2.4.7"
@@ -316,7 +316,7 @@ packages:
     description:
       path: sqlite3_flutter_libs
       ref: "sqlite3_flutter_libs-0.5.25-ohos"
-      resolved-ref: f42c3a0bd5b83ea60aa6939447cd1f25a1af612d
+      resolved-ref: bcb96639ef84d3faf4f8f58ae8ff21c80701af4f
       url: "https://github.com/SageMik/sqlite3-ohos.dart"
     source: git
     version: "0.5.25"
