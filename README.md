@@ -1,16 +1,25 @@
 # sqlite3_simple
 
-[![Pub Package](https://img.shields.io/pub/v/sqlite3_simple)](https://pub.dev/packages/sqlite3_simple)  [![simple-native-android](https://img.shields.io/maven-central/v/io.github.sagemik/simple-native-android?label=simple-native-android)](https://central.sonatype.com/artifact/io.github.sagemik/simple-native-android)  [![simple-native](https://img.shields.io/github/actions/workflow/status/SageMik/sqlite3_simple/simple.yml?branch=simple-native&label=simple-native)](https://github.com/SageMik/sqlite3_simple/tree/simple-native)
+[![Pub Package](https://img.shields.io/pub/v/sqlite3_simple?style=for-the-badge&logo=flutter)](https://pub.dev/packages/sqlite3_simple)
+[![simple-native](https://img.shields.io/github/actions/workflow/status/SageMik/sqlite3_simple/simple.yml?branch=simple-native&label=simple-native&style=for-the-badge&logo=github&logoColor=white)](https://github.com/SageMik/sqlite3_simple/tree/simple-native)
+
+![HarmonyOS](https://img.shields.io/badge/HarmonyOS-black?style=for-the-badge&logo=harmonyos)
+![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
+![iOS](https://img.shields.io/badge/iOS-black?style=for-the-badge&logo=ios&logoColor=white)
+![MacOS](https://img.shields.io/badge/MAC%20OS-black?style=for-the-badge&logo=apple&logoColor=white)
+![Windows](https://img.shields.io/badge/Windows-0078d7?style=for-the-badge&logo=gitforwindows&logoColor=white)
+![Ubuntu](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
 
 基于 [Simple](https://github.com/wangfenjin/simple) (支持中文和拼音的 SQLite fts5 全文搜索扩展) 和 [sqlite3.dart](https://github.com/simolus3/sqlite3.dart) 的 Flutter 库，用于 SQLite 中文和拼音全文搜索。
 
 | 支持平台                                                                                                             | 示例                          |
 |------------------------------------------------------------------------------------------------------------------|-----------------------------|
-| **[HarmonyOS](#x-修改依赖版本以启用-harmonyos-支持可选)**                                                                     | ![HarmonyOS](img/ohos.png)  |
+| **HarmonyOS<br />([详见此处](#x-修改依赖版本以启用-harmonyos-支持可选))**                                                         | ![HarmonyOS](img/ohos.png)  |
 | **Android<br />([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v1.0.4/example.apk))** | ![Android](img/android.png) |
 | **iOS**                                                                                                          | ![iOS](img/ios.png)         |
 | **Windows**                                                                                                      | ![Windows](img/windows.jpg) |
 | **MacOS**                                                                                                        | ![MacOS](img/macos.png)     |
+| **Linux**                                                                                                        | ![Linux](img/linux.png)     |
 
 ## 目录
 
@@ -41,9 +50,9 @@ Dart 提供 FFI 以调用 SQLite、Simple 等 C/C++ 库；
 
 > [!IMPORTANT]
 > 
-> 为了兼容 HarmonyOS 所使用的 [鸿蒙先锋队 / Flutter 3.22.0](https://gitee.com/harmonycommando_flutter/flutter/tree/oh-3.22.0)，示例项目使用的 `extended_text` 版本是 `^13.1.0` 。
+> 本库基于 [鸿蒙先锋队 / Flutter 3.22.0](https://gitee.com/harmonycommando_flutter/flutter/tree/oh-3.22.0) 实现 HarmonyOS 适配，示例项目使用的 `extended_text` 版本是 `13.1.0` 。
 > 
-> 由于官方的破坏性变更，使用 Flutter 3.24 以及更高版本运行示例时会遇到兼容性问题，请将 [`pubspec.yaml`](example/pubspec.yaml#L53-L57) 文件中 `extended_text` 的版本升级到 `^14.1.0` 以解决不兼容报错。
+> 由于官方的破坏性变更，使用 Flutter 3.24 以及更高版本运行示例时会遇到兼容性问题，请将 [`pubspec.yaml` 中的 `extended_text` 升级到 `14.1.0` 或更高版本](example/pubspec.yaml#L38-L47) 以解决不兼容报错。
 
 ## 快速开始
 
@@ -171,11 +180,11 @@ List<MainTableRow> search(String value, String tokenizer) {
 
 ## 待办
 
-- [ ] 添加其他平台的适配。
+- [X] 添加其他平台的适配。
   - [X] Windows
   - [X] MacOS
   - [X] HarmonyOS
-  - [ ] Linux
+  - [X] Linux
 - [ ] 添加用户自定义字典。
 
 ## 致谢

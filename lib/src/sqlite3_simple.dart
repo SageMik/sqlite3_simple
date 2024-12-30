@@ -30,6 +30,7 @@ extension Sqlite3SimpleEx on Sqlite3 {
       } else if (Platform.isWindows) {
         libSimple = "simple.dll";
       } else if (Platform.isLinux) {
+        // https://github.com/wangfenjin/simple/blob/632fd7ba710ff54b8c6de1220bb47253132b94e5/src/CMakeLists.txt#L57
         libSimple = "${File(Platform.resolvedExecutable).parent.path}/bin/libsimple.so";
         // libSimple = "libsimple.so";
       }
