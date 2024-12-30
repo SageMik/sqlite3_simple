@@ -1,0 +1,12 @@
+{
+  "name": "sqlite3_simple",
+  "version": "1.0.4",
+  "description": "",
+  "main": "index.ets",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@ohos/flutter_ohos": "file:./har/flutter.har",
+    "simple-native-ohos": "^1.0.2"
+  }
+}

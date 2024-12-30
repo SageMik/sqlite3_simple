@@ -1,0 +1,10 @@
+{
+  "module": {
+    "name": "sqlite3_simple",
+    "type": "har",
+    "deviceTypes": [
+      "default",
+      "tablet"
+    ]
+  }
+}

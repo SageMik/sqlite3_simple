@@ -10,6 +10,8 @@ import 'package:sqlite3_simple_example/util/custom_text.dart';
 import 'package:sqlite3_simple_example/util/zero_width_text.dart';
 
 import 'dao.dart';
+// import 'sqlite3.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -29,7 +31,7 @@ class _MyAppState extends State<MyApp> {
     initPlatformState();
   }
 
-  late final Dao dao;
+  late Dao dao;
   List<MainTableRow>? results;
 
   Future<void> initPlatformState() async {
@@ -60,8 +62,7 @@ class _MyAppState extends State<MyApp> {
       ],
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('测试'),
-          backgroundColor: colorScheme.primary,
+          title: const Text('测试'),          backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
         ),
         body: SafeArea(
