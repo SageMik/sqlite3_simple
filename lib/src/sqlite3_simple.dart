@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_platform_utils/flutter_platform_utils.dart';
 import 'package:path/path.dart';
 import 'package:sqlite3/sqlite3.dart';
 
@@ -24,10 +25,14 @@ extension Sqlite3SimpleEx on Sqlite3 {
   void loadSimpleExtension({OpenSimple? overrideOpen}) {
     DynamicLibrary defaultOpen() {
       String libSimple = "";
-      if (Platform.isAndroid) {
+      if (Platform.isAndroid || PlatformUtils.isOhos) {
         libSimple = "libsimple.so";
       } else if (Platform.isWindows) {
         libSimple = "simple.dll";
+      } else if (Platform.isLinux) {
+        // https://github.com/wangfenjin/simple/blob/632fd7ba710ff54b8c6de1220bb47253132b94e5/src/CMakeLists.txt#L57
+        libSimple = "${File(Platform.resolvedExecutable).parent.path}/bin/libsimple.so";
+        // libSimple = "libsimple.so";
       }
       return libSimple.isNotEmpty
           ? DynamicLibrary.open(libSimple)

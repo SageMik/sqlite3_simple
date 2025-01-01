@@ -1,7 +1,8 @@
 name: sqlite3_simple
 description: "基于 Simple (支持中文和拼音的 SQLite fts5 全文搜索扩展) 和 sqlite3.dart 的 Flutter 库，用于 SQLite 中文和拼音全文搜索。"
-version: 1.0.3
-homepage: https://github.com/SageMik/sqlite3_simple
+version: 1.0.4
+homepage: https://github.com/SageMik
+repository: https://github.com/SageMik/sqlite3_simple
 
 environment:
   sdk: '>=3.4.0 <4.0.0'
@@ -10,6 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_platform_utils: ^1.0.0
   path: ^1.9.0
   plugin_platform_interface: ^2.0.2
   sqlite3: ^2.4.7
@@ -17,7 +19,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^4.0.0
 
 flutter:
   plugin:
@@ -27,10 +29,16 @@ flutter:
         ffiPlugin: true
       ios:
         pluginClass: Sqlite3SimplePlugin
+        sharedDarwinSource: true # https://docs.flutter.cn/packages-and-plugins/developing-packages#shared-ios-and-macos-implementations
       windows:
         ffiPlugin: true
       macos:
+        pluginClass: Sqlite3SimplePlugin
+        sharedDarwinSource: true
+      linux:
         ffiPlugin: true
+      ohos:
+        pluginClass: Sqlite3SimplePlugin
 
   assets:
     - assets/cpp_jieba_dict/

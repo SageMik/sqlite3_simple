@@ -1,0 +1,47 @@
+{
+  "app": {
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "/Users/sagemik/.ohos/config/default_ohos_6h9nKpq9ragV-RQhowWQSkIwLky4vD_NKT1OgbH1nbM=.cer",
+          "storePassword": "0000001A54585C3E40CD6B490828EE5917E323C71D443F1862F5D2BA49F279FDA6F856000099EEA68DC5",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001ABA85917476EA9623B9DCF6AAA4BC14A3560DCA0EB086FEAA69481B1BEBA8D46A798785B2ABE4",
+          "profile": "/Users/sagemik/.ohos/config/default_ohos_6h9nKpq9ragV-RQhowWQSkIwLky4vD_NKT1OgbH1nbM=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "/Users/sagemik/.ohos/config/default_ohos_6h9nKpq9ragV-RQhowWQSkIwLky4vD_NKT1OgbH1nbM=.p12"
+        }
+      }
+    ],
+    "products": [
+      {
+        "name": "default",
+        "signingConfig": "default",
+        "compatibleSdkVersion": "5.0.0(12)",
+        "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "strictMode": {
+            "caseSensitiveCheck": true,
+            "useNormalizedOHMUrl": true
+          }
+        }
+      }
+    ]
+  },
+  "modules": [
+    {
+      "name": "entry",
+      "srcPath": "./entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    }
+  ]
+}

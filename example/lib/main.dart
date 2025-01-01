@@ -10,6 +10,8 @@ import 'package:sqlite3_simple_example/util/custom_text.dart';
 import 'package:sqlite3_simple_example/util/zero_width_text.dart';
 
 import 'dao.dart';
+// import 'sqlite3.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -29,10 +31,12 @@ class _MyAppState extends State<MyApp> {
     initPlatformState();
   }
 
-  late final Dao dao;
+  late Dao dao;
   List<MainTableRow>? results;
 
   Future<void> initPlatformState() async {
+    searchController.addListener(onSearchChanged);
+
     final docDir = await getApplicationDocumentsDirectory();
     final jiebaDictPath = join(docDir.path, "cpp_jieba");
     dao = Dao(() => sqlite3.openInMemory());
@@ -58,8 +62,7 @@ class _MyAppState extends State<MyApp> {
       ],
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('测试'),
-          backgroundColor: colorScheme.primary,
+          title: const Text('测试'),          backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
         ),
         body: SafeArea(
@@ -90,15 +93,12 @@ class _MyAppState extends State<MyApp> {
   static const tokenizerMap = {"jieba": "结巴", "simple": "Simple"};
   String tokenizer = tokenizerMap.keys.first;
 
-  void onSearchChanged(String value) {
-    value = value.trim();
+  void onSearchChanged() {
     setState(() {
+      final value = searchController.text.trim();
       showClearButton = value.isNotEmpty;
-      if (!showClearButton) {
-        results = dao.selectAll();
-        return;
-      }
-      results = dao.search(value, tokenizer);
+      results =
+          showClearButton ? dao.search(value, tokenizer) : dao.selectAll();
     });
   }
 
@@ -107,7 +107,7 @@ class _MyAppState extends State<MyApp> {
       results = null;
     });
     dao.updateAll();
-    onSearchChanged(searchController.text);
+    onSearchChanged();
   }
 
   final searchController = SearchController();
@@ -131,14 +131,12 @@ class _MyAppState extends State<MyApp> {
                   IconButton(
                       onPressed: () {
                         searchController.text = "";
-                        onSearchChanged("");
                       },
                       icon: const Icon(Icons.clear))
               ],
               elevation: const WidgetStatePropertyAll(0),
               shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8))),
-              onChanged: onSearchChanged,
             ),
           ),
         ),
@@ -170,7 +168,7 @@ class _MyAppState extends State<MyApp> {
               onChanged: (value) {
                 setState(() {
                   tokenizer = value!;
-                  onSearchChanged(searchController.text);
+                  onSearchChanged();
                 });
               },
             ),
@@ -183,7 +181,6 @@ class _MyAppState extends State<MyApp> {
           onTap: () {
             setState(() {
               isHighlight = !isHighlight;
-              onSearchChanged(searchController.text);
             });
           },
           child: Row(

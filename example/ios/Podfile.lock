@@ -23,15 +23,16 @@ PODS:
     - sqlite3/fts5
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
-  - sqlite3_simple (1.0.3):
+  - sqlite3_simple (1.0.4):
     - Flutter
+    - FlutterMacOS
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
-  - sqlite3_simple (from `.symlinks/plugins/sqlite3_simple/ios`)
+  - sqlite3_simple (from `.symlinks/plugins/sqlite3_simple/darwin`)
 
 SPEC REPOS:
   https://mirrors.tuna.tsinghua.edu.cn/git/CocoaPods/Specs.git:
@@ -47,15 +48,15 @@ EXTERNAL SOURCES:
   sqlite3_flutter_libs:
     :path: ".symlinks/plugins/sqlite3_flutter_libs/ios"
   sqlite3_simple:
-    :path: ".symlinks/plugins/sqlite3_simple/ios"
+    :path: ".symlinks/plugins/sqlite3_simple/darwin"
 
 SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
+  integration_test: ce0a3ffa1de96d1a89ca0ac26fca7ea18a749ef4
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   sqlite3: 0bb0e6389d824e40296f531b858a2a0b71c0d2fb
   sqlite3_flutter_libs: c00457ebd31e59fa6bb830380ddba24d44fbcd3b
-  sqlite3_simple: 8359c3f9ae6fd7542f9d39b62340b798c2b1d53f
+  sqlite3_simple: 9219c8c81d79091646d4475c7552bda4a9175381
 
 PODFILE CHECKSUM: 8bf07c9a68c26d0e0c40a3d9e3fea3aa6c79d4b7
 
