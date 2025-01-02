@@ -50,7 +50,7 @@ Dart 提供 FFI 以调用 SQLite、Simple 等 C/C++ 库；
 
 > [!IMPORTANT]
 > 
-> 本库基于 [鸿蒙先锋队 / Flutter 3.22.0](https://gitee.com/harmonycommando_flutter/flutter/tree/oh-3.22.0) 实现 HarmonyOS 适配，示例项目使用的 `extended_text` 版本是 `13.1.0` 。
+> 本库基于 [鸿蒙突击队 / Flutter 3.22.0](https://gitee.com/harmonycommando_flutter/flutter/tree/oh-3.22.0) 实现 HarmonyOS 适配，示例项目使用的 `extended_text` 版本是 `13.1.0` 。
 > 
 > 由于官方的破坏性变更，使用 Flutter 3.24 以及更高版本运行示例时会遇到兼容性问题，请将 [`pubspec.yaml` 中的 `extended_text` 升级到 `14.1.0` 或更高版本](example/pubspec.yaml#L38-L47) 以解决不兼容报错。
 
@@ -86,7 +86,7 @@ import 'package:sqlite3_simple/sqlite3_simple.dart';
 
 ### X. 修改依赖版本以启用 HarmonyOS 支持（可选）
 
-本库基于 [鸿蒙先锋队 / Flutter 3.22.0](https://gitee.com/harmonycommando_flutter/flutter/tree/oh-3.22.0) 实现 HarmonyOS 适配，已在 Mac Arm HarmonyOS 模拟器上经过测试。
+本库基于 [鸿蒙突击队 / Flutter 3.22.0](https://gitee.com/harmonycommando_flutter/flutter/tree/oh-3.22.0) 实现 HarmonyOS 适配，已在 Mac Arm HarmonyOS 模拟器上经过测试。
 
 若需在 HarmonyOS 上使用，请修改项目 `pubspec.yaml` 文件中 `sqlite3`、`sqlite3_flutter_libs` 的版本：
 
