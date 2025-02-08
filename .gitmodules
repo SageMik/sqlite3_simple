@@ -3,4 +3,4 @@
 	url = https://github.com/SageMik/simple-native-android
 [submodule "ohos"]
 	path = ohos
-	url = https://github.com/SageMik/simple-native-ohos
+	url = https://github.com/SageMik/simple-ohos

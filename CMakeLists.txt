@@ -18,6 +18,6 @@ include(FetchContent)
 
 FetchContent_Declare(simple
     GIT_REPOSITORY https://github.com/wangfenjin/simple.git
-    GIT_TAG 632fd7ba710ff54b8c6de1220bb47253132b94e5
+    GIT_TAG v0.5.0
 )
 FetchContent_MakeAvailable(simple)
