@@ -3,7 +3,6 @@
 [![Pub Package](https://img.shields.io/pub/v/sqlite3_simple?style=for-the-badge&logo=flutter)](https://pub.dev/packages/sqlite3_simple)
 [![simple-native](https://img.shields.io/github/actions/workflow/status/SageMik/sqlite3_simple/simple.yml?branch=simple-native&label=simple-native&style=for-the-badge&logo=github&logoColor=white)](https://github.com/SageMik/sqlite3_simple/tree/simple-native)
 
-![HarmonyOS](https://img.shields.io/badge/HarmonyOS-black?style=for-the-badge&logo=harmonyos)
 ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
 ![iOS](https://img.shields.io/badge/iOS-black?style=for-the-badge&logo=ios&logoColor=white)
 ![MacOS](https://img.shields.io/badge/MAC%20OS-black?style=for-the-badge&logo=apple&logoColor=white)
@@ -12,10 +11,13 @@
 
 基于 [Simple](https://github.com/wangfenjin/simple) (支持中文和拼音的 SQLite fts5 全文搜索扩展) 和 [sqlite3.dart](https://github.com/simolus3/sqlite3.dart) 的 Flutter 库，用于 SQLite 中文和拼音全文搜索。
 
+> [!IMPORTANT]
+>
+> 由于 [`sqlite3-ohos.dart` 在 HarmonyOS NEXT 上在提交审核后打出正式签名 Release 包崩溃的问题](https://github.com/SageMik/sqlite3-ohos.dart/issues/1)，目前暂时删除适配说明，请不要在 HarmonyOS NEXT 平台上继续使用。
+
 | 支持平台                                                                                                             | 示例                          |
 |------------------------------------------------------------------------------------------------------------------|-----------------------------|
-| **HarmonyOS<br />([详见此处](#x-修改依赖版本以启用-harmonyos-支持可选))**                                                         | ![HarmonyOS](img/ohos.png)  |
-| **Android<br />([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v1.0.4/example.apk))** | ![Android](img/android.png) |
+| **Android<br />([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v1.0.5/example.apk))** | ![Android](img/android.png) |
 | **iOS**                                                                                                          | ![iOS](img/ios.png)         |
 | **Windows**                                                                                                      | ![Windows](img/windows.jpg) |
 | **MacOS**                                                                                                        | ![MacOS](img/macos.png)     |
@@ -27,7 +29,6 @@
 - [快速开始](#快速开始)
   - [1. 添加 SQLite 依赖](#1-添加-sqlite-依赖)
   - [2. 添加本库并导入依赖](#2-添加本库并导入依赖)
-  - [X. 修改依赖版本以启用 HarmonyOS 支持（可选）](#x-修改依赖版本以启用-harmonyos-支持可选)
   - [3. 加载 Simple 扩展](#3-加载-simple-扩展)
   - [4. 打开数据库](#4-打开数据库)
   - [5. 查询](#5-查询)
@@ -38,7 +39,7 @@
 
 > [!TIP]
 >
-> 本库通过 Github Actions 编译 Simple 原生库，具体请参阅 [simple-native](https://github.com/SageMik/sqlite3_simple/tree/simple-native) 分支。
+> 本库主要通过 Github Actions 编译和维护 Simple 原生库，以支持本库在不同平台的 Flutter 实现，具体请参阅 [simple-native 分支](https://github.com/SageMik/sqlite3_simple/tree/simple-native) 。
 
 SQLite 通过 [SQLite FTS5 Extension](https://sqlite.org/fts5.html) 提供 全文搜索 (Full-Text Search) 功能；
 
@@ -47,12 +48,6 @@ Dart 提供 FFI 以调用 SQLite、Simple 等 C/C++ 库；
 本库通过 [Simple](https://github.com/wangfenjin/simple) 实现 中文拼音全文搜索，通过 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 操作数据库和加载自定义扩展。如果您使用 [Drift](https://github.com/simolus3/drift) 操作数据库，由于 [Drift](https://github.com/simolus3/drift) 基于 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) ，同样可以使用本库实现中文拼音全文搜索（理论上，也适用于任何依赖于 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 的 Flutter 库）。
 
 请参阅相关文档，或 [`example`](./example) 的具体示例，以构建和操作数据库。
-
-> [!IMPORTANT]
-> 
-> 本库基于 [鸿蒙突击队 / Flutter 3.22.0](https://gitee.com/harmonycommando_flutter/flutter/tree/oh-3.22.0) 实现 HarmonyOS 适配，示例项目使用的 `extended_text` 版本是 `13.1.0` 。
-> 
-> 由于官方的破坏性变更，使用 Flutter 3.24 以及更高版本运行示例时会遇到兼容性问题，请将 [`pubspec.yaml` 中的 `extended_text` 升级到 `14.1.0` 或更高版本](example/pubspec.yaml#L38-L47) 以解决不兼容报错。
 
 ## 快速开始
 
@@ -82,40 +77,6 @@ flutter pub add sqlite3_simple
 ```dart
 import 'package:sqlite3/sqlite3.dart';
 import 'package:sqlite3_simple/sqlite3_simple.dart';
-```
-
-### X. 修改依赖版本以启用 HarmonyOS 支持（可选）
-
-本库基于 [鸿蒙突击队 / Flutter 3.22.0](https://gitee.com/harmonycommando_flutter/flutter/tree/oh-3.22.0) 实现 HarmonyOS 适配，已在 Mac Arm HarmonyOS 模拟器上经过测试。
-
-若需在 HarmonyOS 上使用，请修改项目 `pubspec.yaml` 文件中 `sqlite3`、`sqlite3_flutter_libs` 的版本：
-
-```yaml
-# 修改项目使用的版本为支持 HarmonyOS 的分支版本
-dependencies:
-  sqlite3:
-    git:
-      url: https://github.com/SageMik/sqlite3-ohos.dart
-      path: sqlite3
-      ref: sqlite3-2.4.7-ohos
-  sqlite3_flutter_libs:
-    git:
-      url: https://github.com/SageMik/sqlite3-ohos.dart
-      path: sqlite3_flutter_libs
-      ref: sqlite3_flutter_libs-0.5.25-ohos
-
-# 覆盖本库和其他库使用的版本为支持 HarmonyOS 的分支版本
-dependency_overrides:
-  sqlite3:
-    git:
-      url: https://github.com/SageMik/sqlite3-ohos.dart
-      path: sqlite3
-      ref: sqlite3-2.4.7-ohos
-  sqlite3_flutter_libs:
-    git:
-      url: https://github.com/SageMik/sqlite3-ohos.dart
-      path: sqlite3_flutter_libs
-      ref: sqlite3_flutter_libs-0.5.25-ohos
 ```
 
 ### 3. 加载 Simple 扩展
@@ -183,8 +144,8 @@ List<MainTableRow> search(String value, String tokenizer) {
 - [X] 添加其他平台的适配。
   - [X] Windows
   - [X] MacOS
-  - [X] HarmonyOS
   - [X] Linux
+  - [ ] HarmonyOS NEXT
 - [ ] 添加用户自定义字典。
 
 ## 致谢

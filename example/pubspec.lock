@@ -210,12 +210,11 @@ packages:
   path_provider:
     dependency: "direct main"
     description:
-      path: "packages/path_provider/path_provider"
-      ref: HEAD
-      resolved-ref: "09ebb35484a02b04d0086ae7e25910aec0ceed82"
-      url: "https://gitee.com/openharmony-sig/flutter_packages.git"
-    source: git
-    version: "2.1.0"
+      name: path_provider
+      sha256: "50c5dd5b6e1aaf6fb3a78b33f6aa3afca52bf903a8a5298f53101fdaee55bbcd"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.1.5"
   path_provider_android:
     dependency: transitive
     description:
@@ -239,15 +238,6 @@ packages:
       sha256: f7a1fe3a634fe7734c8d3f2766ad746ae2a2884abe22e241a8b301bf5cac3279
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "2.2.1"
-  path_provider_ohos:
-    dependency: transitive
-    description:
-      path: "packages/path_provider/path_provider_ohos"
-      ref: HEAD
-      resolved-ref: "09ebb35484a02b04d0086ae7e25910aec0ceed82"
-      url: "https://gitee.com/openharmony-sig/flutter_packages.git"
-    source: git
     version: "2.2.1"
   path_provider_platform_interface:
     dependency: transitive
@@ -305,28 +295,26 @@ packages:
   sqlite3:
     dependency: "direct main"
     description:
-      path: sqlite3
-      ref: "sqlite3-2.4.7-ohos"
-      resolved-ref: bcb96639ef84d3faf4f8f58ae8ff21c80701af4f
-      url: "https://github.com/SageMik/sqlite3-ohos.dart"
-    source: git
+      name: sqlite3
+      sha256: bb174b3ec2527f9c5f680f73a89af8149dd99782fbb56ea88ad0807c5638f2ed
+      url: "https://pub.flutter-io.cn"
+    source: hosted
     version: "2.4.7"
   sqlite3_flutter_libs:
     dependency: "direct main"
     description:
-      path: sqlite3_flutter_libs
-      ref: "sqlite3_flutter_libs-0.5.25-ohos"
-      resolved-ref: bcb96639ef84d3faf4f8f58ae8ff21c80701af4f
-      url: "https://github.com/SageMik/sqlite3-ohos.dart"
-    source: git
-    version: "0.5.25"
+      name: sqlite3_flutter_libs
+      sha256: "57fafacd815c981735406215966ff7caaa8eab984b094f52e692accefcbd9233"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.5.30"
   sqlite3_simple:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "1.0.4"
+    version: "1.0.5"
   stack_trace:
     dependency: transitive
     description:
