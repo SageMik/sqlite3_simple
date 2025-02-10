@@ -1,3 +1,8 @@
+## 1.0.5
+
+* 更新 Simple 原生库至 [v0.5.0](https://github.com/wangfenjin/simple/tree/v0.5.0) 。
+* 由于 [sqlite-ohos.dart](https://github.com/SageMik/sqlite3-ohos.dart) 崩溃问题，暂时停止 HarmonyOS NEXT 适配，删除相关说明。
+
 ## 1.0.4
 
 * 新增 HarmonyOS 和 Linux 支持。
