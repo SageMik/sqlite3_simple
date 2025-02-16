@@ -3,14 +3,11 @@ import 'dart:async';
 import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:sqlite3/sqlite3.dart' hide Row;
 
+import 'data/impl/sqlite3_impl.dart';
+import 'data/main_table_dao.dart';
+import 'data/main_table_row.dart';
 import 'utils/zero_width_text.dart';
-
-import 'dao.dart';
-// import 'sqlite3.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,25 +21,23 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  late final Sqlite3DbManger dbManager;
+
+  Sqlite3Dao get dao => dbManager.dao;
+
+  List<MainTableRow>? results;
+
   @override
   void initState() {
     super.initState();
-    initPlatformState();
-  }
-
-  late Dao dao;
-  List<MainTableRow>? results;
-
-  Future<void> initPlatformState() async {
-    final docDir = await getApplicationDocumentsDirectory();
-    final jiebaDictPath = join(docDir.path, "cpp_jieba");
-    dao = Dao(() => sqlite3.openInMemory());
-    await dao.init(jiebaDictPath);
-    setState(() {
-      dao.insertRandomData(30);
-      results = dao.selectAll();
-    });
     searchController.addListener(onSearchChanged);
+    dbManager = Sqlite3DbManger()
+      ..init().then((_) {
+        setState(() {
+          dao.insertRandomData(30);
+          results = dao.selectAll();
+        });
+      });
   }
 
   @override
@@ -89,8 +84,11 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  static const tokenizerMap = {"jieba": "结巴", "simple": "Simple"};
-  String tokenizer = tokenizerMap.keys.first;
+  static const tokenizer2uiString = {
+    Tokenizer.jieba: "结巴",
+    Tokenizer.simple: "Simple"
+  };
+  Tokenizer tokenizer = tokenizer2uiString.keys.first;
 
   void onSearchChanged() {
     setState(() {
@@ -154,9 +152,9 @@ class _MyAppState extends State<MyApp> {
               "分词器：",
               style: TextStyle(fontSize: 16),
             ),
-            DropdownButton<String>(
+            DropdownButton<Tokenizer>(
               value: tokenizer,
-              items: tokenizerMap.entries
+              items: tokenizer2uiString.entries
                   .map((e) => DropdownMenuItem(
                         value: e.key,
                         child: Text(e.value),
@@ -185,8 +183,8 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  final highlightTextBuilder = HighlightTextSpanBuilder(
-      (src) => src.copyWith(color: Colors.red));
+  final highlightTextBuilder =
+      HighlightTextSpanBuilder((src) => src.copyWith(color: Colors.red));
 
   Widget buildListView() {
     return ListView.builder(
@@ -201,7 +199,7 @@ class _MyAppState extends State<MyApp> {
               style: const TextStyle(
                   fontSize: 36,
                   fontWeight: FontWeight.bold,
-                  fontFeatures: [FontFeature.tabularFigures()]),
+                  fontFeatures: [FontFeature.tabularFigures()]), // 数字等宽
             ),
             const SizedBox(width: 8),
             Expanded(
