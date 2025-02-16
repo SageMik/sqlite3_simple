@@ -1,0 +1,204 @@
+import 'dart:ffi';
+import 'dart:math';
+
+import 'package:flutter/foundation.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:sqlite3/open.dart';
+import 'package:sqlite3/sqlite3.dart';
+import 'package:sqlite3_simple/sqlite3_simple.dart';
+import 'package:sqlite3_simple_example/data/db_manager.dart';
+
+import '../../utils/random_words.dart';
+import '../../utils/zero_width_text.dart';
+import '../main_table_dao.dart';
+import '../main_table_row.dart';
+
+class Sqlite3DbManger extends IDbManager<Sqlite3Dao> {
+  @override
+  late final Sqlite3Dao dao;
+
+  @override
+  Future<void> init() async {
+    // // [Android SQLite 覆盖]
+    // _overrideForAndroid();
+
+    sqlite3.loadSimpleExtension();
+
+    final docDir = await getApplicationDocumentsDirectory();
+    final jiebaDictPath = join(docDir.path, "cpp_jieba");
+    final jiebaDictSql =
+        await sqlite3.saveJiebaDict(jiebaDictPath, overwriteWhenExist: true);
+    if (kDebugMode) print("用于设置结巴分词字典路径：$jiebaDictSql");
+
+    final db = sqlite3.openInMemory();
+
+    dao = Sqlite3Dao(db);
+
+    db.execute(jiebaDictSql);
+    final init = db.select("SELECT jieba_query('Jieba分词初始化（提前加载避免后续等待）')");
+    if (kDebugMode) print(init);
+
+    dao.initFts5();
+  }
+
+// /// 自定义 SQLite Android 示例，请全局搜索 Android SQLite 覆盖 来查看与此相关的配置。
+// /// 如果你想自定义 SQLite 原生库，可以参考 本方法 或 sqlite3 的文档说明。
+// /// 本方法将原来 sqlite3_flutter_libs 的 [libsqlite.so]，替换为了 sqlite-android 的 [libsqlite3x.so]
+// void _overrideForAndroid() {
+//   open.overrideFor(
+//       OperatingSystem.android, () => DynamicLibrary.open("libsqlite3x.so"));
+// }
+}
+
+class Sqlite3Dao extends IMainTableDao<Database> {
+  @override
+  final Database db;
+
+  Sqlite3Dao(this.db);
+
+  // final fts5Tokenizer = "simple 0";  // 关闭拼音搜索
+  final fts5Tokenizer = "simple";
+  final mainTable = "custom";
+  final id = "id",
+      title = "title",
+      content = "content",
+      insertDate = "insert_date";
+  final fts5Table = "t1";
+
+  @override
+  void initFts5() {
+    /// 主表
+    db.execute('''
+      CREATE TABLE $mainTable (
+        $id INTEGER PRIMARY KEY AUTOINCREMENT, 
+        $title TEXT, 
+        $content TEXT, 
+        $insertDate INTEGER
+      );
+    ''');
+
+    /// FTS5虚表
+    db.execute('''
+      CREATE VIRTUAL TABLE $fts5Table USING fts5(
+        $title, $content, $insertDate UNINDEXED, 
+        tokenize = '$fts5Tokenizer', 
+        content = '$mainTable', 
+        content_rowid = '$id'
+      );
+    ''');
+
+    /// 触发器
+    final newInsert = '''
+      INSERT INTO $fts5Table(rowid, $title, $content) 
+        VALUES (new.$id, new.$title, new.$content);
+    ''';
+    final deleteInsert = '''
+      INSERT INTO $fts5Table($fts5Table, rowid, $title, $content) 
+        VALUES ('delete', old.$id, old.$title, old.$content);
+    ''';
+    db.execute('''
+      CREATE TRIGGER ${mainTable}_insert AFTER INSERT ON $mainTable BEGIN 
+        $newInsert
+      END;
+    ''');
+    db.execute('''
+      CREATE TRIGGER ${mainTable}_delete AFTER DELETE ON $mainTable BEGIN 
+        $deleteInsert
+      END;
+    ''');
+    db.execute('''
+      CREATE TRIGGER ${mainTable}_update AFTER UPDATE ON $mainTable BEGIN 
+        $deleteInsert
+        $newInsert
+      END;
+    ''');
+  }
+
+  /// 构造随机中文词组数据
+  MainTableRow _buildRow(int index) {
+    return MainTableRow(
+      id: 0,
+      title: randomWords(minLength: 2, maxLength: 3),
+      content: randomWords(minLength: 4, maxLength: 10),
+      insertDate: DateTime.utc(2000, 1, 1)
+          .add(Duration(days: index, minutes: Random().nextInt(61))),
+    );
+  }
+
+  @override
+  void insertRandomData(int length) {
+    final insertStmt = db.prepare("INSERT INTO $mainTable VALUES(?, ?, ?, ?);");
+    for (int i = 0; i < length; i++) {
+      final newRow = _buildRow(i);
+      insertStmt.execute([
+        null,
+        newRow.title,
+        newRow.content,
+        newRow.insertDate.toDb,
+      ]);
+    }
+    insertStmt.dispose();
+  }
+
+  /// 将查询结果转为实体类
+  List<MainTableRow> _toMainTableRows(ResultSet resultSet) {
+    return List.generate(
+      resultSet.length,
+      (i) {
+        final r = resultSet.elementAt(i);
+        return MainTableRow(
+          id: r[id],
+          title: r[title],
+          content: r[content],
+          insertDate: (r[insertDate] as int).toEntity,
+        );
+      },
+    );
+  }
+
+  @override
+  List<MainTableRow> selectAll() =>
+      _toMainTableRows(db.select("SELECT * FROM $mainTable"));
+
+  @override
+  int selectCount() =>
+      db.select("SELECT COUNT(*) as c FROM $mainTable").first['c'];
+
+  @override
+  List<MainTableRow> search(String value, Tokenizer tokenizer) {
+    const wrapperSql = "'${ZeroWidth.start}', '${ZeroWidth.end}'";
+    final resultSet = db.select('''
+      SELECT 
+        rowid AS $id, 
+        simple_highlight($fts5Table, 0, $wrapperSql) AS $title, 
+        simple_highlight($fts5Table, 1, $wrapperSql) AS $content, 
+        $insertDate 
+      FROM $fts5Table 
+      WHERE $fts5Table MATCH ${tokenizer.name}_query(?);
+    ''', [value]);
+    return _toMainTableRows(resultSet);
+  }
+
+  @override
+  void updateAll() {
+    final mainTableRowList = selectAll();
+    final updateStmt = db.prepare(
+        "UPDATE $mainTable SET $title = ?, $content = ?, $insertDate = ? WHERE $id = ?;");
+    for (int i = 0; i < mainTableRowList.length; i++) {
+      final oldRow = mainTableRowList[i];
+      final newRow = _buildRow(i);
+      updateStmt.execute([newRow.title, newRow.content, newRow.insertDate.toDb, oldRow.id]);
+    }
+    updateStmt.dispose();
+  }
+}
+
+extension _IntEx on int {
+  DateTime get toEntity => DateTime.fromMicrosecondsSinceEpoch(this);
+}
+
+extension _DateTimeEx on DateTime {
+  int get toDb => microsecondsSinceEpoch;
+}
+
