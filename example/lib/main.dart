@@ -6,12 +6,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart' hide Row;
-import 'package:sqlite3_simple_example/util/custom_text.dart';
-import 'package:sqlite3_simple_example/util/zero_width_text.dart';
+
+import 'utils/zero_width_text.dart';
 
 import 'dao.dart';
 // import 'sqlite3.dart';
-
 
 void main() {
   runApp(const MyApp());
@@ -35,8 +34,6 @@ class _MyAppState extends State<MyApp> {
   List<MainTableRow>? results;
 
   Future<void> initPlatformState() async {
-    searchController.addListener(onSearchChanged);
-
     final docDir = await getApplicationDocumentsDirectory();
     final jiebaDictPath = join(docDir.path, "cpp_jieba");
     dao = Dao(() => sqlite3.openInMemory());
@@ -45,6 +42,7 @@ class _MyAppState extends State<MyApp> {
       dao.insertRandomData(30);
       results = dao.selectAll();
     });
+    searchController.addListener(onSearchChanged);
   }
 
   @override
@@ -62,7 +60,8 @@ class _MyAppState extends State<MyApp> {
       ],
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('测试'),          backgroundColor: colorScheme.primary,
+          title: const Text('测试'),
+          backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
         ),
         body: SafeArea(
@@ -144,8 +143,6 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  bool isHighlight = true;
-
   Widget buildSearchFilter() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -175,24 +172,6 @@ class _MyAppState extends State<MyApp> {
           ],
         ),
         const SizedBox(width: 8),
-        InkWell(
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-          onTap: () {
-            setState(() {
-              isHighlight = !isHighlight;
-            });
-          },
-          child: Row(
-            children: [
-              IgnorePointer(
-                child: Checkbox(value: isHighlight, onChanged: (_) {}),
-              ),
-              const Text("是否高亮", style: TextStyle(fontSize: 16))
-            ],
-          ),
-        ),
-        const SizedBox(width: 8),
         const Expanded(child: SizedBox()),
         IconButton(
           style: ButtonStyle(
@@ -206,14 +185,10 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+  final highlightTextBuilder = HighlightTextSpanBuilder(
+      (src) => src.copyWith(color: Colors.red));
+
   Widget buildListView() {
-    final highlightTextBuilder = isHighlight
-        ? CustomTextBuilder([
-            ZeroWidthText(
-              const TextStyle(color: Colors.red),
-            )
-          ])
-        : null;
     return ListView.builder(
       itemCount: results!.length,
       itemBuilder: (context, index) {

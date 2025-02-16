@@ -2,9 +2,10 @@ import 'dart:math';
 
 import 'package:sqlite3/sqlite3.dart';
 import 'package:sqlite3_simple/sqlite3_simple.dart';
-import 'package:sqlite3_simple_example/util/random_words.dart';
 
-import 'util/zero_width_text.dart';
+import 'utils/random_words.dart';
+import 'utils/zero_width_text.dart';
+
 // import 'sqlite3.dart';
 
 class MainTableRow {
