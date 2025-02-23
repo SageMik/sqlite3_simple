@@ -19,5 +19,5 @@
 | **Linux**     | [CMakeLists.txt](https://github.com/SageMik/sqlite3_simple/blob/master/linux/CMakeLists.txt)                  |                                          |                                |
 
 ## GIT TAG
-1. `NvX.Y.Z` 表示对应 `sqlite_simple: X.Y.Z` 版本所使用的 原生库 (Native Library) 。
-2. `NvX.Y.Z` 中的子模块总是滞后一个版本，故 `NvX.Y.Z/s` 专门用于更新 子模块 (Submodule) 到使用对应 `NvX.Y.Z` 原生库的版本。
+1. `NvX.Y.Z` 表示对应 `sqlite_simple: X.Y.Z` 版本所使用的原生库 。
+2. `NvX.Y.Z` 中的子模块总是滞后一个版本，故 `NvX.Y.Zx` 专门用于更新子模块到使用对应 `NvX.Y.Z` 原生库的版本。

@@ -2,9 +2,8 @@ name: 编译 Simple 原生库
 
 on:
   push:
-    branches: [ "simple-native" ]
-  pull_request:
-    branches: [ "simple-native" ]
+    tag:
+      - Nv[0-9]+.[0-9]+.[0-9]+
   workflow_dispatch:
 
 env:
