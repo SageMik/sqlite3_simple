@@ -18,3 +18,13 @@ class MainTableRow {
     required this.insertDate,
   });
 }
+
+
+extension IntEx on int {
+  DateTime get toEntity => DateTime.fromMicrosecondsSinceEpoch(this);
+}
+
+extension DateTimeEx on DateTime {
+  int get toDb => microsecondsSinceEpoch;
+}
+
