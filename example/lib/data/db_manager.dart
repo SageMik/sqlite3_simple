@@ -5,4 +5,7 @@ abstract class IDbManager<TDao extends IMainTableDao> {
 
   /// 初始化 Simple 分词器，并将结巴分词字典文件保存到本地
   Future<void> init();
+
+  /// 关闭数据库
+  Future<void> dispose();
 }
