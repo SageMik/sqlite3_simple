@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class DropdownFromMap<T> extends StatefulWidget {
+class Dropdown<T> extends StatefulWidget {
   final String label;
   final T initValue;
   final Map<T, String> map;
   final ValueChanged<T?> onChanged;
 
-  const DropdownFromMap({
+  const Dropdown({
     super.key,
     required this.label,
     required this.initValue,
@@ -15,10 +15,10 @@ class DropdownFromMap<T> extends StatefulWidget {
   });
 
   @override
-  State<StatefulWidget> createState() => _DropdownFromMapState<T>();
+  State<StatefulWidget> createState() => _DropdownState<T>();
 }
 
-class _DropdownFromMapState<T> extends State<DropdownFromMap<T>> {
+class _DropdownState<T> extends State<Dropdown<T>> {
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -26,6 +26,7 @@ class _DropdownFromMapState<T> extends State<DropdownFromMap<T>> {
         Text(widget.label, style: const TextStyle(fontSize: 16)),
         DropdownButton<T>(
           isDense: true,
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
           value: widget.initValue,
           items: widget.map.entries
               .map((e) =>

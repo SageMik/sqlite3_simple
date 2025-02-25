@@ -19,6 +19,18 @@ class MainTableRow {
   });
 }
 
+class MainTableRowUiModel extends MainTableRow {
+  /// 格式化的 ID
+  final String idFormatted;
+
+  MainTableRowUiModel({
+    required super.id,
+    required this.idFormatted,
+    required super.title,
+    required super.content,
+    required super.insertDate,
+  });
+}
 
 extension IntEx on int {
   DateTime get toEntity => DateTime.fromMicrosecondsSinceEpoch(this);
@@ -27,4 +39,3 @@ extension IntEx on int {
 extension DateTimeEx on DateTime {
   int get toDb => microsecondsSinceEpoch;
 }
-

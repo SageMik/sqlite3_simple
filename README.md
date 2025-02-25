@@ -13,7 +13,7 @@
 
 > [!IMPORTANT]
 >
-> 由于 [`sqlite3-ohos.dart` 在 HarmonyOS NEXT 上在提交审核后打出正式签名 Release 包崩溃的问题](https://github.com/SageMik/sqlite3-ohos.dart/issues/1)，目前暂时删除适配说明，请不要在 HarmonyOS NEXT 平台上继续使用。
+> 由于 [sqlite3-ohos.dart 在 HarmonyOS NEXT 上在提交审核后打出正式签名 Release 包崩溃的问题](https://github.com/SageMik/sqlite3-ohos.dart/issues/1)，目前暂时删除适配说明，请不要在 HarmonyOS NEXT 平台上继续使用。
 
 | 支持平台                                                                                                             | 示例                          |
 |------------------------------------------------------------------------------------------------------------------|-----------------------------|
@@ -37,17 +37,21 @@
 
 ## 前置准备
 
-> [!TIP]
->
-> 本库主要通过 Github Actions 编译和维护 Simple 原生库，以支持本库在不同平台的 Flutter 实现，具体请参阅 [simple-native 分支](https://github.com/SageMik/sqlite3_simple/tree/simple-native) 。
-
 SQLite 通过 [SQLite FTS5 Extension](https://sqlite.org/fts5.html) 提供 全文搜索 (Full-Text Search) 功能；
 
 Dart 提供 FFI 以调用 SQLite、Simple 等 C/C++ 库；
 
-本库通过 [Simple](https://github.com/wangfenjin/simple) 实现 中文拼音全文搜索，通过 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 操作数据库和加载自定义扩展。如果您使用 [Drift](https://github.com/simolus3/drift) 操作数据库，由于 [Drift](https://github.com/simolus3/drift) 基于 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) ，同样可以使用本库实现中文拼音全文搜索（理论上，也适用于任何依赖于 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 的 Flutter 库）。
+本库通过 [Simple](https://github.com/wangfenjin/simple) 实现 中文拼音全文搜索，通过 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 操作数据库和加载自定义扩展。
 
 请参阅相关文档，或 [`example`](./example) 的具体示例，以构建和操作数据库。
+
+> [!TIP]
+>
+> 本库主要通过 Github Actions 编译和维护 Simple 原生库，以支持本库在不同平台的 Flutter 实现，具体请参阅 [simple-native 分支](https://github.com/SageMik/sqlite3_simple/tree/simple-native) 。
+
+> [!TIP]
+>
+> 本库通过 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 管理数据库，因此理论上任何依赖于 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 的 Flutter 库均可通过本库实现中文和拼音全文搜索，例如 [drift](https://github.com/simolus3/drift)、[sqflite_common_ffi](https://github.com/tekartik/sqflite/tree/master/sqflite_common_ffi) 等，可以在 [`./example/lib/data/impl`](./example/lib/data/impl) 查看不同实现。
 
 ## 快速开始
 
@@ -63,7 +67,7 @@ flutter pub add sqlite3 sqlite3_flutter_libs
 
 > [!TIP]
 >  
-> 若希望自行编译 SQLite 原生库，或环境已存在 SQLite 原生库，可不引入 `sqlite3_flutter_libs` ，自行通过 `DynamicLibrary`、`open.overrideFor` 加载和覆盖。您可以从下述位置获取相关信息：
+> 若希望自行编译 SQLite 原生库，或环境已存在 SQLite 原生库，可不引入 `sqlite3_flutter_libs` ，自行通过 `DynamicLibrary`、`open.overrideFor` 加载和覆盖。可从下述位置获取相关信息：
 > 1. [sqlite.dart](https://github.com/simolus3/sqlite3.dart) 中 [Manually providing sqlite3 libraries](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3#manually-providing-sqlite3-libraries) 。
 > 2. [sqlite-ohos.dart](https://github.com/SageMik/sqlite3-ohos.dart) 中 [自行提供 SQLite 原生库](https://github.com/SageMik/sqlite3-ohos.dart/tree/main/sqlite3#%E8%87%AA%E8%A1%8C%E6%8F%90%E4%BE%9B-sqlite-%E5%8E%9F%E7%94%9F%E5%BA%93) 。
 > 3. [`example`](example) 中带有 **Android SQLite 覆盖** 标识的简单示例（可以全局搜索该标识）。
@@ -155,3 +159,7 @@ List<MainTableRow> search(String value, String tokenizer) {
 [sqlite3.dart](https://github.com/simolus3/sqlite3.dart)：SQLite3 的 Dart FFI 绑定。
 
 [extended_text](https://github.com/fluttercandies/extended_text)：Flutter Text 的扩展组件，支持特殊文本效果。
+
+## 相关项目
+
+[sqlite3-simple](https://github.com/SageMik/sqlite3_simple_ohos/tree/main/sqlite3_simple)：基于 [Simple](https://github.com/wangfenjin/simple) (支持中文和拼音的 SQLite fts5 全文搜索扩展) 的 HarmonyOS NEXT 库，用于 [@ohos.data.relationalStore (关系型数据库)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references-V5/js-apis-data-relationalstore-V5?catalogVersion=V5) 的中文和拼音全文搜索。

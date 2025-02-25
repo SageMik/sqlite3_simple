@@ -2,12 +2,7 @@ import 'package:extended_text/extended_text.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-class ZeroWidth {
-  ZeroWidth._();
-
-  static const start = "\u200B";
-  static const end = "\u200C";
-}
+import '../utils/zero_width.dart';
 
 class HighlightText extends RegExpSpecialText {
   TextStyle Function(TextStyle normalTextStyle) highLightTextStyle;
@@ -40,6 +35,5 @@ class HighlightTextSpanBuilder extends RegExpSpecialTextSpanBuilder {
   HighlightTextSpanBuilder(this.highLightTextStyle);
 
   @override
-  List<RegExpSpecialText> get regExps =>
-      [HighlightText(highLightTextStyle)];
+  List<RegExpSpecialText> get regExps => [HighlightText(highLightTextStyle)];
 }

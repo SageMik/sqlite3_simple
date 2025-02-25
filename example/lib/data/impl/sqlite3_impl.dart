@@ -1,21 +1,15 @@
-import 'dart:ffi';
-import 'dart:math';
-
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sqlite3/open.dart';
 import 'package:sqlite3/sqlite3.dart';
-
 import 'package:sqlite3_simple/sqlite3_simple.dart';
 
-import '../../utils/random_words.dart';
-import '../../utils/zero_width_text.dart';
+import '../../utils/zero_width.dart';
 import '../db_manager.dart';
 import '../main_table_dao.dart';
 import '../main_table_row.dart';
 
-class Sqlite3DbManger extends IDbManager<Sqlite3Dao> {
+class Sqlite3DbManager extends IDbManager<Sqlite3Dao> {
   @override
   late final Sqlite3Dao dao;
 
@@ -116,22 +110,11 @@ class Sqlite3Dao extends IMainTableDao<Database> {
     ''');
   }
 
-  /// 构造随机中文词组数据
-  MainTableRow _buildRow(int index) {
-    return MainTableRow(
-      id: 0,
-      title: randomWords(minLength: 2, maxLength: 3),
-      content: randomWords(minLength: 4, maxLength: 10),
-      insertDate: DateTime.utc(2000, 1, 1)
-          .add(Duration(days: index, minutes: Random().nextInt(61))),
-    );
-  }
-
   @override
   Future<void> insertRandomData(int length) async {
     final insertStmt = db.prepare("INSERT INTO $mainTable VALUES(?, ?, ?, ?);");
     for (int i = 0; i < length; i++) {
-      final newRow = _buildRow(i);
+      final newRow = buildRow(i);
       insertStmt.execute([
         null,
         newRow.title,
@@ -163,7 +146,7 @@ class Sqlite3Dao extends IMainTableDao<Database> {
       _toMainTableRows(db.select("SELECT * FROM $mainTable"));
 
   @override
-  Future<int> selectCount() =>
+  Future<int> selectCount() async =>
       db.select("SELECT COUNT(*) as c FROM $mainTable").first['c'];
 
   @override
@@ -188,7 +171,7 @@ class Sqlite3Dao extends IMainTableDao<Database> {
         "UPDATE $mainTable SET $title = ?, $content = ?, $insertDate = ? WHERE $id = ?;");
     for (int i = 0; i < mainTableRowList.length; i++) {
       final oldRow = mainTableRowList[i];
-      final newRow = _buildRow(i);
+      final newRow = buildRow(i);
       updateStmt.execute(
           [newRow.title, newRow.content, newRow.insertDate.toDb, oldRow.id]);
     }

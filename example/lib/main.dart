@@ -3,13 +3,14 @@ import 'dart:async';
 import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:sqlite3_simple_example/data/impl/sqflite_common_ffi_impl.dart';
-import 'package:sqlite3_simple_example/search_dropdown.dart';
 
+import 'component/dropdown.dart';
+import 'component/highlight_text.dart';
+import 'data/db_manager.dart';
+import 'data/impl/sqflite_common_ffi_impl.dart';
 import 'data/impl/sqlite3_impl.dart';
 import 'data/main_table_dao.dart';
 import 'data/main_table_row.dart';
-import 'utils/zero_width_text.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,22 +24,45 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState<T> extends State<MyApp> {
-  late final SqfliteCommonFfiDbManager dbManager;
+  IDbManager? dbManager;
 
-  SqfliteCommonFfiDao get dao => dbManager.dao;
+  IMainTableDao get dao => dbManager!.dao;
 
-  List<MainTableRow>? results;
+  List<MainTableRowUiModel>? results;
 
   @override
   void initState() {
     super.initState();
     searchController.addListener(onSearchValueChanged);
-    dbManager = SqfliteCommonFfiDbManager()
-      ..init().then((_) async {
-        await dao.insertRandomData(30);
-        results = await dao.selectAll();
-        setState(() {});
-      });
+    initDbManger().then((_) => setState(() {}));
+  }
+
+  /// 初始化数据库
+  Future<void> initDbManger() async {
+    results = null;
+    if (dbManager != null) dbManager!.dispose();
+    setState(() {});
+    dbManager = dbImplement == DbImplement.sqlite3
+        ? Sqlite3DbManager()
+        : SqfliteCommonFfiDbManager();
+    await dbManager!.init();
+    await dao.insertRandomData(30);
+    results = await _toMainTableRowUiModel(await dao.selectAll());
+  }
+
+  /// 转为 UI 显示的数据类
+  Future<List<MainTableRowUiModel>> _toMainTableRowUiModel(
+      List<MainTableRow> rows) async {
+    final count = await dao.selectCount();
+    return rows
+        .map((r) => MainTableRowUiModel(
+              id: r.id,
+              idFormatted: "${r.id}".padLeft("$count".length, "0"),
+              title: r.title,
+              content: r.content,
+              insertDate: r.insertDate,
+            ))
+        .toList();
   }
 
   @override
@@ -55,7 +79,8 @@ class _MyAppState<T> extends State<MyApp> {
       // 通过国际化设置中文环境以让 Flutter 使用正确的中文字体
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Simple 分词器 示例'),
+          title: const Text('Simple 分词器 示例',
+              style: TextStyle(fontWeight: FontWeight.bold)),
           backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
         ),
@@ -112,11 +137,11 @@ class _MyAppState<T> extends State<MyApp> {
   final searchController = SearchController();
 
   Future<void> onSearchValueChanged() async {
-    final value = searchController.text.trim();
+    final value = searchController.text;
     showClearButton = value.isNotEmpty;
-    results = await (showClearButton
-        ? dao.search(value, tokenizer)
-        : dao.selectAll());
+    results = await _toMainTableRowUiModel(showClearButton
+        ? await dao.search(value.trim(), tokenizer)
+        : await dao.selectAll());
     setState(() {});
   }
 
@@ -132,7 +157,7 @@ class _MyAppState<T> extends State<MyApp> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  DropdownFromMap<Tokenizer>(
+                  Dropdown<Tokenizer>(
                     label: "分词器：",
                     initValue: tokenizer,
                     map: tokenizer2uiString,
@@ -141,26 +166,26 @@ class _MyAppState<T> extends State<MyApp> {
                       onSearchValueChanged();
                     }),
                   ),
-                  const SizedBox(width: 8),
-                  DropdownFromMap<DbImplement>(
+                  const SizedBox(width: P.small),
+                  Dropdown<DbImplement>(
                     label: "数据库实现：",
                     initValue: dbImplement,
                     map: implement2uiString,
                     onChanged: (value) => setState(() {
                       dbImplement = value!;
-                      // onSearchValueChanged();
+                      initDbManger().then((_) => onSearchValueChanged());
                     }),
                   ),
                 ],
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: P.small),
           IconButton(
             style: ButtonStyle(
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)))),
+                    borderRadius: BorderRadius.circular(P.small)))),
             onPressed: () => setState(() {
               results = null;
               dao.updateAll().then((_) => onSearchValueChanged());
@@ -202,21 +227,16 @@ class _MyAppState<T> extends State<MyApp> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                FutureBuilder(
-                    future: dao.selectCount(),
-                    builder: (context, snapshot) => snapshot.data == null
-                        ? const SizedBox()
-                        : Text(
-                            "${r.id}".padLeft("${snapshot.data}".length, "0"),
-                            style: const TextStyle(
-                                fontSize: 48,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: -1,
-                                fontFeatures: [
-                                  FontFeature.tabularFigures()
-                                ]), // 数字等宽
-                          )),
-                const SizedBox(width: 8),
+                Text(
+                  r.idFormatted,
+                  style: const TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.w600,
+                      height: 1,
+                      letterSpacing: -1,
+                      fontFeatures: [FontFeature.tabularFigures()]), // 数字等宽
+                ),
+                const SizedBox(width: P.small),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,23 +246,11 @@ class _MyAppState<T> extends State<MyApp> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                ExtendedText(
-                                  r.title,
-                                  style: const TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w600),
-                                  specialTextSpanBuilder: highlightTextBuilder,
-                                ),
-                              ],
-                            ),
-                            ExtendedText(
-                              r.content,
-                              specialTextSpanBuilder: highlightTextBuilder,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w500),
-                            ),
+                            ExtendedText(r.title,
+                                specialTextSpanBuilder: highlightTextBuilder,
+                                style: const TextStyle(fontSize: 20)),
+                            ExtendedText(r.content,
+                                specialTextSpanBuilder: highlightTextBuilder),
                           ],
                         ),
                       ),
@@ -267,9 +275,59 @@ class _MyAppState<T> extends State<MyApp> {
   }
 
   /// 对话框
-  AlertDialog buildDialog(BuildContext context, MainTableRow r) {
+  AlertDialog buildDialog(BuildContext context, MainTableRowUiModel r) {
+    final colorScheme = Theme.of(context).colorScheme;
     return AlertDialog(
-      contentPadding: EdgeInsets.all(P.middle),
+      insetPadding: const EdgeInsets.all(0),
+      contentPadding: const EdgeInsets.all(0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+      content: Container(
+        width: MediaQuery.of(context).size.width,
+        padding: const EdgeInsets.all(P.middle),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              r.idFormatted,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                  height: 1,
+                  letterSpacing: -1,
+                  fontFeatures: [FontFeature.tabularFigures()]),
+            ),
+            const SizedBox(height: P.small),
+            ExtendedText(
+              r.title,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+              textAlign: TextAlign.center,
+              specialTextSpanBuilder: highlightTextBuilder,
+            ),
+            const SizedBox(height: P.extraSmall),
+            ExtendedText(
+              r.content,
+              specialTextSpanBuilder: highlightTextBuilder,
+              style: const TextStyle(fontSize: 18, height: 1.3),
+            ),
+            const SizedBox(height: P.middle),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(P.small),
+                ),
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text("确定"),
+            )
+          ],
+        ),
+      ),
     );
   }
 

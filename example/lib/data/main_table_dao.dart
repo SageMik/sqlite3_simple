@@ -1,3 +1,8 @@
+import 'dart:math';
+
+import 'package:flutter/cupertino.dart';
+
+import '../utils/random_words.dart';
 import 'main_table_row.dart';
 
 enum Tokenizer {
@@ -28,5 +33,15 @@ abstract class IMainTableDao<T> {
   /// 修改所有数据，测试触发器
   Future<void> updateAll();
 
-
+  /// 构造随机中文词组数据
+  @protected
+  MainTableRow buildRow(int index) {
+    return MainTableRow(
+      id: 0,
+      title: randomWords(minLength: 3, maxLength: 4),
+      content: randomWords(minLength: 6, maxLength: 16),
+      insertDate: DateTime.utc(2000, 1, 1)
+          .add(Duration(days: index, minutes: Random().nextInt(61))),
+    );
+  }
 }
