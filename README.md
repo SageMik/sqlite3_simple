@@ -13,15 +13,15 @@
 
 > [!IMPORTANT]
 >
-> 由于 [sqlite3-ohos.dart 在 HarmonyOS NEXT 上在提交审核后打出正式签名 Release 包崩溃的问题](https://github.com/SageMik/sqlite3-ohos.dart/issues/1)，目前暂时删除适配说明，请不要在 HarmonyOS NEXT 平台上继续使用。
+> 由于 [sqlite3-ohos.dart 在 HarmonyOS NEXT 上在提交审核后打出正式签名 Release 包崩溃的问题](https://github.com/SageMik/sqlite3-ohos.dart/issues/1)，暂时删除鸿蒙适配，请不要在 HarmonyOS NEXT 平台上继续使用。
 
-| 支持平台                                                                                                             | 示例                          |
-|------------------------------------------------------------------------------------------------------------------|-----------------------------|
-| **Android<br />([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v1.0.5/example.apk))** | ![Android](img/android.png) |
-| **iOS**                                                                                                          | ![iOS](img/ios.png)         |
-| **Windows**                                                                                                      | ![Windows](img/windows.jpg) |
-| **MacOS**                                                                                                        | ![MacOS](img/macos.png)     |
-| **Linux**                                                                                                        | ![Linux](img/linux.png)     |
+| 支持平台                                                                                                        | 示例                          |
+|-------------------------------------------------------------------------------------------------------------|-----------------------------|
+| **Android ([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v1.0.5/example.apk))** | ![Android](img/android.png) |
+| **iOS**                                                                                                     | ![iOS](img/ios.png)         |
+| **Windows**                                                                                                 | ![Windows](img/windows.png) |
+| **MacOS**                                                                                                   | ![MacOS](img/macos.png)     |
+| **Linux**                                                                                                   | ![Linux](img/linux.png)     |
 
 ## 目录
 
@@ -34,6 +34,7 @@
   - [5. 查询](#5-查询)
 - [待办](#待办)
 - [致谢](#致谢)
+- [相关项目](#相关项目)
 
 ## 前置准备
 
@@ -48,6 +49,8 @@ Dart 提供 FFI 以调用 SQLite、Simple 等 C/C++ 库；
 > [!TIP]
 >
 > 本库主要通过 Github Actions 编译和维护 Simple 原生库，以支持本库在不同平台的 Flutter 实现，具体请参阅 [simple-native 分支](https://github.com/SageMik/sqlite3_simple/tree/simple-native) 。
+>
+> 有关本库的最新开发进展，可以参阅 [develop 分支](https://github.com/SageMik/sqlite3_simple/tree/develop) 。
 
 > [!TIP]
 >
@@ -124,7 +127,7 @@ db.select("SELECT jieba_query('Jieba分词初始化（提前加载避免后续�
 
 ### 5. 查询
 
-请参阅 [SQLite FTS5 Extension](https://sqlite.org/fts5.html) 和 [Simple](https://github.com/wangfenjin/simple) 的说明，根据需要调用相应函数如 `jieba_query`、`simple_query`、`highlight`、  `simple_highlight` 等，执行所需的查询，例如 (  [`./expample/lib/dao.dart`](./example/lib/dao.dart) )：
+请参阅 [SQLite FTS5 Extension](https://sqlite.org/fts5.html) 和 [Simple](https://github.com/wangfenjin/simple) 的说明，根据需要调用相应函数如 `jieba_query`、`simple_query`、`highlight`、  `simple_highlight` 等，执行所需的查询，例如 (  [`./example/lib/data/impl/sqlite3_impl.dart`](./example/lib/data/impl/sqlite3_impl.dart) )：
 
 ```dart
 /// 通过指定分词器 [tokenizer] 搜索， [tokenizer] 取值：jieba, simple

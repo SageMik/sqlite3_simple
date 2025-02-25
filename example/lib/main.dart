@@ -107,28 +107,34 @@ class _MyAppState<T> extends State<MyApp> {
 
   /// 搜索栏
   Widget buildSearchBar() {
-    return Padding(
-      padding:
-          const EdgeInsets.only(left: P.middle, right: P.middle, top: P.middle),
-      child: TapRegion(
-        onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-        child: SearchBar(
-          controller: searchController,
-          leading: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4),
-            child: Icon(Icons.search),
+    return Row(
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(
+                left: P.middle, right: P.middle, top: P.middle),
+            child: TapRegion(
+              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+              child: SearchBar(
+                controller: searchController,
+                leading: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4),
+                  child: Icon(Icons.search),
+                ),
+                trailing: [
+                  if (showClearButton)
+                    IconButton(
+                        onPressed: () => searchController.text = "",
+                        icon: const Icon(Icons.clear))
+                ],
+                elevation: const WidgetStatePropertyAll(0),
+                shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8))),
+              ),
+            ),
           ),
-          trailing: [
-            if (showClearButton)
-              IconButton(
-                  onPressed: () => searchController.text = "",
-                  icon: const Icon(Icons.clear))
-          ],
-          elevation: const WidgetStatePropertyAll(0),
-          shape: WidgetStatePropertyAll(
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-        ),
-      ),
+        )
+      ],
     );
   }
 
