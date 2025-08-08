@@ -37,8 +37,8 @@ flutter:
         sharedDarwinSource: true
       linux:
         ffiPlugin: true
-      ohos:
-        pluginClass: Sqlite3SimplePlugin
+#      ohos:
+#        pluginClass: Sqlite3SimplePlugin
 
   assets:
     - assets/cpp_jieba_dict/
