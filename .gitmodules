@@ -1,6 +1,0 @@
-[submodule "android"]
-	path = android
-	url = https://github.com/SageMik/simple-native-android
-[submodule "ohos"]
-	path = ohos
-	url = https://github.com/SageMik/sqlite3_simple_ohos

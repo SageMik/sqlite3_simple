@@ -2,7 +2,7 @@ name: 编译 Simple 原生库
 
 on:
   push:
-    tag:
+    tags:
       - Nv[0-9]+.[0-9]+.[0-9]+
   workflow_dispatch:
 
