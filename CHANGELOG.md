@@ -1,3 +1,9 @@
+## 1.0.6
+
+* 增加 [sqflite_common_ffi](https://github.com/tekartik/sqflite/tree/master/sqflite_common_ffi) 示例 (#7) 。
+* 更新 Simple 原生库至 [最新提交](https://github.com/wangfenjin/simple/tree/2d950e132028fcdb5718e78a79dd9d5213f13c73)，修复结巴分词搜索 `C#` 错误。
+* 清理鸿蒙适配代码。
+
 ## 1.0.5
 
 * 更新 Simple 原生库至 [v0.5.0](https://github.com/wangfenjin/simple/tree/v0.5.0) 。

@@ -1,5 +1,5 @@
 group = "io.github.sagemik.sqlite3_simple"
-version = "1.0.5"
+version = "1.0.6"
 
 buildscript {
     ext.kotlin_version = "1.7.10"
@@ -66,6 +66,5 @@ android {
 }
 
 dependencies {
-//    api("io.github.sagemik:simple-native-android:1.0.3") // 本地 Maven
-    implementation("io.github.sagemik:simple-native-android:1.0.3")
+    implementation("io.github.sagemik:simple-native-android:1.0.4")
 }

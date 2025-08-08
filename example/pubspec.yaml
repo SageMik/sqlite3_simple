@@ -3,7 +3,7 @@ description: "Demonstrates how to use the sqlite3_simple plugin."
 publish_to: 'none'
 
 environment:
-  sdk: '>=3.4.0 <4.0.0'
+  sdk: '>=3.5.0 <4.0.0'
 
 dependencies:
   flutter:
@@ -17,50 +17,12 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: any
-  flutter_platform_utils: ^1.0.0
   sqflite_common_ffi: ^2.3.3
+  extended_text: ^15.0.2
 
-#  # [HarmonyOS NEXT 暂不可用]
-#  path_provider:
-#    git:
-#      url: https://gitee.com/openharmony-sig/flutter_packages.git
-#      path: packages/path_provider/path_provider
-#  sqlite3:
-#    git:
-#      url: https://github.com/SageMik/sqlite3-ohos.dart
-#      path: sqlite3
-#      ref: sqlite3-2.4.7-ohos
-#  sqlite3_flutter_libs:
-#    git:
-#      url: https://github.com/SageMik/sqlite3-ohos.dart
-#      path: sqlite3_flutter_libs
-#      ref: sqlite3_flutter_libs-0.5.25-ohos
-
-  # Flutter 3.22
-  extended_text: ^13.1.0
-#  # https://github.com/fluttercandies/extended_text/issues/166
-#  # 在 Flutter 3.24 及其更高版本运行示例遇到报错，请使用如下版本
-#  extended_text: ^14.1.0
-
-  # [若无需 HarmonyOS NEXT 适配] 可以使用如下版本
-  # [HarmonyOS NEXT 暂不可用]
   path_provider: ^2.1.5
   sqlite3: ^2.4.7
   sqlite3_flutter_libs: ^0.5.25
-
-## [若无需 HarmonyOS NEXT 适配] 可注释掉如下依赖覆盖
-## [HarmonyOS NEXT 暂不可用]
-#dependency_overrides:
-#  sqlite3:
-#    git:
-#      url: https://github.com/SageMik/sqlite3-ohos.dart
-#      path: sqlite3
-#      ref: sqlite3-2.4.7-ohos
-#  sqlite3_flutter_libs:
-#    git:
-#      url: https://github.com/SageMik/sqlite3-ohos.dart
-#      path: sqlite3_flutter_libs
-#      ref: sqlite3_flutter_libs-0.5.25-ohos
 
 dev_dependencies:
   integration_test:

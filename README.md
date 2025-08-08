@@ -13,11 +13,16 @@
 
 > [!IMPORTANT]
 >
-> 由于 [sqlite3-ohos.dart 在 HarmonyOS NEXT 上在提交审核后打出正式签名 Release 包崩溃的问题](https://github.com/SageMik/sqlite3-ohos.dart/issues/1)，暂时删除鸿蒙适配，请不要在 HarmonyOS NEXT 平台上继续使用。
+> 由于 [sqlite3-ohos.dart 在 HarmonyOS NEXT 上在提交审核后打出正式签名 Release 包崩溃的问题](https://github.com/SageMik/sqlite3-ohos.dart/issues/1)，目前暂时删除鸿蒙适配，请不要在 HarmonyOS NEXT 平台上继续使用。
+>
+> 如有需要，可以使用鸿蒙原生实现的 Simple 分词器 [sqlite3-simple](https://github.com/SageMik/sqlite3_simple_ohos/tree/main/sqlite3_simple) 。
+> 
+> > [sqlite3-simple](https://github.com/SageMik/sqlite3_simple_ohos/tree/main/sqlite3_simple)：基于 [Simple](https://github.com/wangfenjin/simple) (支持中文和拼音的 SQLite fts5 全文搜索扩展) 的 HarmonyOS NEXT 库，用于 [@ohos.data.relationalStore (关系型数据库)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references-V5/js-apis-data-relationalstore-V5?catalogVersion=V5) 的中文和拼音全文搜索。
+> 
 
 | 支持平台                                                                                                        | 示例                          |
 |-------------------------------------------------------------------------------------------------------------|-----------------------------|
-| **Android ([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v1.0.5/example.apk))** | ![Android](img/android.png) |
+| **Android ([example.apk](https://github.com/SageMik/sqlite3_simple/releases/latest/download/example.apk))** | ![Android](img/android.png) |
 | **iOS**                                                                                                     | ![iOS](img/ios.png)         |
 | **Windows**                                                                                                 | ![Windows](img/windows.png) |
 | **MacOS**                                                                                                   | ![MacOS](img/macos.png)     |
@@ -32,9 +37,7 @@
   - [3. 加载 Simple 扩展](#3-加载-simple-扩展)
   - [4. 打开数据库](#4-打开数据库)
   - [5. 查询](#5-查询)
-- [待办](#待办)
 - [致谢](#致谢)
-- [相关项目](#相关项目)
 
 ## 前置准备
 
@@ -49,10 +52,6 @@ Dart 提供 FFI 以调用 SQLite、Simple 等 C/C++ 库；
 > [!TIP]
 >
 > 本库主要通过 Github Actions 编译和维护 Simple 原生库，以支持本库在不同平台的 Flutter 实现，具体请参阅 [simple-native 分支](https://github.com/SageMik/sqlite3_simple/tree/simple-native) 。
->
-> 有关本库的最新开发进展，可以参阅 [develop 分支](https://github.com/SageMik/sqlite3_simple/tree/develop) 。
-
-> [!TIP]
 >
 > 本库通过 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 管理数据库，因此理论上任何依赖于 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 的 Flutter 库均可通过本库实现中文和拼音全文搜索，例如 [drift](https://github.com/simolus3/drift)、[sqflite_common_ffi](https://github.com/tekartik/sqflite/tree/master/sqflite_common_ffi) 等，可以在 [`./example/lib/data/impl`](./example/lib/data/impl) 查看不同实现。
 
@@ -146,15 +145,6 @@ List<MainTableRow> search(String value, String tokenizer) {
 }
 ```
 
-## 待办
-
-- [X] 添加其他平台的适配。
-  - [X] Windows
-  - [X] MacOS
-  - [X] Linux
-  - [ ] HarmonyOS NEXT
-- [ ] 添加用户自定义字典。
-
 ## 致谢
 
 [Simple](https://github.com/wangfenjin/simple)：支持中文和拼音的 SQLite FTS5 全文搜索扩展。
@@ -162,7 +152,3 @@ List<MainTableRow> search(String value, String tokenizer) {
 [sqlite3.dart](https://github.com/simolus3/sqlite3.dart)：SQLite3 的 Dart FFI 绑定。
 
 [extended_text](https://github.com/fluttercandies/extended_text)：Flutter Text 的扩展组件，支持特殊文本效果。
-
-## 相关项目
-
-[sqlite3-simple](https://github.com/SageMik/sqlite3_simple_ohos/tree/main/sqlite3_simple)：基于 [Simple](https://github.com/wangfenjin/simple) (支持中文和拼音的 SQLite fts5 全文搜索扩展) 的 HarmonyOS NEXT 库，用于 [@ohos.data.relationalStore (关系型数据库)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references-V5/js-apis-data-relationalstore-V5?catalogVersion=V5) 的中文和拼音全文搜索。
