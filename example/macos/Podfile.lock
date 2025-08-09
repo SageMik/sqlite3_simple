@@ -22,7 +22,7 @@ PODS:
     - sqlite3/fts5
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
-  - sqlite3_simple (1.0.5):
+  - sqlite3_simple (1.0.6):
     - Flutter
     - FlutterMacOS
 
@@ -51,7 +51,7 @@ SPEC CHECKSUMS:
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   sqlite3: 4922312598b67e1825c6a6c821296dcbf6783046
   sqlite3_flutter_libs: 069c435986dd4b63461aecd68f4b30be4a9e9daa
-  sqlite3_simple: 2eddcff7f44d3eba77fde205baa20af67eabaef8
+  sqlite3_simple: 521c760f7c23aca3fa09ca333c5706c84e022150
 
 PODFILE CHECKSUM: 728a4379ea3c06d69c05545b1b9041063a29456f
 

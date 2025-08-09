@@ -1,10 +1,10 @@
 allprojects {
     repositories {
+        maven { url 'https://maven.aliyun.com/repository/central' }
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/jcenter' }
         mavenCentral()
-        maven { url 'https://maven.aliyun.com/repository/central/' } // 未同步
-        maven { url 'https://maven.aliyun.com/repository/public/' }
-        maven { url 'https://maven.aliyun.com/repository/google/' }
-        maven { url 'https://maven.aliyun.com/repository/jcenter/' }
         google()
 
 //        // [Android SQLite 覆盖] sqlite-android 所在仓库
