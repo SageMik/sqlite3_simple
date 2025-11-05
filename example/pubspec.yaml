@@ -17,12 +17,13 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: any
-  sqflite_common_ffi: ^2.3.3
   extended_text: ^15.0.2
-
   path_provider: ^2.1.5
+
   sqlite3: ^2.4.7
   sqlite3_flutter_libs: ^0.5.25
+
+  sqflite_common_ffi: ^2.3.3
 
 dev_dependencies:
   integration_test:

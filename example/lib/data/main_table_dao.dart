@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 
 import '../utils/random_words.dart';
+import '../utils/zero_width.dart';
 import 'main_table_row.dart';
 
 enum Tokenizer {

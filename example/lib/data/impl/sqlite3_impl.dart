@@ -85,12 +85,12 @@ class Sqlite3Dao extends IMainTableDao<Database> {
 
     /// 触发器
     final newInsert = '''
-      INSERT INTO $fts5Table(rowid, $title, $content) 
-        VALUES (new.$id, new.$title, new.$content);
+      INSERT INTO $fts5Table(rowid, $title, $content, $insertDate) 
+        VALUES (new.$id, new.$title, new.$content, new.$insertDate);
     ''';
     final deleteInsert = '''
-      INSERT INTO $fts5Table($fts5Table, rowid, $title, $content) 
-        VALUES ('delete', old.$id, old.$title, old.$content);
+      INSERT INTO $fts5Table($fts5Table, rowid, $title, $content, $insertDate) 
+        VALUES ('delete', old.$id, old.$title, old.$content, old.$insertDate);
     ''';
     db.execute('''
       CREATE TRIGGER ${mainTable}_insert AFTER INSERT ON $mainTable BEGIN 
@@ -119,7 +119,7 @@ class Sqlite3Dao extends IMainTableDao<Database> {
         null,
         newRow.title,
         newRow.content,
-        newRow.insertDate.toDb,
+        newRow.insertDate.toDb(),
       ]);
     }
     insertStmt.dispose();
@@ -135,7 +135,7 @@ class Sqlite3Dao extends IMainTableDao<Database> {
           id: r[id],
           title: r[title],
           content: r[content],
-          insertDate: (r[insertDate] as int).toEntity,
+          insertDate: (r[insertDate] as int).toEntity(),
         );
       },
     );
@@ -173,7 +173,7 @@ class Sqlite3Dao extends IMainTableDao<Database> {
       final oldRow = mainTableRowList[i];
       final newRow = buildRow(i);
       updateStmt.execute(
-          [newRow.title, newRow.content, newRow.insertDate.toDb, oldRow.id]);
+          [newRow.title, newRow.content, newRow.insertDate.toDb(), oldRow.id]);
     }
     updateStmt.dispose();
   }

@@ -1,5 +1,8 @@
 import 'package:sqlite3_simple_example/data/main_table_dao.dart';
 
+import 'impl/sqflite_common_ffi_impl.dart';
+import 'impl/sqlite3_impl.dart';
+
 abstract class IDbManager<TDao extends IMainTableDao> {
   abstract final TDao dao;
 
@@ -8,4 +11,16 @@ abstract class IDbManager<TDao extends IMainTableDao> {
 
   /// 关闭数据库
   Future<void> dispose();
+}
+
+enum DbManagerImpl {
+  sqlite3,
+  sqfliteCommonFfi;
+
+  IDbManager create() {
+    return switch (this) {
+      DbManagerImpl.sqlite3 => Sqlite3DbManager(),
+      DbManagerImpl.sqfliteCommonFfi => SqfliteCommonFfiDbManager(),
+    };
+  }
 }
