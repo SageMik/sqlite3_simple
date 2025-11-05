@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
@@ -19,8 +18,8 @@ typedef OpenSimple = DynamicLibrary? Function();
 
 extension Sqlite3SimpleEx on Sqlite3 {
   /// 加载 Simple 扩展，请在打开数据库前调用。如果需要结巴分词功能，调用 [saveJiebaDict]。
-  /// 若希望自行加载 Simple 原生库，向 [overrideOpen] 传入返回值为 [DynamicLibrary] 或 null 的函数，
-  /// 返回值非 null 时，优先使用返回值加载扩展，反之使用默认的加载逻辑。
+  /// 若希望自行加载 Simple 原生库，向 [overrideOpen] 传入返回值为 `DynamicLibrary?` 的函数，
+  /// 返回值非空时，优先使用返回值加载扩展，反之使用默认的加载逻辑。
   void loadSimpleExtension({OpenSimple? overrideOpen}) {
     DynamicLibrary defaultOpen() {
       String libSimple = "";
@@ -53,9 +52,8 @@ extension Sqlite3SimpleEx on Sqlite3 {
   }) async {
     // CppJieba通过文件路径读取字典，需要将字典文件保存到本地以供读取
     // https://github.com/yanyiwu/cppjieba/blob/391121d5db0f31dd5ce9795d4d34812f20eeb25c/include/cppjieba/DictTrie.hpp#L211 )
-    final jsonString = await rootBundle.loadString("AssetManifest.json");
-    final pathList = Map<String, dynamic>.from(json.decode(jsonString))
-        .keys
+    final assetManifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+    final pathList = assetManifest.listAssets()
         .where((e) =>
             e.startsWith("packages/sqlite3_simple") &&
             e.contains("cpp_jieba_dict") &&
