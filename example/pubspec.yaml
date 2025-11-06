@@ -25,12 +25,18 @@ dependencies:
 
   sqflite_common_ffi: ^2.3.3
 
+  drift: ^2.29.0
+  drift_flutter: ^0.2.7
+
 dev_dependencies:
   integration_test:
     sdk: flutter
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+
+  drift_dev: ^2.29.0
+  build_runner: ^2.9.0
 
 flutter:
   uses-material-design: true

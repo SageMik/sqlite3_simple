@@ -1,0 +1,8 @@
+import 'database.dart'; -- 同时通过 Dart + SQL 创建表：https://github.com/simolus3/drift/issues/1136
+
+CREATE VIRTUAL TABLE t1 USING fts5(
+    title, content, insert_date UNINDEXED,
+    tokenize = 'simple',
+    content = 'main',
+    content_rowid = 'id'
+);

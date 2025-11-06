@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:extended_text/extended_text.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -175,6 +176,10 @@ class _MyAppState<T> extends State<MyApp> {
                     map: impl2uiString,
                     onChanged: (value) => setState(() {
                       dbManagerImpl = value!;
+                      if(kDebugMode) {
+                        print("\n");
+                        print("切换数据库至：${impl2uiString[value]}");
+                      }
                       initDbManger().then((_) => onSearchValueChanged());
                     }),
                   ),
@@ -208,6 +213,7 @@ class _MyAppState<T> extends State<MyApp> {
   static const impl2uiString = {
     DbManagerImpl.sqlite3: "sqlite3",
     DbManagerImpl.sqfliteCommonFfi: "sqflite_common_ffi",
+    DbManagerImpl.drift: "drift",
   };
   DbManagerImpl dbManagerImpl = impl2uiString.keys.first;
 
