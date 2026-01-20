@@ -11,18 +11,9 @@
 
 基于 [Simple](https://github.com/wangfenjin/simple) (支持中文和拼音的 SQLite fts5 全文搜索扩展) 和 [sqlite3.dart](https://github.com/simolus3/sqlite3.dart) 的 Flutter 库，用于 SQLite 中文和拼音全文搜索。
 
-> [!IMPORTANT]
->
-> 由于 [sqlite3-ohos.dart 在 HarmonyOS NEXT 上在提交审核后打出正式签名 Release 包崩溃的问题](https://github.com/SageMik/sqlite3-ohos.dart/issues/1)，目前暂时删除鸿蒙适配，请不要在 HarmonyOS NEXT 平台上继续使用。
->
-> 如有需要，可以使用鸿蒙原生实现的 Simple 分词器 [sqlite3-simple](https://github.com/SageMik/sqlite3_simple_ohos/tree/main/sqlite3_simple) 。
-> 
-> > [sqlite3-simple](https://github.com/SageMik/sqlite3_simple_ohos/tree/main/sqlite3_simple)：基于 [Simple](https://github.com/wangfenjin/simple) (支持中文和拼音的 SQLite fts5 全文搜索扩展) 的 HarmonyOS NEXT 库，用于 [@ohos.data.relationalStore (关系型数据库)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references-V5/js-apis-data-relationalstore-V5?catalogVersion=V5) 的中文和拼音全文搜索。
-> 
-
 | 支持平台                                                                                                        | 示例                          |
 |-------------------------------------------------------------------------------------------------------------|-----------------------------|
-| **Android ([example.apk](https://github.com/SageMik/sqlite3_simple/releases/latest/download/example.apk))** | ![Android](img/android.png) |
+| **Android ([example.apk](https://github.com/SageMik/sqlite3_simple/releases/v1.0.7/download/example.apk))** | ![Android](img/android.png) |
 | **iOS**                                                                                                     | ![iOS](img/ios.png)         |
 | **Windows**                                                                                                 | ![Windows](img/windows.png) |
 | **MacOS**                                                                                                   | ![MacOS](img/macos.png)     |
@@ -36,7 +27,8 @@
   - [2. 添加本库并导入依赖](#2-添加本库并导入依赖)
   - [3. 加载 Simple 扩展](#3-加载-simple-扩展)
   - [4. 打开数据库](#4-打开数据库)
-  - [5. 查询](#5-查询)
+  - [5. 创建 Fts5 虚表](#5-创建-fts5-虚表)
+  - [6. 查询](#6-查询)
 - [致谢](#致谢)
 
 ## 前置准备
@@ -51,9 +43,9 @@ Dart 提供 FFI 以调用 SQLite、Simple 等 C/C++ 库；
 
 > [!TIP]
 >
-> 本库主要通过 Github Actions 编译和维护 Simple 原生库，以支持本库在不同平台的 Flutter 实现，具体请参阅 [simple-native 分支](https://github.com/SageMik/sqlite3_simple/tree/simple-native) 。
+> 本库主要通过 Github Actions 编译和维护 Simple 原生库，以支持本库在不同平台的 Flutter 实现，具体请参阅分支 [`simple-native`](https://github.com/SageMik/sqlite3_simple/tree/simple-native) 。
 >
-> 本库通过 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 管理数据库，因此理论上任何依赖于 [sqlite3](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 的 Flutter 库均可通过本库实现中文和拼音全文搜索，例如 [drift](https://github.com/simolus3/drift)、[sqflite_common_ffi](https://github.com/tekartik/sqflite/tree/master/sqflite_common_ffi) 等，可以在 [`./example/lib/data/impl`](./example/lib/data/impl) 查看不同实现。
+> 本库通过 sqlite3 管理数据库，因此理论上任何依赖于 sqlite3 的 Flutter 库均可通过本库实现中文和拼音全文搜索，例如 [drift](https://github.com/simolus3/drift)、[sqflite_common_ffi](https://github.com/tekartik/sqflite/tree/master/sqflite_common_ffi) 等，可以在 [`./example/lib/data/impl`](./example/lib/data/impl) 查看不同实现。
 
 ## 快速开始
 
@@ -71,8 +63,7 @@ flutter pub add sqlite3 sqlite3_flutter_libs
 >  
 > 若希望自行编译 SQLite 原生库，或环境已存在 SQLite 原生库，可不引入 `sqlite3_flutter_libs` ，自行通过 `DynamicLibrary`、`open.overrideFor` 加载和覆盖。可从下述位置获取相关信息：
 > 1. [sqlite.dart](https://github.com/simolus3/sqlite3.dart) 中 [Manually providing sqlite3 libraries](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3#manually-providing-sqlite3-libraries) 。
-> 2. [sqlite-ohos.dart](https://github.com/SageMik/sqlite3-ohos.dart) 中 [自行提供 SQLite 原生库](https://github.com/SageMik/sqlite3-ohos.dart/tree/main/sqlite3#%E8%87%AA%E8%A1%8C%E6%8F%90%E4%BE%9B-sqlite-%E5%8E%9F%E7%94%9F%E5%BA%93) 。
-> 3. [`example`](example) 中带有 **Android SQLite 覆盖** 标识的简单示例（可以全局搜索该标识）。
+> 2. [`example`](example) 中带有 **Android SQLite 覆盖** 标识的简单示例（可以全局搜索该标识）。
 
 ### 2. 添加本库并导入依赖
 
@@ -124,9 +115,71 @@ db.execute(jiebaDictSql);
 db.select("SELECT jieba_query('Jieba分词初始化（提前加载避免后续等待）')");
 ```
 
-### 5. 查询
+### 5. 创建 Fts5 虚表
 
-请参阅 [SQLite FTS5 Extension](https://sqlite.org/fts5.html) 和 [Simple](https://github.com/wangfenjin/simple) 的说明，根据需要调用相应函数如 `jieba_query`、`simple_query`、`highlight`、  `simple_highlight` 等，执行所需的查询，例如 (  [`./example/lib/data/impl/sqlite3_impl.dart`](./example/lib/data/impl/sqlite3_impl.dart) )：
+请参阅 [SQLite FTS5 Extension](https://sqlite.org/fts5.html) 的说明，根据自己的项目需要创建对应的 Fts5 虚表，例如 ( [`./example/lib/data/impl/sqlite3_impl.dart`](./example/lib/data/impl/sqlite3_impl.dart) )：
+  
+```dart
+final fts5Tokenizer = "simple";
+final mainTable = "custom";
+final id = "id",
+    title = "title",
+    content = "content",
+    insertDate = "insert_date";
+final fts5Table = "t1";
+
+Future<void> initFts5() async {
+  /// 主表
+  db.execute('''
+    CREATE TABLE $mainTable (
+      $id INTEGER PRIMARY KEY AUTOINCREMENT, 
+      $title TEXT, 
+      $content TEXT, 
+      $insertDate INTEGER
+    );
+  ''');
+
+  /// FTS5虚表
+  db.execute('''
+    CREATE VIRTUAL TABLE $fts5Table USING fts5(
+      $title, $content, $insertDate UNINDEXED, 
+      tokenize = '$fts5Tokenizer', 
+      content = '$mainTable', 
+      content_rowid = '$id'
+    );
+  ''');
+
+  /// 触发器
+  final newInsert = '''
+    INSERT INTO $fts5Table(rowid, $title, $content, $insertDate) 
+      VALUES (new.$id, new.$title, new.$content, new.$insertDate);
+  ''';
+  final deleteInsert = '''
+    INSERT INTO $fts5Table($fts5Table, rowid, $title, $content, $insertDate) 
+      VALUES ('delete', old.$id, old.$title, old.$content, old.$insertDate);
+  ''';
+  db.execute('''
+    CREATE TRIGGER ${mainTable}_insert AFTER INSERT ON $mainTable BEGIN 
+      $newInsert
+    END;
+  ''');
+  db.execute('''
+    CREATE TRIGGER ${mainTable}_delete AFTER DELETE ON $mainTable BEGIN 
+      $deleteInsert
+    END;
+  ''');
+  db.execute('''
+    CREATE TRIGGER ${mainTable}_update AFTER UPDATE ON $mainTable BEGIN 
+      $deleteInsert
+      $newInsert
+    END;
+  ''');
+}
+```
+
+### 6. 查询
+
+请参阅 [Simple](https://github.com/wangfenjin/simple) 的说明，根据需要调用相应函数如 `jieba_query`、`simple_query`、`highlight`、  `simple_highlight` 等，执行所需的查询，例如 ( [`./example/lib/data/impl/sqlite3_impl.dart`](./example/lib/data/impl/sqlite3_impl.dart) )：
 
 ```dart
 /// 通过指定分词器 [tokenizer] 搜索， [tokenizer] 取值：jieba, simple

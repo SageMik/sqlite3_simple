@@ -1,0 +1,27 @@
+# git-cliff --unreleased --bump patch --prepend CHANGELOG.md
+
+[changelog]
+body = """{% if version %}## {{ version | trim_start_matches(pat="v") }}
+{% endif %}{% for commit in commits %}
+* {{ commit.message | trim }}{% endfor %}
+
+"""
+trim = false
+render_always = true
+
+[git]
+# 不使用约定式提交规范
+conventional_commits = false
+# 不过滤非约定式提交
+filter_unconventional = false
+# 提交解析器：跳过合并提交，接受其他所有提交，不分组
+commit_parsers = [
+    { message = "^Merge", skip = true },
+    { message = ".*" },
+]
+# 不排除任何提交
+filter_commits = false
+# 提交排序方式：按时间从旧到新
+sort_commits = "oldest"
+# 不使用拓扑排序，使用时间排序
+topo_order_commits = false

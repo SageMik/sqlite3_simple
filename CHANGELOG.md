@@ -1,3 +1,8 @@
+## 1.0.7
+
+* 增加 [drift](https://github.com/simolus3/drift) 示例 (#13)
+* 更换 AssetManifest API (#14)
+
 ## 1.0.6
 
 * 增加 [sqflite_common_ffi](https://github.com/tekartik/sqflite/tree/master/sqflite_common_ffi) 示例 (#7) 。

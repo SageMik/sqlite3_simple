@@ -1,5 +1,5 @@
 group = "io.github.sagemik.sqlite3_simple"
-version = "1.0.6"
+version = "1.0.7"
 
 buildscript {
     ext.kotlin_version = "1.7.10"
