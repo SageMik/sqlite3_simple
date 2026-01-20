@@ -1,16 +1,15 @@
 import 'dart:async';
 
 import 'package:extended_text/extended_text.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-import 'component/dropdown.dart';
-import 'component/highlight_text.dart';
 import 'data/db_manager.dart';
-import 'data/impl/sqflite_common_ffi_impl.dart';
-import 'data/impl/sqlite3_impl.dart';
 import 'data/main_table_dao.dart';
 import 'data/main_table_row.dart';
+import 'widget/dropdown.dart';
+import 'widget/highlight_text.dart';
 
 void main() {
   runApp(const MyApp());
@@ -40,11 +39,9 @@ class _MyAppState<T> extends State<MyApp> {
   /// 初始化数据库
   Future<void> initDbManger() async {
     results = null;
-    if (dbManager != null) dbManager!.dispose();
+    dbManager?.dispose();
     setState(() {});
-    dbManager = dbImplement == DbImplement.sqlite3
-        ? Sqlite3DbManager()
-        : SqfliteCommonFfiDbManager();
+    dbManager = dbManagerImpl.create();
     await dbManager!.init();
     await dao.insertRandomData(30);
     results = await _toMainTableRowUiModel(await dao.selectAll());
@@ -173,12 +170,16 @@ class _MyAppState<T> extends State<MyApp> {
                     }),
                   ),
                   const SizedBox(width: P.small),
-                  Dropdown<DbImplement>(
+                  Dropdown<DbManagerImpl>(
                     label: "数据库实现：",
-                    initValue: dbImplement,
-                    map: implement2uiString,
+                    initValue: dbManagerImpl,
+                    map: impl2uiString,
                     onChanged: (value) => setState(() {
-                      dbImplement = value!;
+                      dbManagerImpl = value!;
+                      if(kDebugMode) {
+                        print("\n");
+                        print("切换数据库至：${impl2uiString[value]}");
+                      }
                       initDbManger().then((_) => onSearchValueChanged());
                     }),
                   ),
@@ -209,11 +210,12 @@ class _MyAppState<T> extends State<MyApp> {
   };
   Tokenizer tokenizer = tokenizer2uiString.keys.first;
 
-  static const implement2uiString = {
-    DbImplement.sqlite3: "sqlite3",
-    DbImplement.sqfliteCommonFfi: "sqflite_common_ffi",
+  static const impl2uiString = {
+    DbManagerImpl.sqlite3: "sqlite3",
+    DbManagerImpl.sqfliteCommonFfi: "sqflite_common_ffi",
+    DbManagerImpl.drift: "drift",
   };
-  DbImplement dbImplement = implement2uiString.keys.first;
+  DbManagerImpl dbManagerImpl = impl2uiString.keys.first;
 
   /// 搜索结果
   Widget buildListView() {
@@ -342,8 +344,6 @@ class _MyAppState<T> extends State<MyApp> {
   final highlightTextBuilder =
       HighlightTextSpanBuilder((src) => src.copyWith(color: Colors.red));
 }
-
-enum DbImplement { sqlite3, sqfliteCommonFfi }
 
 class P {
   static const middle = 16.0;

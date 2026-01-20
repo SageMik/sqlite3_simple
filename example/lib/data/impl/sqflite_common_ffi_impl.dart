@@ -77,12 +77,12 @@ class SqfliteCommonFfiDao extends IMainTableDao<Database> {
 
     /// 触发器
     final newInsert = '''
-      INSERT INTO $fts5Table(rowid, $title, $content) 
-        VALUES (new.$id, new.$title, new.$content);
+      INSERT INTO $fts5Table(rowid, $title, $content, $insertDate) 
+        VALUES (new.$id, new.$title, new.$content, new.$insertDate);
     ''';
     final deleteInsert = '''
-      INSERT INTO $fts5Table($fts5Table, rowid, $title, $content) 
-        VALUES ('delete', old.$id, old.$title, old.$content);
+      INSERT INTO $fts5Table($fts5Table, rowid, $title, $content, $insertDate) 
+        VALUES ('delete', old.$id, old.$title, old.$content, old.$insertDate);
     ''';
     await db.execute('''
       CREATE TRIGGER ${mainTable}_insert AFTER INSERT ON $mainTable BEGIN 
@@ -110,7 +110,7 @@ class SqfliteCommonFfiDao extends IMainTableDao<Database> {
         id: null,
         title: newRow.title,
         content: newRow.content,
-        insertDate: newRow.insertDate.toDb,
+        insertDate: newRow.insertDate.toDb(),
       });
     }
   }
@@ -122,7 +122,7 @@ class SqfliteCommonFfiDao extends IMainTableDao<Database> {
         id: columnName2Value[id] as int,
         title: columnName2Value[title] as String,
         content: columnName2Value[content] as String,
-        insertDate: (columnName2Value[insertDate] as int).toEntity,
+        insertDate: (columnName2Value[insertDate] as int).toEntity(),
       );
     }).toList();
   }
@@ -163,7 +163,7 @@ class SqfliteCommonFfiDao extends IMainTableDao<Database> {
         {
           title: newRow.title,
           content: newRow.content,
-          insertDate: newRow.insertDate.toDb,
+          insertDate: newRow.insertDate.toDb(),
         },
         where: "$id = ?",
         whereArgs: [oldRow.id],
