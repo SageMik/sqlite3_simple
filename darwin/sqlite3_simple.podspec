@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
   s.ios.dependency 'Flutter'
   s.osx.dependency 'FlutterMacOS'
   s.ios.deployment_target = '12.0'
-  s.osx.deployment_target = '10.11'
+  s.osx.deployment_target = '10.14'
 
   # Flutter.framework does not contain a i386 slice.
   
