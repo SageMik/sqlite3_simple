@@ -6,111 +6,193 @@ on:
       - Nv[0-9]+.[0-9]+.[0-9]+
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 env:
-  BUILD_TYPE: Release
-  BUILD_DIR: ${{ github.workspace }}/build
+  RELEASE_FILE: ''
 
 jobs:
 
 
   Windows:
     runs-on: windows-latest
-    env:
-      BUILD_ARCH: X64
+    strategy:
+      fail-fast: true
+      matrix:
+        arch:
+          - x64
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-      - name: 'CMake 编译，通过 VS16 生成器'
-        uses: lukka/run-cmake@v3
+      - name: '安装 CMake'
+        uses: lukka/get-cmake@v3.31.6
+
+      - name: '获取 simple/vcpkg 的 commit id'
+        id: vcpkg_commit
+        run: |
+          cd "${{ github.workspace }}/simple"
+          COMMIT_ID=$(git ls-tree HEAD vcpkg | awk '{print $3}')
+          echo "commit_id=$COMMIT_ID" >> $GITHUB_OUTPUT
+          echo "vcpkg commit id: $COMMIT_ID"
+        shell: bash
+
+      - name: '安装并配置 vcpkg'
+        uses: lukka/run-vcpkg@v10
         with:
-          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-          cmakeListsTxtPath: "${{ github.workspace }}/CMakeLists.txt"
-          buildDirectory: ${{ env.BUILD_DIR }}
-          useVcpkgToolchainFile: true
-          cmakeBuildType: ${{ env.BUILD_TYPE }}
-          buildWithCMake: true
-          cmakeGenerator: VS16Win64
-          cmakeAppendedArgs: -A ${{ env.BUILD_ARCH }}
-          buildWithCMakeArgs: --config ${{ env.BUILD_TYPE }}
-        
+          vcpkgDirectory: ${{ github.workspace }}/simple/vcpkg
+          vcpkgGitCommitId: ${{ steps.vcpkg_commit.outputs.commit_id }}
+      - run: |
+          echo "RUNVCPKG_NO_CACHE=1" >> $GITHUB_ENV
+        if: ${{ failure() || cancelled() }}
+        shell: bash
+
+      - name: '复制 CMakePresets.json'
+        run: |
+          Copy-Item "${{ github.workspace }}/simple/CMakePresets.json" "${{ github.workspace }}/CMakePresets.json"
+          $content = Get-Content "${{ github.workspace }}/CMakePresets.json" -Raw
+          $content = $content -replace '\$\{sourceDir\}/vcpkg/scripts/buildsystems/vcpkg\.cmake', '${sourceDir}/simple/vcpkg/scripts/buildsystems/vcpkg.cmake'
+          Set-Content "${{ github.workspace }}/CMakePresets.json" -Value $content -NoNewline
+        shell: pwsh
+
+      - name: '通过 CMake 编译'
+        uses: lukka/run-cmake@v10
+        continue-on-error: false
+        with:
+          configurePreset: 'windows-msvc-vs17'
+          buildPreset: 'windows-msvc-vs17-release'
+
+      - name: '重命名编译产物'
+        run: |
+          $dllPath = "${{ github.workspace }}/../../_temp/windows/simple/src/release/simple.dll"
+          $newName = "simple-windows-${{ matrix.arch }}.dll"
+          Copy-Item $dllPath $newName
+          echo "RELEASE_FILE=$newName" >> $env:GITHUB_ENV
+        shell: pwsh
+
       - name: '上传编译产物'
-        uses: actions/upload-artifact@v4
+        uses: softprops/action-gh-release@v2
         with:
-          name: windows
-          path: "${{ env.BUILD_DIR }}/_deps/simple-build/src/${{ env.BUILD_TYPE }}/simple.dll"
-          if-no-files-found: error
-          retention-days: 90
-          compression-level: 0
-          overwrite: true
+          tag_name: ${{ github.ref_name }}
+          draft: true
+          files: ${{ env.RELEASE_FILE }}
 
 
   MacOS:
     runs-on: macos-latest
-    env:
-      BUILD_FILE_PATH: _deps/simple-build/src/libsimple.dylib
+    strategy:
+      fail-fast: true
+      matrix:
+        arch:
+          - universal
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: '[MacOS] CMake 编译'
-        uses: lukka/run-cmake@v3
         with:
-          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-          cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
-          buildDirectory: ${{ env.BUILD_DIR }}
-          cmakeBuildType: ${{ env.BUILD_TYPE }}
-          buildWithCMake: true
-          buildWithCMakeArgs: --config ${{ env.BUILD_TYPE }}
+          submodules: recursive
 
-      - name: '[MacOS] 查看架构'
-        run: file ${{ env.BUILD_FILE_PATH }}
-        working-directory: ${{ env.BUILD_DIR }}
+      - name: '安装 CMake'
+        uses: lukka/get-cmake@v3.31.6
 
-      - name: '[MacOS] 上传编译产物'
-        uses: actions/upload-artifact@v4
+      - name: '安装 Ninja'
+        run: brew install ninja
+
+      - name: '获取 simple/vcpkg 的 commit id'
+        id: vcpkg_commit
+        run: |
+          cd "${{ github.workspace }}/simple"
+          COMMIT_ID=$(git ls-tree HEAD vcpkg | awk '{print $3}')
+          echo "commit_id=$COMMIT_ID" >> $GITHUB_OUTPUT
+          echo "vcpkg commit id: $COMMIT_ID"
+        shell: bash
+
+      - name: '安装并配置 vcpkg'
+        uses: lukka/run-vcpkg@v10
         with:
-          name: macos
-          if-no-files-found: error
-          path: "${{ env.BUILD_DIR }}/${{ env.BUILD_FILE_PATH }}"
-          retention-days: 90
-          compression-level: 0
-          overwrite: true
+          vcpkgDirectory: ${{ github.workspace }}/simple/vcpkg
+          vcpkgGitCommitId: ${{ steps.vcpkg_commit.outputs.commit_id }}
+      - run: |
+          echo "RUNVCPKG_NO_CACHE=1" >> $GITHUB_ENV
+        if: ${{ failure() || cancelled() }}
+        shell: bash
+
+      - name: '复制 CMakePresets.json'
+        run: |
+          cp "${{ github.workspace }}/simple/CMakePresets.json" "${{ github.workspace }}/CMakePresets.json"
+          sed -i '' 's|${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake|${sourceDir}/simple/vcpkg/scripts/buildsystems/vcpkg.cmake|g' "${{ github.workspace }}/CMakePresets.json"
+        shell: bash
+
+      - name: '通过 CMake 编译'
+        uses: lukka/run-cmake@v10
+        continue-on-error: false
+        with:
+          configurePreset: 'macos-ninja'
+          buildPreset: 'macos-ninja-release'
+
+      - name: '重命名编译产物'
+        run: |
+          dylibPath="${{ github.workspace }}/../../_temp/macos/simple/src/libsimple.dylib"
+          newName="libsimple-macos-${{ matrix.arch }}.dylib"
+          cp "$dylibPath" "$newName"
+          echo "RELEASE_FILE=$newName" >> $GITHUB_ENV
+        shell: bash
+
+      - name: '上传编译产物'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          draft: true
+          files: ${{ env.RELEASE_FILE }}
 
 
   iOS:
     runs-on: macos-latest
-    env:
-      BUILD_NAME: ios
-      BUILD_FILE_PATH: libsimple.a
     strategy:
       matrix:
         cfg:
-          - { label: "iOS", simulator: "" }      
-          - { label: "iOS 模拟器", simulator: "-simulator" }
+          - { is_simulator: false, output_dir: "out", arch: "arm64" }
+          - { is_simulator: true, output_dir: "out-simulator", arch: "simulator-universal" }
 
     steps:
       - uses: actions/checkout@v4
-              
-      - name: '[${{ matrix.cfg.label }}] CMake 编译'
-        run: |
-          ./build-ios.sh ${{ matrix.cfg.simulator }}
-          echo "BUILD_NAME=ios${{ matrix.cfg.simulator }}" >> $GITHUB_ENV
-          echo "BUILD_FILE_PATH=libsimple${{ matrix.cfg.simulator }}.a" >> $GITHUB_ENV
-        working-directory: ${{ github.workspace }}
-
-      - name: '[${{ matrix.cfg.label }}] 查看架构'
-        run: |
-          mv ${{ env.BUILD_NAME }}-output/bin/libsimple.a ${{ env.BUILD_FILE_PATH }}
-          file ${{ env.BUILD_FILE_PATH }}
-        working-directory: ${{ github.workspace }}
-
-      - name: '[${{ matrix.cfg.label }}] 上传编译产物'
-        uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.BUILD_NAME }}
-          if-no-files-found: error
-          path: ${{ github.workspace }}/${{ env.BUILD_FILE_PATH }}
-          retention-days: 90
-          compression-level: 0
-          overwrite: true
+          submodules: recursive
+
+      - name: '执行脚本，通过 CMake 编译'
+        run: ./build-ios.sh
+        env:
+          IOS_SIMULATOR: ${{ matrix.cfg.is_simulator }}
+        working-directory: ${{ github.workspace }}
+
+      - name: '查找编译产物'
+        run: |
+          fileName="libsimple.a"
+          foundFiles=$(find "${{ github.workspace }}" -name "$fileName" 2>/dev/null)
+          if [ -n "$foundFiles" ]; then
+            echo "找到编译产物:"
+            echo "$foundFiles" | while read -r file; do
+              echo "  $file"
+            done
+          else
+            echo "未找到 $fileName，搜索路径: ${{ github.workspace }}"
+            exit 1
+          fi
+        shell: bash
+
+      - name: '重命名编译产物'
+        run: |
+          sourcePath="${{ github.workspace }}/${{ matrix.cfg.output_dir }}/bin/libsimple.a"
+          newName="libsimple-ios-${{ matrix.cfg.arch }}.a"
+          cp "$sourcePath" "$newName"
+          file "$newName"
+          echo "RELEASE_FILE=$newName" >> $GITHUB_ENV
+
+      - name: '上传编译产物'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          draft: true
+          files: ${{ env.RELEASE_FILE }}

@@ -14,10 +14,4 @@ endif()
 
 project(simple-native)
 
-include(FetchContent)
-
-FetchContent_Declare(simple
-    GIT_REPOSITORY https://github.com/wangfenjin/simple.git
-    GIT_TAG 2d950e132028fcdb5718e78a79dd9d5213f13c73
-)
-FetchContent_MakeAvailable(simple)
+add_subdirectory(simple)

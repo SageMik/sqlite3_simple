@@ -1,19 +1,15 @@
 #!/bin/sh
 
-simulator=false
-if [ "$1" = "-simulator" ]; then
-  simulator=true
-fi
+current_dir="$(cd "$(dirname "$0")" && pwd)"
 
-current_dir=$(pwd)/$(dirname "$0")
-if [ "$simulator" = false ]; then
-    build_dir="${current_dir}/ios-build"
-    lib_prefix="${current_dir}/ios-output"
-    platform=OS64
-else
+if [ "${IOS_SIMULATOR:-false}" = "true" ]; then
     build_dir="${current_dir}/ios-simulator-build"
-    lib_prefix="${current_dir}/ios-simulator-output"
+    lib_prefix="${current_dir}/out-simulator"
     platform=SIMULATOR64COMBINED
+else
+    build_dir="${current_dir}/ios-build"
+    lib_prefix="${current_dir}/out"
+    platform=OS64
 fi
 
 cmake "$current_dir" -G Xcode -DCMAKE_TOOLCHAIN_FILE=ios.toolchain.cmake \
