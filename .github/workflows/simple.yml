@@ -1,0 +1,12 @@
+name: 编译 Simple 原生库
+
+# https://github.com/orgs/community/discussions/58022
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: 测试
+        run: ls
