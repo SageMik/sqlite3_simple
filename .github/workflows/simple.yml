@@ -2,6 +2,8 @@ name: 编译 Simple 原生库
 
 on:
   push:
+#    branches:
+#      - simple-native
     tags:
       - Nv[0-9]+.[0-9]+.[0-9]+
   workflow_dispatch:
@@ -148,6 +150,44 @@ jobs:
           files: ${{ env.RELEASE_FILE }}
 
 
+  Android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: '设置 Android 环境'
+        uses: android-actions/setup-android@v3
+
+      - name: '通过 Gradle 编译'
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleRelease
+        working-directory: ${{ github.workspace }}/src/android
+
+      - name: '解压 aar 并提取 so 库'
+        run: |
+          EXTRACT_DIR=$(mktemp -d)
+          cd "$EXTRACT_DIR"
+          unzip -q "${{ github.workspace }}/src/android/library/build/outputs/aar/library-release.aar"
+          for abi_dir in jni/*/; do
+            abi=$(basename "$abi_dir")
+            cp "$abi_dir/libsimple.so" "${{ github.workspace }}/libsimple-android-$abi.so"
+          done
+          rm -rf "$EXTRACT_DIR"
+        shell: bash
+
+      - name: '上传编译产物'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          draft: true
+          files: |
+            libsimple-android-*.so
+  
+
   iOS:
     runs-on: macos-latest
     strategy:
@@ -166,21 +206,6 @@ jobs:
         env:
           IOS_SIMULATOR: ${{ matrix.cfg.is_simulator }}
         working-directory: ${{ github.workspace }}
-
-      - name: '查找编译产物'
-        run: |
-          fileName="libsimple.a"
-          foundFiles=$(find "${{ github.workspace }}" -name "$fileName" 2>/dev/null)
-          if [ -n "$foundFiles" ]; then
-            echo "找到编译产物:"
-            echo "$foundFiles" | while read -r file; do
-              echo "  $file"
-            done
-          else
-            echo "未找到 $fileName，搜索路径: ${{ github.workspace }}"
-            exit 1
-          fi
-        shell: bash
 
       - name: '重命名编译产物'
         run: |
