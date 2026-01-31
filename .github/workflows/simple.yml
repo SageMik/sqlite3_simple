@@ -2,8 +2,8 @@ name: 编译 Simple 原生库
 
 on:
   push:
-#    branches:
-#      - simple-native
+    branches:
+      - simple-native
     tags:
       - Nv[0-9]+.[0-9]+.[0-9]+
   workflow_dispatch:
@@ -12,18 +12,13 @@ permissions:
   contents: write
 
 env:
-  RELEASE_FILE: ''
+  TAG_NAME: simple-native ${{ github.ref_name }}
 
 jobs:
 
 
   Windows:
     runs-on: windows-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        arch:
-          - x64
 
     steps:
       - uses: actions/checkout@v4
@@ -69,40 +64,29 @@ jobs:
 
       - name: '重命名编译产物'
         run: |
-          $dllPath = "${{ github.workspace }}/../../_temp/windows/simple/src/release/simple.dll"
-          $newName = "simple-windows-${{ matrix.arch }}.dll"
-          Copy-Item $dllPath $newName
-          echo "RELEASE_FILE=$newName" >> $env:GITHUB_ENV
+          Copy-Item "${{ github.workspace }}/../../_temp/windows/simple/src/release/simple.dll" simple-windows-x64.dll
         shell: pwsh
 
       - name: '上传编译产物'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
+          tag_name: ${{ env.TAG_NAME }}
           draft: true
-          files: ${{ env.RELEASE_FILE }}
+          files: simple-windows-x64.dll
 
 
   MacOS:
     runs-on: macos-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        arch:
-          - universal
 
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: '安装 CMake'
+      - name: '[MacOS] 安装 CMake'
         uses: lukka/get-cmake@v3.31.6
 
-      - name: '安装 Ninja'
-        run: brew install ninja
-
-      - name: '获取 simple/vcpkg 的 commit id'
+      - name: '[MacOS] 获取 simple/vcpkg 的 commit id'
         id: vcpkg_commit
         run: |
           cd "${{ github.workspace }}/simple"
@@ -111,7 +95,7 @@ jobs:
           echo "vcpkg commit id: $COMMIT_ID"
         shell: bash
 
-      - name: '安装并配置 vcpkg'
+      - name: '[MacOS] 安装并配置 vcpkg'
         uses: lukka/run-vcpkg@v10
         with:
           vcpkgDirectory: ${{ github.workspace }}/simple/vcpkg
@@ -121,37 +105,51 @@ jobs:
         if: ${{ failure() || cancelled() }}
         shell: bash
 
-      - name: '复制 CMakePresets.json'
+      - name: '[MacOS] 复制 CMakePresets.json'
         run: |
           cp "${{ github.workspace }}/simple/CMakePresets.json" "${{ github.workspace }}/CMakePresets.json"
           sed -i '' 's|${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake|${sourceDir}/simple/vcpkg/scripts/buildsystems/vcpkg.cmake|g' "${{ github.workspace }}/CMakePresets.json"
         shell: bash
 
-      - name: '通过 CMake 编译'
+      - name: '[MacOS] 通过 CMake 编译'
         uses: lukka/run-cmake@v10
         continue-on-error: false
         with:
           configurePreset: 'macos-ninja'
           buildPreset: 'macos-ninja-release'
 
-      - name: '重命名编译产物'
-        run: |
-          dylibPath="${{ github.workspace }}/../../_temp/macos/simple/src/libsimple.dylib"
-          newName="libsimple-macos-${{ matrix.arch }}.dylib"
-          cp "$dylibPath" "$newName"
-          echo "RELEASE_FILE=$newName" >> $GITHUB_ENV
+      - name: '[MacOS] 重命名编译产物'
+        run: cp "${{ github.workspace }}/../../_temp/macos/simple/src/libsimple.dylib" libsimple-macos-universal.dylib
         shell: bash
+
+      - name: '[iOS] 执行脚本，通过 CMake 编译'
+        run: |
+          ./build-ios.sh
+          cp "${{ github.workspace }}/out/bin/libsimple.a" libsimple-ios-arm64.a
+        env:
+          IOS_SIMULATOR: false
+
+      - name: '[iOS Simulator] 执行脚本，通过 CMake 编译'
+        run: |
+          ./build-ios.sh
+          cp "${{ github.workspace }}/out-simulator/bin/libsimple.a" libsimple-ios-simulator-universal.a
+        env:
+          IOS_SIMULATOR: true
 
       - name: '上传编译产物'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
+          tag_name: ${{ env.TAG_NAME }}
           draft: true
-          files: ${{ env.RELEASE_FILE }}
+          files: |
+            libsimple-macos-universal.dylib
+            libsimple-ios-arm64.a
+            libsimple-ios-simulator-universal.a
 
 
   Android:
     runs-on: ubuntu-latest
+    environment: simple-native-android
 
     steps:
       - uses: actions/checkout@v4
@@ -164,14 +162,21 @@ jobs:
       - name: '通过 Gradle 编译'
         run: |
           chmod +x ./gradlew
-          ./gradlew assembleRelease
+          ./gradlew publishToMavenCentral --info
         working-directory: ${{ github.workspace }}/src/android
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.ORG_GRADLE_PROJECT_mavenCentralUsername }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.ORG_GRADLE_PROJECT_mavenCentralPassword }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKeyId }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKeyPassword }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKey }}
+          SNAPSHOT: ${{ !startsWith(github.ref, 'refs/tags/Nv') }}
 
       - name: '解压 aar 并提取 so 库'
         run: |
           EXTRACT_DIR=$(mktemp -d)
           cd "$EXTRACT_DIR"
-          unzip -q "${{ github.workspace }}/src/android/library/build/outputs/aar/library-release.aar"
+          unzip -q "${{ github.workspace }}/src/android/simple-native-android/build/outputs/aar/simple-native-android-release.aar"
           for abi_dir in jni/*/; do
             abi=$(basename "$abi_dir")
             cp "$abi_dir/libsimple.so" "${{ github.workspace }}/libsimple-android-$abi.so"
@@ -182,42 +187,7 @@ jobs:
       - name: '上传编译产物'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
+          tag_name: ${{ env.TAG_NAME }}
           draft: true
           files: |
             libsimple-android-*.so
-  
-
-  iOS:
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        cfg:
-          - { is_simulator: false, output_dir: "out", arch: "arm64" }
-          - { is_simulator: true, output_dir: "out-simulator", arch: "simulator-universal" }
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: '执行脚本，通过 CMake 编译'
-        run: ./build-ios.sh
-        env:
-          IOS_SIMULATOR: ${{ matrix.cfg.is_simulator }}
-        working-directory: ${{ github.workspace }}
-
-      - name: '重命名编译产物'
-        run: |
-          sourcePath="${{ github.workspace }}/${{ matrix.cfg.output_dir }}/bin/libsimple.a"
-          newName="libsimple-ios-${{ matrix.cfg.arch }}.a"
-          cp "$sourcePath" "$newName"
-          file "$newName"
-          echo "RELEASE_FILE=$newName" >> $GITHUB_ENV
-
-      - name: '上传编译产物'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_name }}
-          draft: true
-          files: ${{ env.RELEASE_FILE }}

@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 
+add_definitions(-w)
+
 set(BUILD_TEST_EXAMPLE OFF)
 
 # 需要在最外层的 CMakeLists.txt 的 project() 前调用，否则无法生效

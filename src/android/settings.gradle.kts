@@ -17,4 +17,5 @@ dependencyResolutionManagement {
         gradlePluginPortal()
     }
 }
-include(":library")
+
+include(":simple-native-android")
