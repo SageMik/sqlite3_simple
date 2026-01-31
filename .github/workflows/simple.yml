@@ -2,8 +2,8 @@ name: 编译 Simple 原生库
 
 on:
   push:
-    branches:
-      - simple-native
+#    branches:
+#      - simple-native
     tags:
       - Nv[0-9]+.[0-9]+.[0-9]+
   workflow_dispatch:
@@ -15,11 +15,8 @@ env:
   TAG_NAME: simple-native ${{ github.ref_name }}
 
 jobs:
-
-
   Windows:
     runs-on: windows-latest
-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,7 +30,7 @@ jobs:
       - name: '获取 simple/vcpkg 的 commit id'
         id: vcpkg_commit
         run: |
-          cd "${{ github.workspace }}/simple"
+          cd simple
           COMMIT_ID=$(git ls-tree HEAD vcpkg | awk '{print $3}')
           echo "commit_id=$COMMIT_ID" >> $GITHUB_OUTPUT
           echo "vcpkg commit id: $COMMIT_ID"
@@ -42,7 +39,7 @@ jobs:
       - name: '安装并配置 vcpkg'
         uses: lukka/run-vcpkg@v10
         with:
-          vcpkgDirectory: ${{ github.workspace }}/simple/vcpkg
+          vcpkgDirectory: simple/vcpkg
           vcpkgGitCommitId: ${{ steps.vcpkg_commit.outputs.commit_id }}
       - run: |
           echo "RUNVCPKG_NO_CACHE=1" >> $GITHUB_ENV
@@ -51,10 +48,10 @@ jobs:
 
       - name: '复制 CMakePresets.json'
         run: |
-          Copy-Item "${{ github.workspace }}/simple/CMakePresets.json" "${{ github.workspace }}/CMakePresets.json"
-          $content = Get-Content "${{ github.workspace }}/CMakePresets.json" -Raw
+          Copy-Item "simple/CMakePresets.json" "CMakePresets.json"
+          $content = Get-Content "CMakePresets.json" -Raw
           $content = $content -replace '\$\{sourceDir\}/vcpkg/scripts/buildsystems/vcpkg\.cmake', '${sourceDir}/simple/vcpkg/scripts/buildsystems/vcpkg.cmake'
-          Set-Content "${{ github.workspace }}/CMakePresets.json" -Value $content -NoNewline
+          Set-Content "CMakePresets.json" -Value $content -NoNewline
         shell: pwsh
 
       - name: '通过 CMake 编译'
@@ -66,16 +63,14 @@ jobs:
 
       - name: '重命名编译产物'
         run: |
-          Copy-Item "${{ github.workspace }}/../../_temp/windows/simple/src/release/simple.dll" simple-windows-x64.dll
+          Copy-Item "../../_temp/windows/simple/src/release/simple.dll" simple.dll
         shell: pwsh
 
-      - name: '上传编译产物'
-        uses: softprops/action-gh-release@v2
+      - name: '上传 Windows 产物'
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: ${{ env.TAG_NAME }}
-          draft: true
-          files: simple-windows-x64.dll
-
+          name: windows
+          path: simple.dll
 
   MacOS:
     runs-on: macos-latest
@@ -93,7 +88,7 @@ jobs:
       - name: '[MacOS] 获取 simple/vcpkg 的 commit id'
         id: vcpkg_commit
         run: |
-          cd "${{ github.workspace }}/simple"
+          cd simple
           COMMIT_ID=$(git ls-tree HEAD vcpkg | awk '{print $3}')
           echo "commit_id=$COMMIT_ID" >> $GITHUB_OUTPUT
           echo "vcpkg commit id: $COMMIT_ID"
@@ -102,7 +97,7 @@ jobs:
       - name: '[MacOS] 安装并配置 vcpkg'
         uses: lukka/run-vcpkg@v10
         with:
-          vcpkgDirectory: ${{ github.workspace }}/simple/vcpkg
+          vcpkgDirectory: simple/vcpkg
           vcpkgGitCommitId: ${{ steps.vcpkg_commit.outputs.commit_id }}
       - run: |
           echo "RUNVCPKG_NO_CACHE=1" >> $GITHUB_ENV
@@ -111,8 +106,8 @@ jobs:
 
       - name: '[MacOS] 复制 CMakePresets.json'
         run: |
-          cp "${{ github.workspace }}/simple/CMakePresets.json" "${{ github.workspace }}/CMakePresets.json"
-          sed -i '' 's|${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake|${sourceDir}/simple/vcpkg/scripts/buildsystems/vcpkg.cmake|g' "${{ github.workspace }}/CMakePresets.json"
+          cp "simple/CMakePresets.json" "CMakePresets.json"
+          sed -i '' 's|${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake|${sourceDir}/simple/vcpkg/scripts/buildsystems/vcpkg.cmake|g' "CMakePresets.json"
         shell: bash
 
       - name: '[MacOS] 通过 CMake 编译'
@@ -123,32 +118,30 @@ jobs:
           buildPreset: 'macos-ninja-release'
 
       - name: '[MacOS] 重命名编译产物'
-        run: cp "${{ github.workspace }}/../../_temp/macos/simple/src/libsimple.dylib" libsimple-macos-universal.dylib
-        shell: bash
+        run: cp ../../_temp/macos/simple/src/libsimple.dylib libsimple.dylib
 
       - name: '[iOS] 执行脚本，通过 CMake 编译'
         run: |
           ./build-ios.sh
-          cp "${{ github.workspace }}/out/bin/libsimple.a" libsimple-ios-arm64.a
+          cp out/bin/libsimple.a libsimple.a
         env:
           IOS_SIMULATOR: false
 
       - name: '[iOS Simulator] 执行脚本，通过 CMake 编译'
         run: |
           ./build-ios.sh
-          cp "${{ github.workspace }}/out-simulator/bin/libsimple.a" libsimple-ios-simulator-universal.a
+          cp out-simulator/bin/libsimple.a libsimple-simulator.a
         env:
           IOS_SIMULATOR: true
 
-      - name: '上传编译产物'
-        uses: softprops/action-gh-release@v2
+      - name: '上传 MacOS/iOS 产物'
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: ${{ env.TAG_NAME }}
-          draft: true
-          files: |
-            libsimple-macos-universal.dylib
-            libsimple-ios-arm64.a
-            libsimple-ios-simulator-universal.a
+          name: macos-ios
+          path: |
+            libsimple.dylib
+            libsimple.a
+            libsimple-simulator.a
 
 
   Android:
@@ -169,7 +162,7 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew publishToMavenCentral --info
-        working-directory: ${{ github.workspace }}/src/android
+        working-directory: src/android
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.ORG_GRADLE_PROJECT_mavenCentralUsername }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.ORG_GRADLE_PROJECT_mavenCentralPassword }}
@@ -180,16 +173,42 @@ jobs:
 
       - name: '解压 aar 并提取 so 库'
         run: |
-          EXTRACT_DIR=$(mktemp -d)
-          cd "$EXTRACT_DIR"
-          unzip -q "${{ github.workspace }}/src/android/simple-native-android/build/outputs/aar/simple-native-android-release.aar"
-          zip -r "${{ github.workspace }}/libsimple-android.zip" jni/
-          rm -rf "$EXTRACT_DIR"
+          unzip -q src/android/simple-native-android/build/outputs/aar/simple-native-android-release.aar -d temp_aar
         shell: bash
 
-      - name: '上传编译产物'
+      - name: '上传 Android 产物'
+        uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: temp_aar/jni/
+
+
+  Package:
+    runs-on: ubuntu-latest
+    needs: [Windows, MacOS, Android]
+    steps:
+      - name: '下载所有产物'
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: '整理并打包'
+        run: |
+          mkdir -p dist/{windows,macos,ios,android} 
+          
+          cp artifacts/windows/simple.dll dist/windows/simple.dll
+          cp artifacts/macos-ios/libsimple.dylib dist/macos/libsimple.dylib
+          cp artifacts/macos-ios/libsimple.a dist/ios/libsimple.a
+          cp artifacts/macos-ios/libsimple-simulator.a dist/ios/libsimple-simulator.a
+          
+          cp -r artifacts/android/* dist/android/
+          
+          cd dist && zip -r ../libsimple.zip .
+        shell: bash
+
+      - name: '上传最终产物到 Release'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG_NAME }}
           draft: true
-          files: libsimple-android.zip
+          files: libsimple.zip
