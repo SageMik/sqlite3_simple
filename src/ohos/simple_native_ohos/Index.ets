@@ -1,0 +1,1 @@
+const SimpleNativeOhosNothing = 0

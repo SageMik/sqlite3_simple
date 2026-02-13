@@ -8,7 +8,7 @@ val isSnapshot = System.getenv("SNAPSHOT")?.toBooleanStrictOrNull() ?: true
 
 group = "io.github.sagemik"
 version = "2.0.0" + if(isSnapshot) "-SNAPSHOT" else ""
-description = "Simple 的 Android 原生库，用于 sqlite3_simple Flutter 插件。"
+description = "Simple (支持中文和拼音的 SQLite fts5 全文搜索扩展) 的 Android 原生库，用于 sqlite3_simple Flutter 插件。"
 
 android {
     namespace = "io.github.sagemik.simple_native_android"
@@ -85,10 +85,5 @@ mavenPublishing {
             }
         }
 
-        scm {
-            url = "https://github.com/SageMik/sqlite3_simple"
-            connection = "scm:git:https://github.com/SageMik/sqlite3_simple.git"
-            developerConnection = "scm:git:ssh://git@github.com/SageMik/sqlite3_simple.git"
-        }
     }
 }

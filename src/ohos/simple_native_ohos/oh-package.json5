@@ -1,0 +1,12 @@
+{
+  "name": "simple-native-ohos",
+  "version": "2.0.0",
+  "description": "Simple (支持中文和拼音的 SQLite fts5 全文搜索扩展) 的 HarmonyOS NEXT 原生库。",
+  "main": "Index.ets",
+  "author": "SageMik",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/SageMik",
+  "keywords": ["sqlite3", "native", "分词器", "fts5", "CMake"],
+  "repository": "https://github.com/SageMik/sqlite3_simple/tree/simple-native/src/ohos",
+  "dependencies": {}
+}
