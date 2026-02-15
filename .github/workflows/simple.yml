@@ -195,15 +195,30 @@ jobs:
 
       - name: '整理并打包'
         run: |
-          mkdir -p dist/{windows,macos,ios,android} 
+          mkdir -p dist/{windows,macos,ios,android}
+          mkdir -p upload
           
+          # Windows
           cp artifacts/windows/simple.dll dist/windows/simple.dll
+          cp artifacts/windows/simple.dll upload/simple-windows-x64.dll
 
+          # MacOS
           cp artifacts/macos-ios/libsimple.dylib dist/macos/libsimple.dylib
+          cp artifacts/macos-ios/libsimple.dylib upload/libsimple-macos-universal.dylib
+
+          # iOS
           cp artifacts/macos-ios/libsimple.a dist/ios/libsimple.a
           cp artifacts/macos-ios/libsimple-simulator.a dist/ios/libsimple-simulator.a
+          cp artifacts/macos-ios/libsimple.a upload/libsimple-ios-arm64.a
+          cp artifacts/macos-ios/libsimple-simulator.a upload/libsimple-ios-simulator-universal.a
           
+          # Android
           cp -r artifacts/android/* dist/android/
+          for arch in armeabi-v7a arm64-v8a x86 x86_64; do
+            if [ -f artifacts/android/$arch/libsimple.so ]; then
+              cp artifacts/android/$arch/libsimple.so upload/libsimple-android-$arch.so
+            fi
+          done
           
           cd dist && zip -r ../libsimple.zip .
         shell: bash
@@ -213,4 +228,6 @@ jobs:
         with:
           tag_name: ${{ env.TAG_NAME }}
           draft: true
-          files: libsimple.zip
+          files: |
+            libsimple.zip
+            upload/*
