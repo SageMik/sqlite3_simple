@@ -1,11 +1,19 @@
 import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
 
+fun ifTestEnabled(block: () -> Unit) {
+    if(System.getenv("ENABLE_TEST")?.toBooleanStrictOrNull() != false) {
+        block()
+    }
+}
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.maven.publish)
-
-    alias(libsTest.plugins.kotlinAndroid)
+    if(System.getenv("ENABLE_TEST")?.toBooleanStrictOrNull() != false) {
+        alias(libsTest.plugins.kotlinAndroid)
+    }
 }
+
 val isSnapshot = System.getenv("SNAPSHOT")?.toBooleanStrictOrNull() ?: true
 
 group = "io.github.sagemik"
@@ -30,7 +38,14 @@ android {
             )
         }
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        ifTestEnabled {
+            testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        }
+
+        compileOptions {
+            targetCompatibility = JavaVersion.VERSION_21
+            sourceCompatibility = JavaVersion.VERSION_21
+        }
     }
 
     buildTypes {
@@ -44,10 +59,6 @@ android {
             version = "3.22.1"
             path = rootDir.resolve("../../CMakeLists.txt").normalize()
         }
-    }
-
-    kotlin {
-        jvmToolchain(21)
     }
 }
 
@@ -96,11 +107,13 @@ mavenPublishing {
     }
 }
 
-dependencies {
-    androidTestImplementation(libsTest.androidx.test.ext.junit)
-    androidTestImplementation(libsTest.androidx.test.ext.truth)
-    androidTestImplementation(libsTest.androidx.test.core.ktx)
-    androidTestImplementation(libsTest.androidx.test.runner)
-    androidTestImplementation(libsTest.androidx.test.rules)
-    androidTestImplementation(libsTest.sqlite.android)
+ifTestEnabled {
+    dependencies {
+        androidTestImplementation(libsTest.androidx.test.ext.junit)
+        androidTestImplementation(libsTest.androidx.test.ext.truth)
+        androidTestImplementation(libsTest.androidx.test.core.ktx)
+        androidTestImplementation(libsTest.androidx.test.runner)
+        androidTestImplementation(libsTest.androidx.test.rules)
+        androidTestImplementation(libsTest.sqlite.android)
+    }
 }

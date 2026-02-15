@@ -171,6 +171,7 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKeyPassword }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKey }}
           SNAPSHOT: ${{ !startsWith(github.ref, 'refs/tags/Nv') }}
+          ENABLE_TEST: false
 
       - name: '解压 aar 并提取 so 库'
         run: |
