@@ -1,6 +1,7 @@
 ## 2.0.0
 
 - 更换字典文件为 [`zdic.txt`](https://github.com/SageMik/sqlite3_simple/blob/Nv2.0.0/zdic.txt)，原拼音文件包含大量非常用读音。
+- 增加 [resolveLibSimplePath()]，提供 Simple 原生库路径。
 
 ## 1.0.3
 

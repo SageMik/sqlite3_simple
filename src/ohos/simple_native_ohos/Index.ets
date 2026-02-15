@@ -1,1 +1,1 @@
-const SimpleNativeOhosNothing = 0
+export  { resolveLibSimplePath } from './src/main/ets/lib'
