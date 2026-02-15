@@ -16,6 +16,12 @@ dependencyResolutionManagement {
         mavenCentral()
         gradlePluginPortal()
     }
+
+    versionCatalogs {
+        create("libsTest") {
+            from(files("gradle/libs-test.versions.toml"))
+        }
+    }
 }
 
 include(":simple-native-android")

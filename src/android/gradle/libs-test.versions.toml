@@ -1,0 +1,10 @@
+[libraries]
+androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version = "1.1.5" }
+androidx-test-ext-truth = { group = "androidx.test.ext", name = "truth", version = "1.5.0" }
+androidx-test-core-ktx = { group = "androidx.test", name = "core-ktx", version = "1.7.0" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version = "1.5.2" }
+androidx-test-rules = { group = "androidx.test", name = "rules", version = "1.5.0" }
+sqlite-android = { group = "com.github.requery", name = "sqlite-android", version = "3.49.0" }
+
+[plugins]
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version = "2.3.10" }

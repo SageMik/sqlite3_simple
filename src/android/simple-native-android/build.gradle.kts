@@ -3,6 +3,8 @@ import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.maven.publish)
+
+    alias(libsTest.plugins.kotlinAndroid)
 }
 val isSnapshot = System.getenv("SNAPSHOT")?.toBooleanStrictOrNull() ?: true
 
@@ -27,6 +29,8 @@ android {
                 "x86_64"
             )
         }
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -40,6 +44,10 @@ android {
             version = "3.22.1"
             path = rootDir.resolve("../../CMakeLists.txt").normalize()
         }
+    }
+
+    kotlin {
+        jvmToolchain(21)
     }
 }
 
@@ -86,4 +94,13 @@ mavenPublishing {
         }
 
     }
+}
+
+dependencies {
+    androidTestImplementation(libsTest.androidx.test.ext.junit)
+    androidTestImplementation(libsTest.androidx.test.ext.truth)
+    androidTestImplementation(libsTest.androidx.test.core.ktx)
+    androidTestImplementation(libsTest.androidx.test.runner)
+    androidTestImplementation(libsTest.androidx.test.rules)
+    androidTestImplementation(libsTest.sqlite.android)
 }
