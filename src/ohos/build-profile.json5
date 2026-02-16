@@ -14,7 +14,7 @@
           },
           "nativeCompiler": "BiSheng"
         },
-        "targetSdkVersion": "6.0.1(21)"
+        "targetSdkVersion": "6.0.0(20)"
       }
     ],
     "buildModeSet": [

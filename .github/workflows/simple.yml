@@ -13,9 +13,11 @@ permissions:
 
 env:
   TAG_NAME: simple-native ${{ github.ref_name }}
+  SNAPSHOT: ${{ !startsWith(github.ref, 'refs/tags/Nv') }}
 
 jobs:
   Windows:
+#    if: false
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -74,6 +76,7 @@ jobs:
 
 
   MacOS-iOS:
+#    if: false
     runs-on: macos-latest
 
     steps:
@@ -146,6 +149,7 @@ jobs:
 
 
   Android:
+#    if: false
     runs-on: ubuntu-latest
     environment: simple-native-android
 
@@ -160,9 +164,7 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: '通过 Gradle 编译'
-        run: |
-          chmod +x ./gradlew
-          ./gradlew publishToMavenCentral --info
+        run: ./gradlew publishToMavenCentral --info
         working-directory: src/android
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.ORG_GRADLE_PROJECT_mavenCentralUsername }}
@@ -170,10 +172,9 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKeyId }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKeyPassword }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKey }}
-          SNAPSHOT: ${{ !startsWith(github.ref, 'refs/tags/Nv') }}
           ENABLE_TEST: false
 
-      - name: '解压 aar 并提取 so 库'
+      - name: '解压 aar 提取 so 库'
         run: |
           unzip -q src/android/simple-native-android/build/outputs/aar/simple-native-android-release.aar -d temp_aar
         shell: bash
@@ -185,9 +186,55 @@ jobs:
           path: temp_aar/jni/
 
 
-  Package:
+  HarmonyOS:
+#    if: false
     runs-on: ubuntu-latest
-    needs: [Windows, MacOS-iOS, Android]
+    environment: simple-native-ohos
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - run: cp zdic.txt simple/contrib/pinyin.txt
+        shell: bash
+
+      - name: '设置 HarmonyOS 环境'
+        uses: ErBWs/setup-ohos@v1
+        with:
+          version: 6.0.0.858
+          cache: true
+
+      - name: '通过 Hvigor 编译'
+        run: hvigorw --mode module -p product=default -p module=simple_native_ohos@default -p buildMode=release assembleHar --analyze=normal --parallel --incremental --daemon
+        working-directory: src/ohos
+
+      - name: '安装 expect'
+        run: sudo apt-get update && sudo apt-get install -y expect
+
+      - name: '发布至 OpenHarmony 三方库'
+        if: env.SNAPSHOT == 'false'
+        run: src/ohos/publish.exp
+        env:
+          OHPM_PASSPHRASE: ${{ secrets.OHPM_PASSPHRASE }}
+          OHPM_PUBLISH_ID: ${{ secrets.OHPM_PUBLISH_ID }}
+          OHPM_KEY: ${{ secrets.OHPM_KEY }}
+
+      - name: '解压 har 提取 so 库'
+        run: |
+          mkdir -p temp_har
+          tar -xvf src/ohos/simple_native_ohos/build/default/outputs/default/simple_native_ohos.har -C temp_har
+
+      - name: '上传 HarmonyOS 产物'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ohos
+          path: temp_har/package/libs/
+
+
+  Package:
+#    if: false
+    runs-on: ubuntu-latest
+    needs: [Windows, MacOS-iOS, Android, HarmonyOS]
     steps:
       - name: '下载所有产物'
         uses: actions/download-artifact@v4
@@ -196,7 +243,7 @@ jobs:
 
       - name: '整理并打包'
         run: |
-          mkdir -p dist/{windows,macos,ios,android}
+          mkdir -p dist/{windows,macos,ios,android,ohos}
           mkdir -p upload
           
           # Windows
@@ -218,6 +265,14 @@ jobs:
           for arch in armeabi-v7a arm64-v8a x86 x86_64; do
             if [ -f artifacts/android/$arch/libsimple.so ]; then
               cp artifacts/android/$arch/libsimple.so upload/libsimple-android-$arch.so
+            fi
+          done
+          
+          # HarmonyOS
+          cp -r artifacts/ohos/* dist/ohos/
+          for arch in arm64-v8a x86_64; do
+            if [ -f artifacts/ohos/$arch/libsimple.so ]; then
+              cp artifacts/ohos/$arch/libsimple.so upload/libsimple-ohos-$arch.so
             fi
           done
           

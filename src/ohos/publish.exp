@@ -1,0 +1,49 @@
+#!/usr/bin/expect -f
+
+set timeout -1
+
+rename exit real_exit
+proc exit {{code 0}} {
+    catch {exec rm -f key}
+    real_exit $code
+}
+
+set passphrase $env(OHPM_PASSPHRASE)
+set publish_id $env(OHPM_PUBLISH_ID)
+set key $env(OHPM_KEY)
+
+set sent_passphrase 0
+set success 0
+
+log_user 0
+
+set fd [open "key" w]
+puts -nonewline $fd $key
+close $fd
+
+spawn ohpm publish src/ohos/simple_native_ohos/build/default/outputs/default/simple_native_ohos.har \
+    --publish_registry=https://ohpm.openharmony.cn/ohpm \
+    --key_path [pwd]/key \
+    --publish_id=$publish_id
+
+log_user 1
+
+expect {
+    "what is your passphrase of the private key:" {
+        if {$sent_passphrase} { exit 1 }
+        set sent_passphrase 1
+        send "$passphrase\r"
+        exp_continue
+    }
+    "the submitted OHPM library is under review" {
+        set success 1
+        exp_continue
+    }
+    eof
+}
+
+if {!$success} {
+    exit 1
+} else {
+    exit 0
+}
