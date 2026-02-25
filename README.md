@@ -6,7 +6,7 @@
 
 该分支编译和维护用于主分支的 Simple 原生库。
 
-标签 `NvX.Y.Z`。自 `Nv2.0.0` 开始，本库所用拼音文件替换为 [`zdic.txt`](zdic.txt) ，以解决原拼音文件存在大量不常用读音的问题。
+标签 `NvX.Y.Z`。自 `Nv2.0.0` 开始，本库所用拼音文件替换为 [`zdic.txt`](zdic.txt) ，以解决原拼音文件存在大量不常用读音的问题（例如输入q，会匹配到 `示(U+793A, qí)`、`客(U+5BA2, qià)` 等）。
 
 通过 Github Actions 进行持续集成（CI），详见 [`.github/workflow/simple.yml`](.github/workflows/simple.yml) 。
 
