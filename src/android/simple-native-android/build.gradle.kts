@@ -104,6 +104,11 @@ mavenPublishing {
             }
         }
 
+        scm {
+            url = "https://github.com/SageMik/sqlite3_simple.git"
+            connection = "scm:git:https://github.com/SageMik/sqlite3_simple.git"
+            developerConnection = "scm:git:ssh://git@github.com/SageMik/sqlite3_simple.git"
+        }
     }
 }
 
