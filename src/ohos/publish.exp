@@ -28,11 +28,15 @@ spawn ohpm publish src/ohos/simple_native_ohos/build/default/outputs/default/sim
 
 log_user 1
 
+# 每发送 1 个字符，暂停 0.1 秒
+# 结合 send -s 避免发送太快导致 ohpm 没有接收到输入
+set send_slow {1 0.1}
+
 expect {
     "what is your passphrase of the private key:" {
         if {$sent_passphrase} { exit 1 }
         set sent_passphrase 1
-        send "$passphrase\r"
+        send -s "$passphrase\r"
         exp_continue
     }
     "the submitted OHPM library is under review" {
