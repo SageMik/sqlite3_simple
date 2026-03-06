@@ -1,3 +1,8 @@
+## 2.0.0
+
+* 迁移至 sqlite3: ^3.0.0 即 v3 版本，使用 Dart Hooks 构建 SQLite 原生库。
+* 更新 Simple 原生库至 [v0.5.2](https://github.com/wangfenjin/simple/tree/v0.5.0) 。自当前版本即 `2.0.0` 起，本库所用拼音文件替换为 [`zdic.txt`](https://github.com/SageMik/sqlite3_simple/blob/simple-native/zdic.txt) ，以解决原拼音文件存在大量不常用读音的问题（例如输入q，会匹配到 `示(U+793A, qí)`、`客(U+5BA2, qià)` 等）
+
 ## 1.0.7
 
 * 增加 [drift](https://github.com/simolus3/drift) 示例 (#13)

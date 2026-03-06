@@ -2,68 +2,27 @@ PODS:
   - Flutter (1.0.0)
   - integration_test (0.0.1):
     - Flutter
-  - path_provider_foundation (0.0.1):
-    - Flutter
-    - FlutterMacOS
-  - sqlite3 (3.50.4):
-    - sqlite3/common (= 3.50.4)
-  - sqlite3/common (3.50.4)
-  - sqlite3/dbstatvtab (3.50.4):
-    - sqlite3/common
-  - sqlite3/fts5 (3.50.4):
-    - sqlite3/common
-  - sqlite3/math (3.50.4):
-    - sqlite3/common
-  - sqlite3/perf-threadsafe (3.50.4):
-    - sqlite3/common
-  - sqlite3/rtree (3.50.4):
-    - sqlite3/common
-  - sqlite3/session (3.50.4):
-    - sqlite3/common
-  - sqlite3_flutter_libs (0.0.1):
-    - Flutter
-    - FlutterMacOS
-    - sqlite3 (~> 3.50.4)
-    - sqlite3/dbstatvtab
-    - sqlite3/fts5
-    - sqlite3/math
-    - sqlite3/perf-threadsafe
-    - sqlite3/rtree
-    - sqlite3/session
-  - sqlite3_simple (1.0.7):
+  - sqlite3_simple (2.0.0):
     - Flutter
     - FlutterMacOS
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
-  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
-  - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/darwin`)
   - sqlite3_simple (from `.symlinks/plugins/sqlite3_simple/darwin`)
-
-SPEC REPOS:
-  https://mirrors.tuna.tsinghua.edu.cn/git/CocoaPods/Specs.git:
-    - sqlite3
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
   integration_test:
     :path: ".symlinks/plugins/integration_test/ios"
-  path_provider_foundation:
-    :path: ".symlinks/plugins/path_provider_foundation/darwin"
-  sqlite3_flutter_libs:
-    :path: ".symlinks/plugins/sqlite3_flutter_libs/darwin"
   sqlite3_simple:
     :path: ".symlinks/plugins/sqlite3_simple/darwin"
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
-  path_provider_foundation: 0b743cbb62d8e47eab856f09262bb8c1ddcfe6ba
-  sqlite3: 73513155ec6979715d3904ef53a8d68892d4032b
-  sqlite3_flutter_libs: 86f82662868ee26ff3451f73cac9c5fc2a1f57fa
-  sqlite3_simple: 3181b0f775bf365a47100a7a62fbedce73318cac
+  sqlite3_simple: 835a9a30ef44fa8e240f19069ca595f905087109
 
 PODFILE CHECKSUM: 13ef514beecdb0dc5d3f5ec77eedc252f0003363
 
