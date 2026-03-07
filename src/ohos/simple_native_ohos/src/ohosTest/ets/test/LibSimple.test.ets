@@ -21,9 +21,9 @@ export default function LibSimpleTest() {
         }
         const db = await relationalStore.getRdbStore(context, storeConfig)
         await db.executeSql("CREATE VIRTUAL TABLE t1 USING fts5(text, tokenize = 'simple')")
-        await db.execute("INSERT INTO t1 (text) VALUES (?);", ["人工智能正在改变我们的生活方式"])
+        await db.execute("INSERT INTO t1 (text) VALUES (?);", ["示 (qí)，通「祇」，地神。《周礼·春官·大宗伯》：「大宗伯之职，掌建邦之天神人鬼地示之礼。」。汉·郑玄·注：「示，音祇，本或作祇。」"])
 
-        const resultSet = await db.querySql("SELECT simple_highlight(t1, 0, '[', ']') as c0 FROM t1 WHERE text MATCH simple_query('z s');")
+        const resultSet = await db.querySql("SELECT simple_highlight(t1, 0, '[', ']') as c0 FROM t1 WHERE text MATCH simple_query('qi');")
         resultSet.goToFirstRow()
         result = resultSet.getRow()["c0"]?.toString()
 
@@ -32,7 +32,7 @@ export default function LibSimpleTest() {
       } catch (error) {
         result = error
       }
-      expect(result).assertEqual("人工[智]能[正在]改变我们的[生]活方[式]")
+      expect(result).assertEqual("示 (qí)，通「[祇]」，地神。《周礼·春官·大宗伯》：「大宗伯之职，掌建邦之天神人鬼地示之礼。」。汉·郑玄·注：「示，音[祇]，本或作[祇]。」")
     })
   })
 }

@@ -1,3 +1,4 @@
 [submodule "simple"]
 	path = simple
 	url = https://github.com/wangfenjin/simple
+	ignore = all

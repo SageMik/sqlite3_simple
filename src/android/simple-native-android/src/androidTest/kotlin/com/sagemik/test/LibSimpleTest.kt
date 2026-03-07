@@ -26,11 +26,13 @@ class LibSimpleTest {
         val dbHelper = context.createSQLiteOpenHelper()
         val db = dbHelper.readableDatabase
 
-        val cursor = db.query("SELECT simple_highlight(t1, 0, '[', ']') FROM t1 WHERE text MATCH simple_query('z s');")
+        val cursor = db.query(
+            "SELECT simple_highlight(t1, 0, '[', ']') FROM t1 WHERE text MATCH simple_query('qi');"
+        )
         cursor.moveToFirst()
         val result = cursor.getString(0)
         println(result)
-        assertThat(result).isEqualTo("人工[智]能[正在]改变我们的[生]活方[式]")
+        assertThat(result).isEqualTo("示 (qí)，通「[祇]」，地神。《周礼·春官·大宗伯》：「大宗伯之职，掌建邦之天神人鬼地示之礼。」。汉·郑玄·注：「示，音[祇]，本或作[祇]。」")
 
         cursor.close()
         db.close()
@@ -41,7 +43,10 @@ fun Context.createSQLiteOpenHelper(): SupportSQLiteOpenHelper {
     val extensionConfigs = mutableListOf(
         RequerySQLiteOpenHelperFactory.ConfigurationOptions {
             it.apply {
-                customExtensions += SQLiteCustomExtension("libsimple.so", "sqlite3_simple_init") // 加载 Simple 扩展
+                customExtensions += SQLiteCustomExtension(
+                    "libsimple.so",
+                    "sqlite3_simple_init"
+                ) // 加载 Simple 扩展
             }
         }
     )
@@ -51,7 +56,10 @@ fun Context.createSQLiteOpenHelper(): SupportSQLiteOpenHelper {
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     db.apply {
                         execSQL("CREATE VIRTUAL TABLE t1 USING fts5(text, tokenize = 'simple')")
-                        execSQL("INSERT INTO t1 (text) VALUES (?);", arrayOf("人工智能正在改变我们的生活方式"))
+                        execSQL(
+                            sql = "INSERT INTO t1 (text) VALUES (?);",
+                            bindArgs = arrayOf("示 (qí)，通「祇」，地神。《周礼·春官·大宗伯》：「大宗伯之职，掌建邦之天神人鬼地示之礼。」。汉·郑玄·注：「示，音祇，本或作祇。」")
+                        )
                     }
                 }
 
@@ -59,7 +67,8 @@ fun Context.createSQLiteOpenHelper(): SupportSQLiteOpenHelper {
                     db: SupportSQLiteDatabase,
                     oldVersion: Int,
                     newVersion: Int
-                ) {}
+                ) {
+                }
             }
         )
     )

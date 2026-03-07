@@ -1,3 +1,7 @@
+## 2.0.0+1
+
+- 将替换拼音文件的操作由 GitHub Actions 迁移至最外层 CMakeLists.txt ，以便直接引用 CMakeLists.txt 的项目也使用替换的拼音文件，更新测试用例以验证替换生效
+
 ## 2.0.0
 
 - 更换字典文件为 [`zdic.txt`](https://github.com/SageMik/sqlite3_simple/blob/Nv2.0.0/zdic.txt)，原拼音文件包含大量非常用读音。

@@ -16,5 +16,12 @@ endif()
 
 project(simple-native)
 
+# 覆盖拼音文件
+file(CREATE_LINK 
+    ${CMAKE_CURRENT_LIST_DIR}/zdic.txt
+    ${CMAKE_CURRENT_LIST_DIR}/simple/contrib/pinyin.txt
+    SYMBOLIC
+)
+
 # 使用 CMAKE_CURRENT_LIST_DIR 获取当前文件所在目录，并显式指定二进制目录，兼容 ohos 配置
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/simple ${CMAKE_BINARY_DIR}/simple)

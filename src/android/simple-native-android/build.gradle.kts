@@ -17,7 +17,7 @@ plugins {
 val isSnapshot = System.getenv("SNAPSHOT")?.toBooleanStrictOrNull() ?: true
 
 group = "io.github.sagemik"
-version = "2.0.0" + if(isSnapshot) "-SNAPSHOT" else ""
+version = "2.0.0+1" + if(isSnapshot) "-SNAPSHOT" else ""
 description = "Simple (支持中文和拼音的 SQLite fts5 全文搜索扩展) 的 Android 原生库，用于 sqlite3_simple Flutter 插件。"
 
 android {

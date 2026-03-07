@@ -5,7 +5,7 @@ on:
 #    branches:
 #      - simple-native
     tags:
-      - Nv[0-9]+.[0-9]+.[0-9]+
+      - Nv*
   workflow_dispatch:
 
 permissions:
@@ -23,8 +23,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - run: cp zdic.txt simple/contrib/pinyin.txt
-        shell: bash
 
       - name: '安装 CMake'
         uses: lukka/get-cmake@v3.31.6
@@ -83,8 +81,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - run: cp zdic.txt simple/contrib/pinyin.txt
-        shell: bash
 
       - name: '[MacOS] 安装 CMake'
         uses: lukka/get-cmake@v3.31.6
@@ -157,8 +153,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - run: cp zdic.txt simple/contrib/pinyin.txt
-        shell: bash
 
       - name: '设置 Android 环境'
         uses: android-actions/setup-android@v3
@@ -195,8 +189,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - run: cp zdic.txt simple/contrib/pinyin.txt
-        shell: bash
 
       - name: '设置 HarmonyOS 环境'
         uses: ErBWs/setup-ohos@v1
