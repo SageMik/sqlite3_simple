@@ -15,9 +15,6 @@ class Sqlite3DbManager extends IDbManager<Sqlite3Dao> {
 
   @override
   Future<void> init() async {
-    // // [Android SQLite 覆盖]
-    // _overrideForAndroid();
-
     sqlite3.loadSimpleExtension();
 
     final docDir = await getApplicationDocumentsDirectory();
@@ -37,16 +34,7 @@ class Sqlite3DbManager extends IDbManager<Sqlite3Dao> {
   }
 
   @override
-  Future<void> dispose() async => dao.db.dispose();
-
-// /// 自定义 SQLite Android 示例，请全局搜索 Android SQLite 覆盖 来查看与此相关的配置。
-// /// 如果你想自定义 SQLite 原生库，可以参考 本方法 或 sqlite3 的文档说明。
-// /// 本方法将原来 sqlite3_flutter_libs 的 [libsqlite.so]，替换为了 sqlite-android 的 [libsqlite3x.so]
-// void _overrideForAndroid() {
-//   open.overrideFor(
-//       OperatingSystem.android, () => DynamicLibrary.open("libsqlite3x.so"));
-// }
-
+  Future<void> dispose() async => dao.db.close();
 }
 
 class Sqlite3Dao extends IMainTableDao<Database> {

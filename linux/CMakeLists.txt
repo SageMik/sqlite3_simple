@@ -15,7 +15,7 @@ include(FetchContent)
 
 FetchContent_Declare(simple_native
     GIT_REPOSITORY https://github.com/SageMik/sqlite3_simple
-    GIT_TAG Nv1.0.6
+    GIT_TAG Nv2.0.0+1
 )
 FetchContent_MakeAvailable(simple_native)
 
