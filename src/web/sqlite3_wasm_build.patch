@@ -1,0 +1,652 @@
+Subject: [PATCH] sqlite3.wasm
+---
+Index: sqlite3_wasm_build/src/sqlite_cfg.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqlite3_wasm_build/src/sqlite_cfg.h b/sqlite3_wasm_build/src/sqlite_cfg.h
+--- a/sqlite3_wasm_build/src/sqlite_cfg.h	(revision c3dfeb872b0f019a6ff90e3b821f068562fdb18d)
++++ b/sqlite3_wasm_build/src/sqlite_cfg.h	(date 1775208461623)
+@@ -47,7 +47,7 @@
+ #define SQLITE_OMIT_AUTHORIZATION
+ #define SQLITE_UNTESTABLE
+ #define SQLITE_OMIT_COMPILEOPTION_DIAGS
+-#define SQLITE_OMIT_LOAD_EXTENSION
++//#define SQLITE_OMIT_LOAD_EXTENSION
+ #define SQLITE_OMIT_TCL_VARIABLE
+ #define SQLITE_OMIT_UTF16
+ #define SQLITE_OMIT_DESERIALIZE
+Index: sqlite3_wasm_build/src/cpp_exception_stubs.cc
+===================================================================
+diff --git a/sqlite3_wasm_build/src/cpp_exception_stubs.cc b/sqlite3_wasm_build/src/cpp_exception_stubs.cc
+new file mode 100644
+--- /dev/null	(date 1775208461596)
++++ b/sqlite3_wasm_build/src/cpp_exception_stubs.cc	(date 1775208461596)
+@@ -0,0 +1,8 @@
++#include <cstddef>
++#include <cstdlib>
++
++extern "C" void *__cxa_allocate_exception(size_t thrown_size) { return malloc(thrown_size); }
++
++extern "C" void __cxa_free_exception(void *thrown_exception) { free(thrown_exception); }
++
++extern "C" void __cxa_throw(void *, void *, void (*)(void *)) { abort(); }
+Index: sqlite3/lib/src/wasm/wasi_snapshot_preview1_callbacks.dart
+===================================================================
+diff --git a/sqlite3/lib/src/wasm/wasi_snapshot_preview1_callbacks.dart b/sqlite3/lib/src/wasm/wasi_snapshot_preview1_callbacks.dart
+new file mode 100644
+--- /dev/null	(date 1775208461553)
++++ b/sqlite3/lib/src/wasm/wasi_snapshot_preview1_callbacks.dart	(date 1775208461553)
+@@ -0,0 +1,166 @@
++// WASI preview1 imports for sqlite3.wasm, exposed like [DartBridgeCallbacks] via
++// [createJSInteropWrapper]. Implementation delegates to [wasd.WASI] after
++// [bindLinearMemory] wires linear memory (must run before the module's
++// `_initialize` export).
++
++import 'dart:js_interop';
++import 'dart:js_interop_unsafe';
++import 'dart:typed_data';
++
++import 'package:wasd/wasd.dart' as wasd;
++
++import 'js_interop/wasm.dart' as wasm_js;
++
++// ignore_for_file: non_constant_identifier_names
++
++final class _WasdInstanceNoExports implements wasd.Instance {
++  @override
++  wasd.Exports get exports => <String, wasd.ExportValue>{};
++}
++
++final class _SqliteMemoryForWasd implements wasd.Memory {
++  _SqliteMemoryForWasd(this._mem);
++
++  final wasm_js.Memory _mem;
++
++  @override
++  ByteBuffer get buffer => _mem.buffer.toDart;
++
++  @override
++  int grow(int delta) {
++    // Keep [wasm_js.Memory] unchanged: invoke WebAssembly.Memory.prototype.grow
++    // without declaring [grow] on the extension type.
++    return _mem.callMethod<JSNumber>('grow'.toJS, delta.toJS).toDartInt;
++  }
++}
++
++final class WasiSnapshotPreview1Callbacks {
++  final wasd.WASI _wasi = wasd.WASI();
++
++  late final Map<String, wasd.ImportValue> _preview1 =
++      _wasi.imports['wasi_snapshot_preview1']!;
++
++  /// Binds wasm linear memory for WASI syscalls. Call from
++  /// [WasmInstance.loadWithBeforeInitialize] after instantiation and before
++  /// `_initialize`.
++  void bindLinearMemory(wasm_js.Memory memory) {
++    _wasi.finalizeBindings(
++      _WasdInstanceNoExports(),
++      memory: _SqliteMemoryForWasd(memory),
++    );
++  }
++
++  int _call(String name, List<Object?> args) {
++    final v = _preview1[name];
++    if (v is! wasd.FunctionImportExportValue) return 52;
++    final r = v.ref(args);
++    if (r == null) return 0;
++    if (r is int) return r;
++    if (r is BigInt) return r.toInt();
++    return (r as num).toInt();
++  }
++
++  @JSExport('args_get')
++  int args_get(int argvPtr, int argvBufPtr) => _call('args_get', [argvPtr, argvBufPtr]);
++
++  @JSExport('args_sizes_get')
++  int args_sizes_get(int argcPtr, int argvBufSizePtr) =>
++      _call('args_sizes_get', [argcPtr, argvBufSizePtr]);
++
++  @JSExport('environ_get')
++  int environ_get(int environPtr, int environBufPtr) =>
++      _call('environ_get', [environPtr, environBufPtr]);
++
++  @JSExport('environ_sizes_get')
++  int environ_sizes_get(int environCountPtr, int environBufSizePtr) =>
++      _call('environ_sizes_get', [environCountPtr, environBufSizePtr]);
++
++  @JSExport('random_get')
++  int random_get(int bufPtr, int bufLen) => _call('random_get', [bufPtr, bufLen]);
++
++  @JSExport('fd_close')
++  int fd_close(int fd) => _call('fd_close', [fd]);
++
++  @JSExport('fd_fdstat_get')
++  int fd_fdstat_get(int fd, int fdstatPtr) =>
++      _call('fd_fdstat_get', [fd, fdstatPtr]);
++
++  @JSExport('fd_filestat_get')
++  int fd_filestat_get(int fd, int filestatPtr) =>
++      _call('fd_filestat_get', [fd, filestatPtr]);
++
++  @JSExport('fd_fdstat_set_flags')
++  int fd_fdstat_set_flags(int fd, int flags) =>
++      _call('fd_fdstat_set_flags', [fd, flags]);
++
++  @JSExport('fd_prestat_get')
++  int fd_prestat_get(int fd, int prestatPtr) =>
++      _call('fd_prestat_get', [fd, prestatPtr]);
++
++  @JSExport('fd_prestat_dir_name')
++  int fd_prestat_dir_name(int fd, int pathPtr, int pathLen) =>
++      _call('fd_prestat_dir_name', [fd, pathPtr, pathLen]);
++
++  @JSExport('fd_read')
++  int fd_read(int fd, int iovs, int iovsLen, int nreadPtr) =>
++      _call('fd_read', [fd, iovs, iovsLen, nreadPtr]);
++
++  @JSExport('fd_seek')
++  int fd_seek(int fd, Object? offset, int whence, int newOffsetPtr) =>
++      _call('fd_seek', [fd, offset, whence, newOffsetPtr]);
++
++  @JSExport('fd_write')
++  int fd_write(int fd, int iovs, int iovsLen, int nwrittenPtr) =>
++      _call('fd_write', [fd, iovs, iovsLen, nwrittenPtr]);
++
++  @JSExport('clock_time_get')
++  int clock_time_get(int clockId, Object? precision, int timePtr) =>
++      _call('clock_time_get', [clockId, precision, timePtr]);
++
++  @JSExport('sched_yield')
++  int sched_yield() => _call('sched_yield', const []);
++
++  @JSExport('path_filestat_get')
++  int path_filestat_get(
++    int fd,
++    int flags,
++    int pathPtr,
++    int pathLen,
++    int filestatPtr,
++  ) => _call('path_filestat_get', [fd, flags, pathPtr, pathLen, filestatPtr]);
++
++  @JSExport('path_open')
++  int path_open(
++    int fd,
++    int dirflags,
++    int pathPtr,
++    int pathLen,
++    int oflags,
++    Object? rightsBase,
++    Object? rightsInheriting,
++    int fdflags,
++    int openedFdPtr,
++  ) => _call('path_open', [
++    fd,
++    dirflags,
++    pathPtr,
++    pathLen,
++    oflags,
++    rightsBase,
++    rightsInheriting,
++    fdflags,
++    openedFdPtr,
++  ]);
++
++  @JSExport('poll_oneoff')
++  int poll_oneoff(int inPtr, int outPtr, int nsubscriptions, int neventsPtr) =>
++      _call('poll_oneoff', [inPtr, outPtr, nsubscriptions, neventsPtr]);
++
++  @JSExport('proc_exit')
++  void proc_exit(int code) {
++    final v = _preview1['proc_exit'];
++    if (v is wasd.FunctionImportExportValue) {
++      v.ref([code]);
++    }
++  }
++}
+Index: sqlite3/example/web/main.dart
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqlite3/example/web/main.dart b/sqlite3/example/web/main.dart
+--- a/sqlite3/example/web/main.dart	(revision c3dfeb872b0f019a6ff90e3b821f068562fdb18d)
++++ b/sqlite3/example/web/main.dart	(date 1775208461530)
+@@ -1,18 +1,43 @@
+ import 'dart:js_interop';
+ 
+-import 'package:web/web.dart';
++import 'package:web/web.dart' hide WebAssembly;
+ 
+ import 'package:sqlite3/wasm.dart';
+ 
++/// Mirrors [LibSimpleTest.testSimpleQuery] in
++/// `src/android/simple-native-android/src/androidTest/.../LibSimpleTest.kt`.
++void runLibSimpleTest(WasmSqlite3 sqlite3) {
++  sqlite3.registerVirtualFileSystem(InMemoryFileSystem(), makeDefault: true);
++
++  final db = sqlite3.open('/lib_simple_test.db');
++  try {
++    db.execute(
++      "CREATE VIRTUAL TABLE t1 USING fts5(text, tokenize = 'simple')",
++    );
++
++    const insertText =
++        '示 (qí)，通「祇」，地神。《周礼·春官·大宗伯》：「大宗伯之职，掌建邦之天神人鬼地示之礼。」。汉·郑玄·注：「示，音祇，本或作祇。」';
++    db.execute('INSERT INTO t1 (text) VALUES (?)', [insertText]);
++
++    final rows = db.select(
++      "SELECT simple_highlight(t1, 0, '[', ']') FROM t1 WHERE text MATCH jieba_query('qi');",
++    );
++    print(rows.first.columnAt(0));
++  } finally {
++    db.dispose();
++  }
++}
++
+ Future<void> main() async {
+   final startIndexedDb = document.getElementById('start-idb')!;
+   final startOpfs = document.getElementById('start-opfs')!;
+   final startEncryption = document.getElementById('start-encryption')!;
++  final libSimpleButton = document.getElementById('start-libsimple-test');
+ 
+   startIndexedDb.onClick.listen((_) async {
+     startIndexedDb.remove();
+     final sqlite3 = await WasmSqlite3.loadFromUrl(
+-      Uri.parse('sqlite3.debug.wasm'),
++      Uri.parse('sqlite3.debug.wasm?v=2'),
+     );
+ 
+     print(sqlite3.version);
+@@ -22,13 +47,16 @@
+       makeDefault: true,
+     );
+ 
+-    sqlite3.open('/database')
+-      ..execute('pragma user_version = 1')
+-      ..execute('CREATE TABLE foo (bar INTEGER NOT NULL);')
+-      ..execute('INSERT INTO foo (bar) VALUES (?)', [3])
+-      ..close();
++    // sqlite3.open('/database')
++    //   ..execute('pragma user_version = 1')
++    //   ..execute('CREATE TABLE foo (bar INTEGER NOT NULL);')
++    //   ..execute('INSERT INTO foo (bar) VALUES (?)', [3])
++    //   ..close();
+ 
+     final db = sqlite3.open('/database');
++
++    print(db.select("SELECT jieba_query('测试测试测试测试测试测试测试')"));
++
+     print(db.select('SELECT * FROM foo'));
+   });
+ 
+@@ -61,4 +89,14 @@
+     db.execute("pragma key = 'test';");
+     print(db.select('SELECT * FROM foo'));
+   });
++
++  if (libSimpleButton != null) {
++    libSimpleButton.onClick.listen((_) async {
++      libSimpleButton.remove();
++      final sqlite3 = await WasmSqlite3.loadFromUrl(
++        Uri.parse('sqlite3.debug.wasm?v=2'),
++      );
++      runLibSimpleTest(sqlite3);
++    });
++  }
+ }
+Index: sqlite3/pubspec.yaml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqlite3/pubspec.yaml b/sqlite3/pubspec.yaml
+--- a/sqlite3/pubspec.yaml	(revision c3dfeb872b0f019a6ff90e3b821f068562fdb18d)
++++ b/sqlite3/pubspec.yaml	(date 1775208461576)
+@@ -35,6 +35,7 @@
+   code_assets: ^1.0.0
+   native_toolchain_c: ^0.17.5
+   crypto: ^3.0.6
++  wasd: ^0.2.0
+ 
+ dev_dependencies:
+   analyzer: ^10.0.0
+Index: sqlite3_wasm_build/src/simple_wasm.cmake
+===================================================================
+diff --git a/sqlite3_wasm_build/src/simple_wasm.cmake b/sqlite3_wasm_build/src/simple_wasm.cmake
+new file mode 100644
+--- /dev/null	(date 1775208461615)
++++ b/sqlite3_wasm_build/src/simple_wasm.cmake	(date 1775208461615)
+@@ -0,0 +1,41 @@
++get_filename_component(_repo_root ${CMAKE_CURRENT_SOURCE_DIR}/../../../../.. ABSOLUTE)
++set(simple_root ${_repo_root}/simple)
++
++file(INSTALL FILES ${_repo_root}/zdic.txt DESTINATION ${CMAKE_BINARY_DIR}/contrib RENAME pinyin.txt) # 替换拼音文件
++include(${simple_root}/contrib/CMakeRC.cmake)
++cmrc_add_resource_library(PINYIN_TEXT TYPE OBJECT NAMESPACE pinyin_text WHENCE ${CMAKE_BINARY_DIR} ${CMAKE_BINARY_DIR}/contrib/pinyin.txt)
++get_target_property(pinyin_cmrc_sources PINYIN_TEXT SOURCES)
++
++set(SIMPLE_WASM_SOURCES
++    ${simple_root}/src/entry.cc
++    ${simple_root}/src/simple_highlight.cc
++    ${simple_root}/src/simple_tokenizer.cc
++    ${simple_root}/src/pinyin.cc
++    ${pinyin_cmrc_sources}
++)
++
++set(SIMPLE_WASM_CPP_ARGS
++    -I ${CMAKE_CURRENT_BINARY_DIR}
++    -I ${simple_root}/src
++    -I ${CMRC_INCLUDE_DIR}
++)
++
++OPTION(SIMPLE_WITH_JIEBA "Option to build with cppjieba" ON)
++if(SIMPLE_WITH_JIEBA)
++  include(FetchContent)
++  FetchContent_Declare(
++    cppjieba
++    GIT_REPOSITORY https://github.com/yanyiwu/cppjieba.git
++    GIT_TAG 194c144d8b5ed1baf3190d07c5226e804454ab47
++  )
++  FetchContent_GetProperties(cppjieba)
++  if(NOT cppjieba_POPULATED)
++    FetchContent_Populate(cppjieba)
++  endif()
++  list(APPEND SIMPLE_WASM_CPP_ARGS
++    -DUSE_JIEBA=1
++    -I ${cppjieba_SOURCE_DIR}/include
++    -I ${cppjieba_SOURCE_DIR}/deps
++  )
++  message(STATUS "cppjieba source dir: ${cppjieba_SOURCE_DIR}")
++endif()
+\ No newline at end of file
+Index: sqlite3_wasm_build/src/CMakeLists.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqlite3_wasm_build/src/CMakeLists.txt b/sqlite3_wasm_build/src/CMakeLists.txt
+--- a/sqlite3_wasm_build/src/CMakeLists.txt	(revision c3dfeb872b0f019a6ff90e3b821f068562fdb18d)
++++ b/sqlite3_wasm_build/src/CMakeLists.txt	(date 1775208461587)
+@@ -1,11 +1,16 @@
+ cmake_minimum_required(VERSION 3.24)
+ 
+ set(PROJECT_NAME "sqlite3_web")
+-project(${PROJECT_NAME} LANGUAGES C)
++project(${PROJECT_NAME} LANGUAGES C CXX)
+ 
+-set(triple wasm32-unknown-wasi)
++set(triple wasm32-wasip1)
+ set(wasi_sysroot "/usr/share/wasi-sysroot" CACHE PATH "Path to wasi sysroot")
+ set(clang "clang" CACHE FILEPATH "Path to wasm-capable clang executable")
++set(clangxx "clang++" CACHE FILEPATH "Path to wasm-capable clang++ executable")
++set(wasm_ctor_eval "wasm-ctor-eval" CACHE FILEPATH "Path to wasm-ctor-eval executable")
++set(wasm_opt "wasm-opt" CACHE FILEPATH "Path to wasm-opt executable")
++
++include(simple_wasm.cmake)
+ 
+ include(FetchContent)
+ 
+@@ -44,7 +49,11 @@
+     ${CMAKE_CURRENT_SOURCE_DIR}/helpers.c
+     ${CMAKE_CURRENT_SOURCE_DIR}/external_objects.c
+   )
+-  set(flags -Wall -Wextra -Wno-unused-parameter -Wno-unused-function)
++  set(cpp_sources
++    ${CMAKE_CURRENT_SOURCE_DIR}/cpp_exception_stubs.cc
++    ${SIMPLE_WASM_SOURCES}
++  )
++  set(flags -Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable)
+ 
+   if(${crypto})
+     list(APPEND sources "${sqlite3mc_SOURCE_DIR}/sqlite3mc_amalgamation.c")
+@@ -70,23 +79,81 @@
+     list(APPEND flags "-Oz" "-DNDEBUG" "-flto")
+   endif()
+ 
+-  add_custom_command(
+-    OUTPUT ${clang_output}
+-    COMMAND ${clang} --target=${triple} -std=c23
+-      ${flags}
+-      -o ${clang_output}
+-      -I ${PROJECT_SOURCE_DIR} -I ${sqlite3_SOURCE_DIR}
+-      -DSQLITE_ENABLE_SESSION
+-      -DSQLITE_ENABLE_PREUPDATE_HOOK
+-      -D_HAVE_SQLITE_CONFIG_H
+-      -D__WASM__
++  set(common_compile_flags
++    --target=${triple}
++    -mcpu=generic
++    -fno-stack-protector -fno-stack-clash-protection
++    --sysroot ${wasi_sysroot}
++    -DSQLITE_ENABLE_SESSION
++    -DSQLITE_ENABLE_PREUPDATE_HOOK
++    -D_HAVE_SQLITE_CONFIG_H
++    -D__WASM__
++    ${flags}
++  )
++
++  # C 中间产物
++  set(c_objects)
++  foreach(source IN LISTS sources)
++    get_filename_component(source_name "${source}" NAME)
++    string(REPLACE "." "_" source_token "${source_name}")
++    set(object "${CMAKE_CURRENT_BINARY_DIR}/${name}_${source_token}.o")
++    add_custom_command(
++      OUTPUT ${object}
++      COMMAND ${clang}
++        ${common_compile_flags}
++        -x c -std=c23 -c
++        -I ${CMAKE_CURRENT_BINARY_DIR}
++        -I ${PROJECT_SOURCE_DIR}
++        -I ${sqlite3_SOURCE_DIR}
++        -o ${object}
++        ${source}
++      DEPENDS ${source}
++      VERBATIM
++    )
++    list(APPEND c_objects ${object})
++  endforeach()
++
++  # C++ 中间产物
++  set(cpp_objects)
++  foreach(source IN LISTS cpp_sources)
++    get_filename_component(source_name "${source}" NAME)
++    string(REPLACE "." "_" source_token "${source_name}")
++    set(object "${CMAKE_CURRENT_BINARY_DIR}/${name}_${source_token}.o")
++    add_custom_command(
++      OUTPUT ${object}
++      COMMAND ${clangxx}
++        ${common_compile_flags}
++        -fno-rtti
++        -DSQLITE_CORE
++        # -fwasm-exceptions -mllvm -wasm-use-legacy-eh=false # C++ 异常支持：https://github.com/WebAssembly/wasi-sdk/pull/606
++        -x c++ -std=c++14 -c
++        ${SIMPLE_WASM_CPP_ARGS}
++        -iquote ${sqlite3_SOURCE_DIR} # include <VERSION> 导致包含版本文件：https://github.com/nmap/nmap/issues/2747
++        -o ${object}
++        ${source}
++      DEPENDS ${source}
++      VERBATIM
++    )
++    list(APPEND cpp_objects ${object})
++  endforeach()
++
++  # 链接编译
++  add_custom_command(
++    OUTPUT ${clang_output}
++    COMMAND ${clangxx}
++      --target=${triple}
+       -mcpu=generic
+       -mexec-model=reactor
+       -fno-stack-protector -fno-stack-clash-protection
+       --sysroot ${wasi_sysroot}
+-      ${sources}
++      -o ${clang_output}
++      ${c_objects}
++      ${cpp_objects}
++      # -lunwind # C++ 异常支持：https://github.com/WebAssembly/wasi-sdk/blob/main/CppExceptions.md
++      -lc++
++      -lc++abi
+       @${CMAKE_CURRENT_BINARY_DIR}/required_symbols.txt
+-    DEPENDS ${sources} required_symbols
++    DEPENDS ${c_objects} ${cpp_objects} required_symbols
+     VERBATIM
+   )
+ 
+@@ -96,13 +163,13 @@
+ 
+     add_custom_command(
+       OUTPUT ${init_output}
+-      COMMAND wasm-ctor-eval -c _initialize ${clang_output} -o ${init_output}
++      COMMAND ${wasm_ctor_eval} -c _initialize ${clang_output} -o ${init_output}
+       VERBATIM
+       DEPENDS ${clang_output}
+     )
+     add_custom_command(
+         OUTPUT ${output}
+-        COMMAND wasm-opt --strip --strip-producers -c -O4 ${init_output} -o ${output}
++        COMMAND ${wasm_opt} --strip --strip-producers -c -O4 ${init_output} -o ${output}
+         VERBATIM
+         DEPENDS ${init_output}
+     )
+@@ -115,9 +182,12 @@
+ base_sqlite3_target(sqlite3_opt false false)
+ base_sqlite3_target(sqlite3mc false true)
+ 
++get_filename_component(_final_out_dir "${_repo_root}/src/web/out" ABSOLUTE)
++
+ add_custom_target(output)
+-add_custom_command(TARGET output COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/sqlite3_opt.wasm ${PROJECT_SOURCE_DIR}/../out/sqlite3.wasm)
+-add_custom_command(TARGET output COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/sqlite3_debug.clang.wasm ${PROJECT_SOURCE_DIR}/../out/sqlite3.debug.wasm)
+-add_custom_command(TARGET output COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/sqlite3mc.wasm ${PROJECT_SOURCE_DIR}/../out/sqlite3mc.wasm)
++add_custom_command(TARGET output COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/sqlite3_opt.wasm "${_final_out_dir}/sqlite3.wasm")
++add_custom_command(TARGET output COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/sqlite3_debug.clang.wasm "${_final_out_dir}/sqlite3.debug.wasm")
++add_custom_command(TARGET output COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/sqlite3mc.wasm "${_final_out_dir}/sqlite3mc.wasm")
++add_custom_command(TARGET output POST_BUILD COMMAND ${CMAKE_COMMAND} -E echo "Final wasm outputs were copied to: ${_final_out_dir}")
+ add_dependencies(output sqlite3_debug sqlite3_opt sqlite3mc)
+ add_dependencies(output sqlite3_debug)
+Index: sqlite3/lib/src/wasm/js_interop/wasm.dart
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqlite3/lib/src/wasm/js_interop/wasm.dart b/sqlite3/lib/src/wasm/js_interop/wasm.dart
+--- a/sqlite3/lib/src/wasm/js_interop/wasm.dart	(revision c3dfeb872b0f019a6ff90e3b821f068562fdb18d)
++++ b/sqlite3/lib/src/wasm/js_interop/wasm.dart	(date 1775208461542)
+@@ -10,20 +10,37 @@
+ extension type WasmInstance._(JSObject _) implements JSObject {
+   external JSObject get exports;
+ 
++  // static Future<WasmInstance> load(
++  //   web.Response response,
++  //   JSObject imports,
++  // ) async {
++  //   final native = await _instantiateStreaming(response, imports).toDart;
++  //
++  //   // If the module has an `_initialize` export, it needs to be called to run
++  //   // C constructors and set up memory.
++  //   final exports = native.instance.exports;
++  //   if (exports.has('_initialize')) {
++  //     (exports['_initialize'] as JSFunction).callAsFunction();
++  //   }
++  //
++  //   return WasmInstance._(native.instance);
++  // }
++
++  /// Like [load], but runs [beforeInitialize] after instantiation and before
++  /// `_initialize` (e.g. to bind WASI linear memory).
+   static Future<WasmInstance> load(
+     web.Response response,
+     JSObject imports,
++    void Function(WasmInstance instance) beforeInitialize,
+   ) async {
+     final native = await _instantiateStreaming(response, imports).toDart;
+-
+-    // If the module has an `_initialize` export, it needs to be called to run
+-    // C constructors and set up memory.
+-    final exports = native.instance.exports;
++    final instance = WasmInstance._(native.instance);
++    beforeInitialize(instance);
++    final exports = instance.exports;
+     if (exports.has('_initialize')) {
+       (exports['_initialize'] as JSFunction).callAsFunction();
+     }
+-
+-    return WasmInstance._(native.instance);
++    return instance;
+   }
+ }
+ 
+Index: sqlite3/lib/src/wasm/wasm_interop.dart
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqlite3/lib/src/wasm/wasm_interop.dart b/sqlite3/lib/src/wasm/wasm_interop.dart
+--- a/sqlite3/lib/src/wasm/wasm_interop.dart	(revision c3dfeb872b0f019a6ff90e3b821f068562fdb18d)
++++ b/sqlite3/lib/src/wasm/wasm_interop.dart	(date 1775208461565)
+@@ -8,6 +8,7 @@
+ import '../implementation/bindings.dart';
+ import 'injected_values.dart';
+ import 'js_interop.dart';
++import 'wasi_snapshot_preview1_callbacks.dart';
+ 
+ import 'package:web/web.dart' as web;
+ 
+@@ -46,11 +47,15 @@
+ 
+   static Future<WasmBindings> instantiateAsync(web.Response response) async {
+     final injectedDartFunctions = DartBridgeCallbacks();
++    final wasiCallbacks = WasiSnapshotPreview1Callbacks();
+ 
+     final imported = JSObject();
+     imported['dart'] = createJSInteropWrapper(injectedDartFunctions);
++    imported['wasi_snapshot_preview1'] = createJSInteropWrapper(wasiCallbacks);
+ 
+-    final instance = await WasmInstance.load(response, imported);
++    final instance = await WasmInstance.load(response, imported, (inst) {
++      wasiCallbacks.bindLinearMemory(inst.exports['memory'] as Memory);
++    });
+     return WasmBindings._(instance, injectedDartFunctions);
+   }
+ 
+Index: sqlite3/example/web/index.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqlite3/example/web/index.html b/sqlite3/example/web/index.html
+--- a/sqlite3/example/web/index.html	(revision c3dfeb872b0f019a6ff90e3b821f068562fdb18d)
++++ b/sqlite3/example/web/index.html	(date 1775208461521)
+@@ -23,6 +23,7 @@
+       that is not available with <code>build_runner serve</code>, but it will work when launching this website with <code>dart run tool/example_server.dart</code> <button id="start-opfs">Start demo!</button>
+   </li>
+   <li>With an in-memory test (using <a href="https://utelle.github.io/SQLite3MultipleCiphers/">SQLite3 Multiple Ciphers</a> for encryption): <button id="start-encryption">Start encryption!</button></li>
++  <li>LibSimple test (same as Android <code>LibSimpleTest.kt</code>): <button id="start-libsimple-test">Run LibSimple test</button></li>
+ </ul>
+ 
+ After launching the example, you can check the console and the code in <code>main.dart</code> (or <code>worker.dart</code> for the OPFS example)
+Index: sqlite3_wasm_build/src/os_web.c
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqlite3_wasm_build/src/os_web.c b/sqlite3_wasm_build/src/os_web.c
+--- a/sqlite3_wasm_build/src/os_web.c	(revision c3dfeb872b0f019a6ff90e3b821f068562fdb18d)
++++ b/sqlite3_wasm_build/src/os_web.c	(date 1775208469859)
+@@ -6,7 +6,12 @@
+ #include "bridge.h"
+ #include "sqlite3.h"
+ 
+-int sqlite3_os_init(void) { return SQLITE_OK; }
++int sqlite3_simple_init(sqlite3* db, char** pzErrMsg,
++                        const sqlite3_api_routines* pApi);
++
++int sqlite3_os_init(void) {
++  return sqlite3_auto_extension((void*)sqlite3_simple_init);
++}
+ 
+ int sqlite3_os_end(void) { return SQLITE_OK; }
+ 
