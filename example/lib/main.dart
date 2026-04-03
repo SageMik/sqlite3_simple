@@ -23,9 +23,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState<T> extends State<MyApp> {
-  IDbManager? dbManager;
+  DbManager? dbManager;
 
-  IMainTableDao get dao => dbManager!.dao;
+  MainTableDao get dao => dbManager!.dao;
 
   List<MainTableRowUiModel>? results;
 
@@ -41,7 +41,7 @@ class _MyAppState<T> extends State<MyApp> {
     results = null;
     dbManager?.dispose();
     setState(() {});
-    dbManager = dbManagerImpl.create();
+    dbManager = DbManager.create(dbManagerKind);
     await dbManager!.init();
     await dao.insertRandomData(30);
     results = await _toMainTableRowUiModel(await dao.selectAll());
@@ -170,15 +170,15 @@ class _MyAppState<T> extends State<MyApp> {
                     }),
                   ),
                   const SizedBox(width: P.small),
-                  Dropdown<DbManagerImpl>(
+                  Dropdown<DbManagerKind>(
                     label: "数据库实现：",
-                    initValue: dbManagerImpl,
-                    map: impl2uiString,
+                    initValue: dbManagerKind,
+                    map: type2uiString,
                     onChanged: (value) => setState(() {
-                      dbManagerImpl = value!;
+                      dbManagerKind = value!;
                       if(kDebugMode) {
                         print("\n");
-                        print("切换数据库至：${impl2uiString[value]}");
+                        print("切换数据库至：${type2uiString[value]}");
                       }
                       initDbManger().then((_) => onSearchValueChanged());
                     }),
@@ -210,12 +210,10 @@ class _MyAppState<T> extends State<MyApp> {
   };
   Tokenizer tokenizer = tokenizer2uiString.keys.first;
 
-  static const impl2uiString = {
-    DbManagerImpl.sqlite3: "sqlite3",
-    DbManagerImpl.sqfliteCommonFfi: "sqflite_common_ffi",
-    DbManagerImpl.drift: "drift",
+  static final type2uiString = {
+    for (final t in DbManagerKind.values) t: t.name,
   };
-  DbManagerImpl dbManagerImpl = impl2uiString.keys.first;
+  DbManagerKind dbManagerKind = type2uiString.keys.first;
 
   /// 搜索结果
   Widget buildListView() {
@@ -292,7 +290,7 @@ class _MyAppState<T> extends State<MyApp> {
       contentPadding: const EdgeInsets.all(0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
       content: Container(
-        width: MediaQuery.of(context).size.width,
+        width: 420,
         padding: const EdgeInsets.all(P.middle),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

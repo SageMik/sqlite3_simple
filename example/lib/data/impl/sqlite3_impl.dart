@@ -9,7 +9,7 @@ import '../db_manager.dart';
 import '../main_table_dao.dart';
 import '../main_table_row.dart';
 
-class Sqlite3DbManager extends IDbManager<Sqlite3Dao> {
+class Sqlite3DbManager extends DbManager<Sqlite3Dao> {
   @override
   late final Sqlite3Dao dao;
 
@@ -37,7 +37,7 @@ class Sqlite3DbManager extends IDbManager<Sqlite3Dao> {
   Future<void> dispose() async => dao.db.close();
 }
 
-class Sqlite3Dao extends IMainTableDao<Database> {
+class Sqlite3Dao extends MainTableDao<Database> {
   Sqlite3Dao(super.db);
 
   // final fts5Tokenizer = "simple 0";  // 关闭拼音搜索

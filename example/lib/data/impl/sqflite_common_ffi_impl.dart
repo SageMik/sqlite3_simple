@@ -10,7 +10,7 @@ import '../db_manager.dart';
 import '../main_table_dao.dart';
 import '../main_table_row.dart';
 
-class SqfliteCommonFfiDbManager extends IDbManager<SqfliteCommonFfiDao> {
+class SqfliteCommonFfiDbManager extends DbManager<SqfliteCommonFfiDao> {
   @override
   late final SqfliteCommonFfiDao dao;
 
@@ -41,7 +41,7 @@ class SqfliteCommonFfiDbManager extends IDbManager<SqfliteCommonFfiDao> {
   Future<void> dispose() => dao.db.close();
 }
 
-class SqfliteCommonFfiDao extends IMainTableDao<Database> {
+class SqfliteCommonFfiDao extends MainTableDao<Database> {
   SqfliteCommonFfiDao(super.db);
 
   // final fts5Tokenizer = "simple 0";  // 关闭拼音搜索

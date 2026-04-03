@@ -13,7 +13,7 @@ import '../../db_manager.dart';
 import 'custom_expression.dart';
 import 'database.dart';
 
-class DriftDbManager extends IDbManager<DriftDao> {
+class DriftDbManager extends DbManager<DriftDao> {
   @override
   late final DriftDao dao;
 
@@ -41,7 +41,7 @@ class DriftDbManager extends IDbManager<DriftDao> {
   Future<void> dispose() => dao.db.close();
 }
 
-class DriftDao extends IMainTableDao<AppDatabase> {
+class DriftDao extends MainTableDao<AppDatabase> {
   DriftDao(super.db);
 
   $MainTable get mainTable => db.main;
