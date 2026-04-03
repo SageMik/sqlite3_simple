@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 
 import '../utils/random_words.dart';
-import '../utils/zero_width.dart';
 import 'main_table_row.dart';
 
 enum Tokenizer {
@@ -11,10 +10,10 @@ enum Tokenizer {
   simple;
 }
 
-abstract class IMainTableDao<T> {
+abstract class MainTableDao<T> {
   final T db;
 
-  IMainTableDao(this.db);
+  MainTableDao(this.db);
 
   /// 初始化 SQLite FTS5 虚表，官方说明：https://sqlite.org/fts5.html
   Future<void> initFts5();
