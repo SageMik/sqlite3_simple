@@ -1,8 +1,5 @@
-import 'package:sqlite3_simple_example/data/main_table_dao.dart';
-
-import 'impl/drift/drift_impl.dart';
-import 'impl/sqflite_common_ffi_impl.dart';
-import 'impl/sqlite3_impl.dart';
+import 'impl/kind.dart' if(dart.library.html) 'impl_web/kind.dart';
+import 'main_table_dao.dart';
 
 abstract class DbManager<TDao extends MainTableDao> {
   abstract final TDao dao;
@@ -11,20 +8,9 @@ abstract class DbManager<TDao extends MainTableDao> {
   Future<void> init();
 
   /// 关闭数据库
-  Future<void> dispose();
+  Future<void> close();
 
   static DbManager create(DbManagerKind kind) {
-    return switch (kind) {
-      DbManagerKind.sqlite3 => Sqlite3DbManager(),
-      DbManagerKind.sqflite_common_ffi => SqfliteCommonFfiDbManager(),
-      DbManagerKind.drift => DriftDbManager(),
-    };
+    return createDbManager(kind);
   }
-}
-
-enum DbManagerKind {
-  sqlite3,
-  // ignore: constant_identifier_names
-  sqflite_common_ffi,
-  drift,
 }

@@ -5,14 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-/// https://github.com/wangfenjin/simple/blob/ffc78ec4d5ac962d889cb68ea3691e83a699fe2c/src/simple_tokenizer.cc#L65
-const _jiebaDictFileSet = {
-  "jieba.dict.utf8",
-  "hmm_model.utf8",
-  "user.dict.utf8",
-  "idf.utf8",
-  "stop_words.utf8",
-};
+import 'jieba_dict.dart';
 
 typedef OpenSimple = DynamicLibrary? Function();
 
@@ -38,38 +31,29 @@ extension Sqlite3SimpleEx on Sqlite3 {
     }
 
     // sqlite3 库 如何加载自定义扩展：
-    // https://github.com/simolus3/sqlite3.dart/blob/855bdc1ff1b6e03b60cded99dd45a107b3588009/sqlite3/test/ffi/sqlite3_test.dart#L37-L104
+    // https://github.com/simolus3/sqlite3.dart/blob/32eac80e47f4ca2822663730b6eeaa3c9b801833/sqlite3/test/ffi/sqlite3_test.dart#L37-L104
     ensureExtensionLoaded(SqliteExtension.inLibrary(
         overrideOpen?.call() ?? defaultOpen(), "sqlite3_simple_init"));
   }
 
   /// 将结巴分词所需字典文件保存到指定目录 [dir] ，
   /// 当字典文件存在时，通过 [overwriteWhenExist] 控制是否覆盖，默认不覆盖。
-  /// 使用结巴分词功能务必调用该函数，并执行本方法返回的SQL语句
+  /// 使用结巴分词功能务必调用该函数，并执行本方法返回的SQL语句。
   Future<String> saveJiebaDict(
     String dir, {
     bool overwriteWhenExist = false,
   }) async {
     // CppJieba通过文件路径读取字典，需要将字典文件保存到本地以供读取
     // https://github.com/yanyiwu/cppjieba/blob/391121d5db0f31dd5ce9795d4d34812f20eeb25c/include/cppjieba/DictTrie.hpp#L211 )
-    final assetManifest = await AssetManifest.loadFromAssetBundle(rootBundle);
-    final pathList = assetManifest.listAssets()
-        .where((e) =>
-            e.startsWith("packages/sqlite3_simple") &&
-            e.contains("cpp_jieba_dict") &&
-            _jiebaDictFileSet.contains(basename(e)))
-        .toList();
-
+    final jiebaDictPath = await JiebaDictType.resolveAssetPaths();
     await Directory(dir).create(recursive: true);
-    await Future.wait(pathList.map((p) async {
-      final fileName = basename(p);
-      final file = File(join(dir, fileName));
+    await Future.wait(jiebaDictPath.entries.map((e) async {
+      final file = File(join(dir, e.key.filename));
       if (overwriteWhenExist || !file.existsSync()) {
-        final dictData = await rootBundle.load(p);
+        final dictData = await rootBundle.load(e.value);
         return file.writeAsBytes(dictData.buffer.asUint8List());
       }
     }));
-
     return "SELECT jieba_dict('$dir');";
   }
 }

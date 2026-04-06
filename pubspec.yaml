@@ -11,15 +11,19 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_web_plugins:
+      sdk: flutter
   path: ^1.9.0
   plugin_platform_interface: ^2.0.2
-  sqlite3: ^3.0.0
-  archive: ^3.4.10
+  sqlite3: ^3.3.0
+  wasd: ^0.2.0
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  archive: ^3.4.10
 
 flutter:
   plugin:
@@ -37,6 +41,9 @@ flutter:
         sharedDarwinSource: true
       linux:
         ffiPlugin: true
+      web:
+        pluginClass: Sqlite3SimpleWeb
+        fileName: web.dart
 
   assets:
     - assets/cpp_jieba_dict/

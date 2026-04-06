@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'data/db_manager.dart';
+import 'data/impl/kind.dart' if(dart.library.html) 'data/impl_web/kind.dart';
 import 'data/main_table_dao.dart';
 import 'data/main_table_row.dart';
 import 'widget/dropdown.dart';
@@ -39,7 +40,7 @@ class _MyAppState<T> extends State<MyApp> {
   /// 初始化数据库
   Future<void> initDbManger() async {
     results = null;
-    dbManager?.dispose();
+    dbManager?.close();
     setState(() {});
     dbManager = DbManager.create(dbManagerKind);
     await dbManager!.init();

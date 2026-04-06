@@ -5,10 +5,10 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:sqlite3_simple/sqlite3_simple.dart';
-import 'package:sqlite3_simple_example/utils/zero_width.dart';
 
-import '../../../data/main_table_dao.dart';
-import '../../../data/main_table_row.dart';
+import '../../../utils/zero_width.dart';
+import '../../main_table_dao.dart';
+import '../../main_table_row.dart';
 import '../../db_manager.dart';
 import 'custom_expression.dart';
 import 'database.dart';
@@ -38,7 +38,7 @@ class DriftDbManager extends DbManager<DriftDao> {
   }
 
   @override
-  Future<void> dispose() => dao.db.close();
+  Future<void> close() => dao.db.close();
 }
 
 class DriftDao extends MainTableDao<AppDatabase> {
