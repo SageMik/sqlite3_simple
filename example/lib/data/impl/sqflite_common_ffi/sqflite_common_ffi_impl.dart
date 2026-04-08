@@ -10,7 +10,7 @@ import '../../db_manager.dart';
 import '../../main_table_dao.dart';
 import '../../main_table_row.dart';
 
-class SqfliteCommonFfiDbManager extends DbManager<SqfliteCommonFfiDao> {
+class SqfliteCommonFfiDbManager implements DbManager<SqfliteCommonFfiDao> {
   @override
   late final SqfliteCommonFfiDao dao;
 
@@ -41,7 +41,7 @@ class SqfliteCommonFfiDbManager extends DbManager<SqfliteCommonFfiDao> {
   Future<void> close() => dao.db.close();
 }
 
-class SqfliteCommonFfiDao extends MainTableDao<Database> {
+class SqfliteCommonFfiDao extends MainTableDaoBase<Database> {
   SqfliteCommonFfiDao(super.db);
 
   // final fts5Tokenizer = "simple 0";  // 关闭拼音搜索
@@ -105,7 +105,7 @@ class SqfliteCommonFfiDao extends MainTableDao<Database> {
   @override
   Future<void> insertRandomData(int length) async {
     for (int i = 0; i < length; i++) {
-      final newRow = buildRow(i);
+      final newRow = createRandomRow(i);
       await db.insert(mainTable, {
         id: null,
         title: newRow.title,
@@ -157,7 +157,7 @@ class SqfliteCommonFfiDao extends MainTableDao<Database> {
     final mainTableRowList = await selectAll();
     for (int i = 0; i < mainTableRowList.length; i++) {
       final oldRow = mainTableRowList[i];
-      final newRow = buildRow(i);
+      final newRow = createRandomRow(i);
       db.update(
         mainTable,
         {

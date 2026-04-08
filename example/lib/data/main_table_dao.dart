@@ -1,19 +1,12 @@
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
-
 import '../utils/random_words.dart';
 import 'main_table_row.dart';
 
-enum Tokenizer {
-  jieba,
-  simple;
-}
+enum Tokenizer { jieba, simple }
 
-abstract class MainTableDao<T> {
-  final T db;
-
-  MainTableDao(this.db);
+abstract interface class MainTableDao<T> {
+  abstract final T db;
 
   /// 初始化 SQLite FTS5 虚表，官方说明：https://sqlite.org/fts5.html
   Future<void> initFts5();
@@ -32,16 +25,25 @@ abstract class MainTableDao<T> {
 
   /// 修改所有数据，测试触发器
   Future<void> updateAll();
+}
 
-  /// 构造随机中文词组数据
-  @protected
-  MainTableRow buildRow(int index) {
-    return MainTableRow(
-      id: 0,
-      title: randomWords(minLength: 3, maxLength: 4),
-      content: randomWords(minLength: 6, maxLength: 16),
-      insertDate: DateTime.utc(2000, 1, 1)
-          .add(Duration(days: index, minutes: Random().nextInt(61))),
-    );
-  }
+abstract class MainTableDaoBase<T> implements MainTableDao<T> {
+  @override
+  final T db;
+
+  MainTableDaoBase(this.db);
+}
+
+/// 构造随机中文词组数据
+MainTableRow createRandomRow(int index) {
+  return MainTableRow(
+    id: 0,
+    title: randomWords(minLength: 3, maxLength: 4),
+    content: randomWords(minLength: 6, maxLength: 16),
+    insertDate: DateTime.utc(
+      2000,
+      1,
+      1,
+    ).add(Duration(days: index, minutes: Random().nextInt(61))),
+  );
 }

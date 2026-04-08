@@ -13,7 +13,7 @@ import '../../db_manager.dart';
 import 'custom_expression.dart';
 import 'database.dart';
 
-class DriftDbManager extends DbManager<DriftDao> {
+class DriftDbManager implements DbManager<DriftDao> {
   @override
   late final DriftDao dao;
 
@@ -41,7 +41,7 @@ class DriftDbManager extends DbManager<DriftDao> {
   Future<void> close() => dao.db.close();
 }
 
-class DriftDao extends MainTableDao<AppDatabase> {
+class DriftDao extends MainTableDaoBase<AppDatabase> {
   DriftDao(super.db);
 
   $MainTable get mainTable => db.main;
@@ -57,7 +57,7 @@ class DriftDao extends MainTableDao<AppDatabase> {
   Future<void> insertRandomData(int length) {
     return db.batch((b) {
       b.insertAll(mainTable,
-          Iterable.generate(length, (i) => buildRow(i).toCompanion()));
+          Iterable.generate(length, (i) => createRandomRow(i).toCompanion()));
     });
   }
 
@@ -131,7 +131,7 @@ class DriftDao extends MainTableDao<AppDatabase> {
       for (int i = 0; i < mainTableRowList.length; i++) {
         b.update(
           mainTable,
-          buildRow(i).toCompanion(),
+          createRandomRow(i).toCompanion(),
           where: (t) => t.id.equals(mainTableRowList[i].id),
         );
       }

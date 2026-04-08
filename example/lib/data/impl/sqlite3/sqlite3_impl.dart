@@ -7,7 +7,7 @@ import 'package:sqlite3_simple/sqlite3_simple.dart';
 import '../../db_manager.dart';
 import 'sqlite3_dao.dart';
 
-class Sqlite3DbManager extends DbManager<Sqlite3Dao> {
+class Sqlite3DbManager implements DbManager<Sqlite3Dao> {
   @override
   late final Sqlite3Dao dao;
 

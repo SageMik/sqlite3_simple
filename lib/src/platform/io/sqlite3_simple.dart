@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-import 'jieba_dict.dart';
+import '../../features/jieba/jieba_dict_assets.dart';
 
 typedef OpenSimple = DynamicLibrary? Function();
 
@@ -45,7 +45,7 @@ extension Sqlite3SimpleEx on Sqlite3 {
   }) async {
     // CppJieba通过文件路径读取字典，需要将字典文件保存到本地以供读取
     // https://github.com/yanyiwu/cppjieba/blob/391121d5db0f31dd5ce9795d4d34812f20eeb25c/include/cppjieba/DictTrie.hpp#L211 )
-    final jiebaDictPath = await JiebaDictType.resolveAssetPaths();
+    final jiebaDictPath = await JiebaDictAssets.loadPaths();
     await Directory(dir).create(recursive: true);
     await Future.wait(jiebaDictPath.entries.map((e) async {
       final file = File(join(dir, e.key.filename));

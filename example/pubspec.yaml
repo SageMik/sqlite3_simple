@@ -20,6 +20,8 @@ dependencies:
   extended_text: ^15.0.2
   path_provider: ^2.1.5
   web: ^1.1.1
+  meta: ^1.17.0
+  squadron: ^7.4.3
 
   sqlite3: ^3.3.0
 
@@ -35,8 +37,9 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^3.0.0
 
-  drift_dev: ^2.32.0
   build_runner: ^2.9.0
+  drift_dev: ^2.32.0
+  squadron_builder: ^9.1.0
 
 flutter:
   uses-material-design: true

@@ -6,7 +6,7 @@ import '../../../utils/zero_width.dart';
 import '../../main_table_dao.dart';
 import '../../main_table_row.dart';
 
-class Sqlite3Dao extends MainTableDao<CommonDatabase> {
+class Sqlite3Dao extends MainTableDaoBase<CommonDatabase> {
   Sqlite3Dao(super.db);
 
   // final fts5Tokenizer = "simple 0";  // 关闭拼音搜索
@@ -71,7 +71,7 @@ class Sqlite3Dao extends MainTableDao<CommonDatabase> {
   Future<void> insertRandomData(int length) async {
     final insertStmt = db.prepare("INSERT INTO $mainTable VALUES(?, ?, ?, ?);");
     for (int i = 0; i < length; i++) {
-      final newRow = buildRow(i);
+      final newRow = createRandomRow(i);
       insertStmt.execute([
         null,
         newRow.title,
@@ -128,7 +128,7 @@ class Sqlite3Dao extends MainTableDao<CommonDatabase> {
         "UPDATE $mainTable SET $title = ?, $content = ?, $insertDate = ? WHERE $id = ?;");
     for (int i = 0; i < mainTableRowList.length; i++) {
       final oldRow = mainTableRowList[i];
-      final newRow = buildRow(i);
+      final newRow = createRandomRow(i);
       updateStmt.execute(
           [newRow.title, newRow.content, newRow.insertDate.toDb(), oldRow.id]);
     }

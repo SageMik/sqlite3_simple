@@ -89,6 +89,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "8.12.4"
+  cancelation_token:
+    dependency: transitive
+    description:
+      name: cancelation_token
+      sha256: "7f1cd2148f6d14dc307ddc22cece6ab52f60e3b7212ef0b8cb9fd294d7b06931"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.1.0"
   characters:
     dependency: transitive
     description:
@@ -396,6 +404,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "3.0.0"
+  logger:
+    dependency: transitive
+    description:
+      name: logger
+      sha256: "25aee487596a6257655a1e091ec2ae66bc30e7af663592cc3a27e6591e05035c"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.7.0"
   logging:
     dependency: transitive
     description:
@@ -421,7 +437,7 @@ packages:
     source: hosted
     version: "0.13.0"
   meta:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: meta
       sha256: "23f08335362185a5ea2ad3a4e597f1375e78bce8a040df5c600c8d3552ef2394"
@@ -664,6 +680,22 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.44.2"
+  squadron:
+    dependency: "direct main"
+    description:
+      name: squadron
+      sha256: "197777c09d9d6f7ee2c24554c37632a2c3035c3b5160f6c096679b121073d674"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "7.4.3"
+  squadron_builder:
+    dependency: "direct dev"
+    description:
+      name: squadron_builder
+      sha256: "69114cb2302f7db13fdf0519f22a08e71c3577a949ba8c51d5e1ea101bfc91b3"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "9.1.0"
   stack_trace:
     dependency: transitive
     description:
@@ -736,6 +768,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.4.0"
+  using:
+    dependency: transitive
+    description:
+      name: using
+      sha256: "60cc4569f782c5d73637a16aac933aea59fa5d31ed019fd50128f209e25730d3"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.5"
   vector_math:
     dependency: transitive
     description:
