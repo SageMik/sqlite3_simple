@@ -22,10 +22,10 @@ final class DefaultSimpleWasmModuleLoader extends WasmModuleLoader {
   /// 传入「路径 → 字节」的映射 [files] 以供 Wasm 模块进行文件读写。
   /// 例如，如果自定义了 Simple 的拼音文件 `select pinyin_dict('/path/to/pinyin.txt')` ，则需要传入 `{ "/path/to/pinyin.txt": 拼音文件字节内容 }` 供扩展使用。
   ///
-  /// 如需使用结巴分词，可以通过 [JiebaDictBundle.toPathBytesMap] 传入，例如：
+  /// 如需使用结巴分词，可以通过 [JiebaDictBundle.resolve] 传入，例如：
   /// ```dart
   /// DefaultSimpleWasmModuleLoader.create(
-  ///   files: {...其他需要的文件, ...await const JiebaDictBundle().toPathBytesMap()},
+  ///   files: {...其他需要的文件, ...await const JiebaDictBundle().fetchPathBytesMap()},
   /// )
   /// ```
   static Future<DefaultSimpleWasmModuleLoader> create({

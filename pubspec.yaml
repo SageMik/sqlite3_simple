@@ -43,7 +43,7 @@ flutter:
         ffiPlugin: true
       web:
         pluginClass: Sqlite3SimpleWeb
-        fileName: src/platform/web/web_plugins.dart
+        fileName: src/web/web_plugins.dart
 
   assets:
     - assets/cpp_jieba_dict/

@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-import '../../features/jieba/jieba_dict_assets.dart';
+import 'jieba_dict_assets.dart';
 
 typedef OpenSimple = DynamicLibrary? Function();
 

@@ -24,22 +24,31 @@ extension on Sqlite3Wasm {
     _$closeDatabaseId: ($req) => closeDatabase(),
     _$initDatabaseId: ($req) {
       final $dsr = _$Deser(contextAware: false);
-      return initDatabase($dsr.$2($req.args[0]));
+      return initDatabase($dsr.$1($req.args[0]));
     },
     _$initFts5Id: ($req) => initFts5(),
     _$insertRandomDataId: ($req) {
       final $dsr = _$Deser(contextAware: false);
-      return insertRandomData($dsr.$3($req.args[0]));
+      return insertRandomData($dsr.$2($req.args[0]));
     },
     _$searchId: ($req) async {
       final List<MainTableRow> $res;
       try {
         final $dsr = _$Deser(contextAware: false);
-        $res = await search($dsr.$0($req.args[0]), $dsr.$4($req.args[1]));
+        $res = await search($dsr.$0($req.args[0]), $dsr.$3($req.args[1]));
       } finally {}
-      return $res;
+      try {
+        final $sr = _$Ser(contextAware: false);
+        return $sr.$1($res);
+      } finally {}
     },
-    _$selectAllId: ($req) => selectAll(),
+    _$selectAllId: ($req) async {
+      final List<MainTableRow> $res = await selectAll();
+      try {
+        final $sr = _$Ser(contextAware: false);
+        return $sr.$1($res);
+      } finally {}
+    },
     _$selectCountId: ($req) => selectCount(),
     _$updateAllId: ($req) => updateAll(),
   });
@@ -52,8 +61,8 @@ base mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
   Future<void> closeDatabase() => send(_$closeDatabaseId);
 
   @override
-  Future<void> initDatabase(Map<String, Uint8List> files) =>
-      send(_$initDatabaseId, args: [files]);
+  Future<void> initDatabase(Map<String, String> jiebaDictPath2Url) =>
+      send(_$initDatabaseId, args: [jiebaDictPath2Url]);
 
   @override
   Future<void> initFts5() => send(_$initFts5Id);
@@ -67,11 +76,11 @@ base mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
     final dynamic $res;
     try {
       final $sr = _$Ser(contextAware: false);
-      $res = await send(_$searchId, args: [value, $sr.$0(tokenizer)]);
+      $res = await send(_$searchId, args: [value, $sr.$2(tokenizer)]);
     } finally {}
     try {
-      final $dsr = _$Deser(contextAware: false);
-      return $dsr.$6($res);
+      final $dsr = _$Deser(contextAware: true);
+      return $dsr.$5($res);
     } finally {}
   }
 
@@ -79,8 +88,8 @@ base mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
   Future<List<MainTableRow>> selectAll() async {
     final dynamic $res = await send(_$selectAllId);
     try {
-      final $dsr = _$Deser(contextAware: false);
-      return $dsr.$6($res);
+      final $dsr = _$Deser(contextAware: true);
+      return $dsr.$5($res);
     } finally {}
   }
 
@@ -89,7 +98,7 @@ base mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
     final dynamic $res = await send(_$selectCountId);
     try {
       final $dsr = _$Deser(contextAware: false);
-      return $dsr.$3($res);
+      return $dsr.$2($res);
     } finally {}
   }
 
@@ -101,15 +110,8 @@ base mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
 /// invoking the remote service.
 base mixin _$Sqlite3Wasm$Facade implements Sqlite3Wasm {
   @override
-  MainTableRow buildRow(int index) => throw UnimplementedError();
-
-  @override
   // ignore: unused_element
-  Sqlite3Dao get dao => throw UnimplementedError();
-
-  @override
-  // ignore: unused_element
-  CommonDatabase get db => throw UnimplementedError();
+  Sqlite3Dao get _dao => throw UnimplementedError();
 
   @override
   // ignore: unused_element
@@ -121,7 +123,7 @@ base mixin _$Sqlite3Wasm$Facade implements Sqlite3Wasm {
 
   @override
   // ignore: unused_element
-  set dao(void $value) => throw UnimplementedError();
+  set _dao(void $value) => throw UnimplementedError();
 
   @override
   // ignore: unused_element
@@ -217,8 +219,8 @@ base class Sqlite3WasmWorkerPool extends WorkerPool<Sqlite3WasmWorker>
   Future<void> closeDatabase() => execute((w) => w.closeDatabase());
 
   @override
-  Future<void> initDatabase(Map<String, Uint8List> files) =>
-      execute((w) => w.initDatabase(files));
+  Future<void> initDatabase(Map<String, String> jiebaDictPath2Url) =>
+      execute((w) => w.initDatabase(jiebaDictPath2Url));
 
   @override
   Future<void> initFts5() => execute((w) => w.initFts5());
@@ -244,15 +246,17 @@ base class Sqlite3WasmWorkerPool extends WorkerPool<Sqlite3WasmWorker>
 final class _$Deser extends MarshalingContext {
   _$Deser({super.contextAware});
   late final $0 = value<String>();
-  late final $1 = value<Uint8List>();
-  late final $2 = map<String, Uint8List>(kcast: $0, vcast: $1);
-  late final $3 = value<int>();
-  late final $4 = (($) => Tokenizer.values[$3($)]);
-  late final $5 = value<MainTableRow>();
-  late final $6 = list<MainTableRow>($5);
+  late final $1 = map<String, String>(kcast: $0, vcast: $0);
+  late final $2 = value<int>();
+  late final $3 = (($) => Tokenizer.values[$2($)]);
+  late final $4 = (($) => MainTableRowSquadronMarshaling.unmarshal($, this));
+  late final $5 = list<MainTableRow>($4);
 }
 
 final class _$Ser extends MarshalingContext {
   _$Ser({super.contextAware});
-  late final $0 = (($) => ($ as Tokenizer).index);
+  late final $0 = (($) =>
+      MainTableRowSquadronMarshaling($ as MainTableRow).marshal());
+  late final $1 = list($0);
+  late final $2 = (($) => ($ as Tokenizer).index);
 }

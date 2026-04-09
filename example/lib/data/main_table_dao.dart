@@ -5,8 +5,7 @@ import 'main_table_row.dart';
 
 enum Tokenizer { jieba, simple }
 
-abstract interface class MainTableDao<T> {
-  abstract final T db;
+abstract interface class MainTableDao {
 
   /// 初始化 SQLite FTS5 虚表，官方说明：https://sqlite.org/fts5.html
   Future<void> initFts5();
@@ -27,8 +26,7 @@ abstract interface class MainTableDao<T> {
   Future<void> updateAll();
 }
 
-abstract class MainTableDaoBase<T> implements MainTableDao<T> {
-  @override
+abstract class MainTableDaoBase<T> implements MainTableDao {
   final T db;
 
   MainTableDaoBase(this.db);
