@@ -25,7 +25,7 @@ final class DefaultSimpleBridgeCallbacks extends SimpleBridgeCallbacks {
     );
   }
 
-  /// 需要更新文件时调用此函数。例如在运行时调用 `select pinyin_dict('/path/to/new_pinyin.txt')` 更新了 Simple 的拼音文件，需要向 [files] 传入 `{ "/path/to/new_pinyin.txt": 拼音文件字节内容 }` 。
+  /// 需要更新文件时调用此函数以进行全量更新。例如在运行时调用 `select pinyin_dict('/path/to/new_pinyin.txt')` 更新了 Simple 的拼音文件，需要向 [files] 传入 `{ "/path/to/new_pinyin.txt": 拼音文件字节内容 }` 。
   void updateFiles(Map<String, Uint8List> files) {
     _wasi = wasd.WASI(preopens: const {'.': '.'}, files: files);
     bindLinearMemory(_memory);

@@ -7095,6 +7095,11 @@
     WasmBindings_closure2: function WasmBindings_closure2(t0) {
       this.$this = t0;
     },
+    JiebaDictType: function JiebaDictType(t0, t1, t2) {
+      this.filename = t0;
+      this.index = t1;
+      this._core$_name = t2;
+    },
     SimpleBridgeCallbacks: function SimpleBridgeCallbacks() {
     },
     DefaultSimpleBridgeCallbacks: function DefaultSimpleBridgeCallbacks(t0) {
@@ -7219,10 +7224,13 @@
     },
     _$Deser: function _$Deser(t0) {
       var _ = this;
-      _.___$Deser_$3_FI = _.___$Deser_$2_FI = _.___$Deser_$1_FI = _.___$Deser_$0_FI = $;
+      _.___$Deser_$4_FI = _.___$Deser_$3_FI = _.___$Deser_$2_FI = _.___$Deser_$1_FI = _.___$Deser_$0_FI = $;
       _._converter = t0;
     },
-    _$Deser_$3_closure: function _$Deser_$3_closure(t0) {
+    _$Deser_$1_closure: function _$Deser_$1_closure(t0) {
+      this.$this = t0;
+    },
+    _$Deser_$4_closure: function _$Deser_$4_closure(t0) {
       this.$this = t0;
     },
     _$Ser: function _$Ser(t0) {
@@ -7841,9 +7849,7 @@
       var t2, t3, t4, t5, _i, t6, t7, t8, t9, t10, entry,
         t1 = new A.Stopwatch();
       $.$get$Stopwatch__frequency();
-      t2 = $.Primitives_timerTicks.call$0();
-      t1._core$_start = t2;
-      t1._stop = null;
+      t1.start$0();
       t2 = type$.int;
       t3 = type$.String;
       t4 = type$.JSArray_Uint8List;
@@ -10737,7 +10743,7 @@
     call$2(errorCode, result) {
       this.$protected(A._asInt(errorCode), result);
     },
-    $signature: 59
+    $signature: 60
   };
   A._SyncStarIterator.prototype = {
     get$current() {
@@ -10868,7 +10874,7 @@
         _this._future._completeErrorObject$1(new A.AsyncError(t2, t1));
       }
     },
-    $signature: 70
+    $signature: 73
   };
   A.Future_wait_closure.prototype = {
     call$1(value) {
@@ -11185,7 +11191,7 @@
       type$.StackTrace._as(s);
       this.joinedResult._completeErrorObject$1(new A.AsyncError(e, s));
     },
-    $signature: 73
+    $signature: 74
   };
   A._Future__propagateToListeners_handleValueCallback.prototype = {
     call$0() {
@@ -13604,14 +13610,30 @@
   };
   A.Stopwatch.prototype = {
     get$elapsedMicroseconds() {
-      var ticks,
-        t1 = this._stop;
-      if (t1 == null)
-        t1 = $.Primitives_timerTicks.call$0();
-      ticks = t1 - this._core$_start;
+      var ticks = this.get$elapsedTicks();
       if ($.$get$Stopwatch__frequency() === 1000000)
         return ticks;
       return ticks * 1000;
+    },
+    get$elapsedMilliseconds() {
+      var ticks = this.get$elapsedTicks();
+      if ($.$get$Stopwatch__frequency() === 1000)
+        return ticks;
+      return B.JSInt_methods._tdivFast$1(ticks, 1000);
+    },
+    start$0() {
+      var _this = this,
+        $stop = _this._stop;
+      if ($stop != null) {
+        _this._core$_start = _this._core$_start + ($.Primitives_timerTicks.call$0() - $stop);
+        _this._stop = null;
+      }
+    },
+    get$elapsedTicks() {
+      var t1 = this._stop;
+      if (t1 == null)
+        t1 = $.Primitives_timerTicks.call$0();
+      return t1 - this._core$_start;
     }
   };
   A.StringBuffer.prototype = {
@@ -15539,6 +15561,11 @@
     },
     $signature: 4
   };
+  A.JiebaDictType.prototype = {
+    _enumToString$0() {
+      return "JiebaDictType." + this._core$_name;
+    }
+  };
   A.SimpleBridgeCallbacks.prototype = {};
   A.DefaultSimpleBridgeCallbacks.prototype = {
     _call$2($name, args) {
@@ -15864,12 +15891,12 @@
   };
   A.Sqlite3Wasm.prototype = {
     initDatabase$1(jiebaDictPath2Url) {
-      return this.initDatabase$body$Sqlite3Wasm(type$.Map_String_String._as(jiebaDictPath2Url));
+      return this.initDatabase$body$Sqlite3Wasm(type$.Map_JiebaDictType_String._as(jiebaDictPath2Url));
     },
     initDatabase$body$Sqlite3Wasm(jiebaDictPath2Url) {
       var $async$goto = 0,
         $async$completer = A._makeAsyncAwaitCompleter(type$.void),
-        $async$self = this, t3, t4, _this, ptr, db, t1, t2, $async$temp1, $async$temp2, $async$temp3;
+        $async$self = this, t1, t2, t3, t4, _this, ptr, db, stopWatch, $async$temp1, $async$temp2, $async$temp3;
       var $async$initDatabase$1 = A._wrapJsFunctionForAsync(function($async$errorCode, $async$result) {
         if ($async$errorCode === 1)
           return A._asyncRethrow($async$result, $async$completer);
@@ -15877,7 +15904,10 @@
           switch ($async$goto) {
             case 0:
               // Function start
-              t1 = A.Uri_parse("sqlite3.debug.wasm");
+              stopWatch = new A.Stopwatch();
+              $.$get$Stopwatch__frequency();
+              stopWatch.start$0();
+              t1 = A.Uri_parse("sqlite3.wasm");
               t2 = A.LinkedHashMap_LinkedHashMap$_empty(type$.String, type$.Uint8List);
               t3 = jiebaDictPath2Url.get$entries(), t3 = t3.get$iterator(t3);
             case 2:
@@ -15889,7 +15919,7 @@
               }
               t4 = t3.get$current();
               $async$temp1 = t2;
-              $async$temp2 = t4.key;
+              $async$temp2 = "/" + t4.key.filename;
               $async$goto = 4;
               return A._asyncAwait(A.Sqlite3Wasm__fetch(t4.value), $async$initDatabase$1);
             case 4:
@@ -15926,7 +15956,11 @@
               t1 = new A.Sqlite3Dao(db);
               $async$self.__Sqlite3Wasm__dao_F !== $ && A.throwLateFieldAI("_dao");
               $async$self.__Sqlite3Wasm__dao_F = t1;
+              db.select$2("SELECT jieba_dict(?)", [""]);
               A.print(db.select$1("SELECT jieba_query('Jieba\u5206\u8bcd\u521d\u59cb\u5316\uff08\u63d0\u524d\u52a0\u8f7d\u907f\u514d\u540e\u7eed\u7b49\u5f85\uff09')"));
+              if (stopWatch._stop == null)
+                stopWatch._stop = $.Primitives_timerTicks.call$0();
+              A.print("\u6570\u636e\u5e93\u521d\u59cb\u5316\u8017\u65f6\uff1a" + stopWatch.get$elapsedMilliseconds() + "ms");
               $async$goto = 7;
               return A._asyncAwait(t1.initFts5$0(), $async$initDatabase$1);
             case 7:
@@ -15972,7 +16006,7 @@
   };
   A._extension_0__$getOperations_closure0.prototype = {
     call$1($$req) {
-      return this._this.initDatabase$1(A._$Deser$(false).$$1$1(J.$index$asx(type$.List_dynamic._as(J.$index$asx($$req, 3)), 0)));
+      return this._this.initDatabase$1(A._$Deser$(false).$$3$1(J.$index$asx(type$.List_dynamic._as(J.$index$asx($$req, 3)), 0)));
     },
     $signature: 7
   };
@@ -15986,7 +16020,7 @@
   };
   A._extension_0__$getOperations_closure2.prototype = {
     call$1($$req) {
-      var t1 = A._asInt(A._$Deser$(false).$$2$1(J.$index$asx(type$.List_dynamic._as(J.$index$asx($$req, 3)), 0))),
+      var t1 = A._asInt(A._$Deser$(false).$$0$1(J.$index$asx(type$.List_dynamic._as(J.$index$asx($$req, 3)), 0))),
         t2 = this._this.__Sqlite3Wasm__dao_F;
       t2 === $ && A.throwLateFieldNI("_dao");
       return t2.insertRandomData$1(t1);
@@ -16015,8 +16049,8 @@
               $$dsr = A._$Deser$(false);
               t1 = J.getInterceptor$asx($$req);
               t2 = type$.List_dynamic;
-              t3 = $$dsr.$$0$1(J.$index$asx(t2._as(t1.$index($$req, 3)), 0));
-              t1 = $$dsr.$$3$1(J.$index$asx(t2._as(t1.$index($$req, 3)), 1));
+              t3 = $$dsr.$$2$1(J.$index$asx(t2._as(t1.$index($$req, 3)), 0));
+              t1 = $$dsr.$$4$1(J.$index$asx(t2._as(t1.$index($$req, 3)), 1));
               A._asString(t3);
               type$.Tokenizer._as(t1);
               t2 = $async$self._this.__Sqlite3Wasm__dao_F;
@@ -16121,7 +16155,7 @@
       var result, _this = this,
         value = _this.___$Deser_$0_FI;
       if (value === $) {
-        result = A.ConverterExt_get_converter(_this).value$1$0(type$.String);
+        result = A.ConverterExt_get_converter(_this).value$1$0(type$.int);
         _this.___$Deser_$0_FI !== $ && A.throwLateFieldADI("$0");
         _this.___$Deser_$0_FI = result;
         value = result;
@@ -16129,23 +16163,14 @@
       return value;
     },
     get$$$1() {
-      var t1, t2, result, _this = this,
-        value = _this.___$Deser_$1_FI;
-      if (value === $) {
-        t1 = _this.get$$$0();
-        t2 = type$.String;
-        result = A.ConverterExt_get_converter(_this).map$2$2$kcast$vcast(0, t1, t1, t2, t2);
-        _this.___$Deser_$1_FI !== $ && A.throwLateFieldADI("$1");
-        _this.___$Deser_$1_FI = result;
-        value = result;
-      }
-      return value;
+      var value = this.___$Deser_$1_FI;
+      return value === $ ? this.___$Deser_$1_FI = new A._$Deser_$1_closure(this) : value;
     },
     get$$$2() {
       var result, _this = this,
         value = _this.___$Deser_$2_FI;
       if (value === $) {
-        result = A.ConverterExt_get_converter(_this).value$1$0(type$.int);
+        result = A.ConverterExt_get_converter(_this).value$1$0(type$.String);
         _this.___$Deser_$2_FI !== $ && A.throwLateFieldADI("$2");
         _this.___$Deser_$2_FI = result;
         value = result;
@@ -16153,27 +16178,46 @@
       return value;
     },
     get$$$3() {
-      var value = this.___$Deser_$3_FI;
-      return value === $ ? this.___$Deser_$3_FI = new A._$Deser_$3_closure(this) : value;
+      var t1, t2, result, _this = this,
+        value = _this.___$Deser_$3_FI;
+      if (value === $) {
+        t1 = _this.get$$$1();
+        t2 = _this.get$$$2();
+        result = A.ConverterExt_get_converter(_this).map$2$2$kcast$vcast(0, t1, t2, type$.JiebaDictType, type$.String);
+        _this.___$Deser_$3_FI !== $ && A.throwLateFieldADI("$3");
+        _this.___$Deser_$3_FI = result;
+        value = result;
+      }
+      return value;
+    },
+    get$$$4() {
+      var value = this.___$Deser_$4_FI;
+      return value === $ ? this.___$Deser_$4_FI = new A._$Deser_$4_closure(this) : value;
     },
     $$0$1(arg0) {
       return this.get$$$0().call$1(arg0);
-    },
-    $$1$1(arg0) {
-      return this.get$$$1().call$1(arg0);
     },
     $$2$1(arg0) {
       return this.get$$$2().call$1(arg0);
     },
     $$3$1(arg0) {
       return this.get$$$3().call$1(arg0);
+    },
+    $$4$1(arg0) {
+      return this.get$$$4().call$1(arg0);
     }
   };
-  A._$Deser_$3_closure.prototype = {
+  A._$Deser_$1_closure.prototype = {
     call$1($$) {
-      return B.JSArray_methods.$index(B.List_Tokenizer_0_Tokenizer_1, this.$this.$$2$1($$));
+      return B.JSArray_methods.$index(B.List_fJ6, this.$this.$$0$1($$));
     },
-    $signature: 83
+    $signature: 55
+  };
+  A._$Deser_$4_closure.prototype = {
+    call$1($$) {
+      return B.JSArray_methods.$index(B.List_Tokenizer_0_Tokenizer_1, this.$this.$$0$1($$));
+    },
+    $signature: 84
   };
   A._$Ser.prototype = {
     get$$$0() {
@@ -16203,7 +16247,7 @@
       t1 = $$.insertDate;
       return [$$.id, $$.title, $$.content, 1000 * t1._core$_value + t1._microsecond];
     },
-    $signature: 56
+    $signature: 57
   };
   A.Tokenizer.prototype = {
     _enumToString$0() {
@@ -16221,7 +16265,7 @@
       A._asJSObject(t1.port2).close();
       A._asJSObject(init.G.self).close();
     },
-    $signature: 57
+    $signature: 58
   };
   A.bootstrap_closure.prototype = {
     call$1(e) {
@@ -16234,7 +16278,7 @@
       t3.toString;
       t2.connect$3(A.WorkerRequest_constructor_from(t3), A._asJSObject(t1.port2), this.initializer);
     },
-    $signature: 58
+    $signature: 59
   };
   A.$jsify_closure.prototype = {
     call$1(js) {
@@ -16474,7 +16518,7 @@
       t1.toString;
       return this._this.processRequest$1(A.WorkerRequest_constructor_from(t1));
     },
-    $signature: 62
+    $signature: 63
   };
   A.InternalLogger.prototype = {};
   A._NoLogOutput.prototype = {
@@ -16813,13 +16857,13 @@
     call$1(k) {
       return A._asInt(k) <= 0;
     },
-    $signature: 63
+    $signature: 64
   };
   A.WorkerRunner_connect_closure.prototype = {
     call$1($event) {
       return this.logger.call$1(type$.OutputEvent._as($event).origin);
     },
-    $signature: 64
+    $signature: 65
   };
   A.WorkerRunner_connect_closure0.prototype = {
     call$0() {
@@ -16831,7 +16875,7 @@
     call$0() {
       return new A.CancelationTokenReference(this.token.get$id(), new A._AsyncCompleter(new A._Future($.Zone__current, type$._Future_SquadronCanceledException), type$._AsyncCompleter_SquadronCanceledException), true);
     },
-    $signature: 65
+    $signature: 66
   };
   A.CastConverter.prototype = {
     value$1$0($T) {
@@ -17406,7 +17450,7 @@
       type$.CanceledException._as(e);
       return A.SquadronCanceledException_SquadronCanceledException$from(this.tokenId, e, e.get$stackTrace());
     },
-    $signature: 66
+    $signature: 67
   };
   A.SquadronCanceledExceptions.prototype = {
     get$message() {
@@ -17432,13 +17476,13 @@
     call$1(e) {
       return type$.SquadronCanceledException._as(e).get$message();
     },
-    $signature: 67
+    $signature: 68
   };
   A.SquadronCanceledExceptions_serialize_closure.prototype = {
     call$1(e) {
       return type$.SquadronCanceledException._as(e).serialize$0();
     },
-    $signature: 68
+    $signature: 69
   };
   A.SquadronError.prototype = {
     serialize$0() {
@@ -17626,7 +17670,7 @@
       t1 = t2.call.apply(t2, t1);
       return t1 == null ? null : A.dartify(t1);
     },
-    $signature: 69
+    $signature: 70
   };
   A.WASI.prototype = {$isWASI2: 1};
   A.WASI1.prototype = {
@@ -17899,7 +17943,7 @@
         A._asInt0(t1.get$first(args));
       throw A.wrapException(new A._WasiExit());
     },
-    $signature: 71
+    $signature: 72
   };
   A.WASI__fdWriteImport_closure.prototype = {
     call$1(args) {
@@ -18577,17 +18621,17 @@
     _static_1(A, "async__AsyncRun__scheduleImmediateWithSetImmediate$closure", "_AsyncRun__scheduleImmediateWithSetImmediate", 8);
     _static_1(A, "async__AsyncRun__scheduleImmediateWithTimer$closure", "_AsyncRun__scheduleImmediateWithTimer", 8);
     _static_0(A, "async___startMicrotaskLoop$closure", "_startMicrotaskLoop", 0);
-    _static_1(A, "collection___defaultHashCode$closure", "_defaultHashCode", 75);
+    _static_1(A, "collection___defaultHashCode$closure", "_defaultHashCode", 76);
     _instance(A._LinkedHashSet.prototype, "get$_newSimilarSet", 0, 0, null, ["call$1$0", "call$0"], ["_newSimilarSet$1$0", "_newSimilarSet$0"], 32, 0, 0);
     _static_1(A, "convert___defaultToEncodable$closure", "_defaultToEncodable", 13);
     var _;
     _instance_1_u(_ = A.DartBridgeCallbacks.prototype, "get$logError", "logError$1", 4);
-    _instance_2_u(_, "get$localtime", "localtime$2", 61);
-    _instance(_, "get$xOpen", 0, 5, null, ["call$5"], ["xOpen$5"], 30, 0, 0);
-    _instance(_, "get$xDelete", 0, 3, null, ["call$3"], ["xDelete$3"], 72, 0, 0);
+    _instance_2_u(_, "get$localtime", "localtime$2", 62);
+    _instance(_, "get$xOpen", 0, 5, null, ["call$5"], ["xOpen$5"], 71, 0, 0);
+    _instance(_, "get$xDelete", 0, 3, null, ["call$3"], ["xDelete$3"], 30, 0, 0);
     _instance(_, "get$xAccess", 0, 4, null, ["call$4"], ["xAccess$4"], 19, 0, 0);
     _instance(_, "get$xFullPathname", 0, 4, null, ["call$4"], ["xFullPathname$4"], 19, 0, 0);
-    _instance(_, "get$xRandomness", 0, 3, null, ["call$3"], ["xRandomness$3"], 74, 0, 0);
+    _instance(_, "get$xRandomness", 0, 3, null, ["call$3"], ["xRandomness$3"], 75, 0, 0);
     _instance_2_u(_, "get$xSleep", "xSleep$2", 20);
     _instance_2_u(_, "get$xCurrentTimeInt64", "xCurrentTimeInt64$2", 20);
     _instance_1_u(_, "get$xClose", "xClose$1", 21);
@@ -18625,7 +18669,7 @@
     _instance(_, "get$fd_write", 0, 4, null, ["call$4"], ["fd_write$4"], 25, 0, 0);
     _instance(_, "get$path_open", 0, 9, null, ["call$9"], ["path_open$9"], 50, 0, 0);
     _instance_1_u(_, "get$proc_exit", "proc_exit$1", 4);
-    _static_1(A, "sqlite3_wasm__$Sqlite3WasmInitializer$closure", "$Sqlite3WasmInitializer", 76);
+    _static_1(A, "sqlite3_wasm__$Sqlite3WasmInitializer$closure", "$Sqlite3WasmInitializer", 77);
     _static_1(A, "_patch___toJSStr$closure", "_toJSStr", 2);
     _static_1(A, "_patch___toJSBool$closure", "_toJSBool", 2);
     _static_1(A, "_patch___toJSNum$closure", "_toJSNum", 2);
@@ -18634,21 +18678,21 @@
     _static_1(A, "_patch___noRegistration$closure", "_noRegistration", 27);
     _instance_1_u(_ = A._WebWorkerChannel.prototype, "get$reply", "reply$1", 5);
     _instance_1_u(_, "get$inspectAndReply", "inspectAndReply$1", 5);
-    _instance_1_u(_, "get$log", "log$1", 60);
+    _instance_1_u(_, "get$log", "log$1", 61);
     _static(A, "converter_Converter_identity$closure", 1, null, ["call$1$1", "call$1"], ["Converter_identity", function(x) {
       return A.Converter_identity(x, type$.dynamic);
-    }], 77, 1);
+    }], 78, 1);
     _static(A, "converter_Converter__castList$closure", 1, null, ["call$1$1", "call$1"], ["Converter__castList", function(x) {
       return A.Converter__castList(x, type$.dynamic);
-    }], 78, 1);
+    }], 79, 1);
     _static(A, "converter_Converter__castMap$closure", 1, null, ["call$2$1", "call$1"], ["Converter__castMap", function(x) {
       var t1 = type$.dynamic;
       return A.Converter__castMap(x, t1, t1);
-    }], 79, 0);
-    _static_1(A, "squadron_canceled_exception__SquadronCanceledExceptionExt_deserialize$closure", "SquadronCanceledExceptionExt_deserialize", 80);
-    _static_1(A, "module_FunctionImportExportValue_____tearOff$closure", "FunctionImportExportValue_____tearOff", 81);
-    _static_0(A, "clock__systemTime$closure", "systemTime", 82);
-    _static_2(A, "_platform__isSameInstance$closure", "isSameInstance", 55);
+    }], 80, 0);
+    _static_1(A, "squadron_canceled_exception__SquadronCanceledExceptionExt_deserialize$closure", "SquadronCanceledExceptionExt_deserialize", 81);
+    _static_1(A, "module_FunctionImportExportValue_____tearOff$closure", "FunctionImportExportValue_____tearOff", 82);
+    _static_0(A, "clock__systemTime$closure", "systemTime", 83);
+    _static_2(A, "_platform__isSameInstance$closure", "isSameInstance", 56);
   })();
   (function inheritance() {
     var _mixin = hunkHelpers.mixin,
@@ -18668,7 +18712,7 @@
     _inherit(A._CastListBase, A.__CastListBase__CastIterableBase_ListMixin);
     _inherit(A.CastList, A._CastListBase);
     _inheritMany(A.MapBase, [A.CastMap, A.UnmodifiableMapBase, A.JsLinkedHashMap, A._HashMap]);
-    _inheritMany(A.Closure, [A.Closure2Args, A.CastMap_entries_closure, A.Instantiation, A.Closure0Args, A.TearOffClosure, A.initHooks_closure, A.initHooks_closure1, A._AsyncRun__initializeScheduleImmediate_internalCallback, A._AsyncRun__initializeScheduleImmediate_closure, A._awaitOnObject_closure, A.Future_wait_closure, A._Future__propagateToListeners_handleWhenCompleteCallback_closure, A._RootZone_bindUnaryCallbackGuarded_closure, A._CustomHashMap_closure, A.MapBase_entries_closure, A._BigIntImpl_hashCode_finish, A.jsify__convert, A.promiseToFuture_closure, A.promiseToFuture_closure0, A.dartify_convert, A.SqliteException_toString_closure, A.WasmBindings_closure, A.WasmBindings_closure0, A.WasmBindings_closure1, A.WasmBindings_closure2, A.Sqlite3Dao__toMainTableRows_closure, A._extension_0__$getOperations_closure, A._extension_0__$getOperations_closure0, A._extension_0__$getOperations_closure1, A._extension_0__$getOperations_closure2, A._extension_0__$getOperations_closure3, A._extension_0__$getOperations_closure4, A._extension_0__$getOperations_closure5, A._extension_0__$getOperations_closure6, A._$Deser_$3_closure, A._$Ser_$0_closure, A.bootstrap_closure0, A.bootstrap_closure, A.$jsify_closure, A.$jsify_closure0, A.$dartify_closure, A.JsWorkerRunnerExt_get_handle_closure, A.WorkerRunner__checkOperations_closure, A.WorkerRunner_connect_closure, A.ContextAwareConverter_value_closure, A.ContextAwareConverter_list_closure, A.ContextAwareConverter_list_closure0, A.ContextAwareConverter_map_closure, A.ContextAwareConverter_map_closure0, A.ContextAwareConverter_map_closure1, A.ContextAwareConverter_map__closure, A.Converter__mapList_closure, A.Converter__mapMap_closure, A.LazyInPlaceMap_entries_closure, A.SquadronCanceledException_SquadronCanceledException$from_closure, A.SquadronCanceledExceptions_message_closure, A.SquadronCanceledExceptions_serialize_closure, A._wrapNodeFunc_closure, A.WASI__nosysImport_closure, A.WASI__procExitImport_closure, A.WASI__fdWriteImport_closure, A.WASI__argsSizesGetImport_closure, A.WASI__argsGetImport_closure, A.WASI__environSizesGetImport_closure, A.WASI__environGetImport_closure, A.WASI__randomGetImport_closure, A.WASI__fdReadImport_closure, A.WASI__fdFdstatGetImport_closure, A.WASI__fdFilestatGetImport_closure, A.WASI__fdCloseImport_closure, A.WASI__fdSeekImport_closure, A.WASI__clockTimeGetImport_closure, A.WASI__schedYieldImport_closure, A.WASI__fdPrestatGetImport_closure, A.WASI__fdPrestatDirNameImport_closure, A.WASI__pathOpenImport_closure, A.WASI__pathFilestatGetImport_closure, A.WASI__pollOneoffImport_closure, A._buildVirtualDirectorySet_addDirectoryAndParents, A._buildVirtualDirectorySet_addParentDirectories]);
+    _inheritMany(A.Closure, [A.Closure2Args, A.CastMap_entries_closure, A.Instantiation, A.Closure0Args, A.TearOffClosure, A.initHooks_closure, A.initHooks_closure1, A._AsyncRun__initializeScheduleImmediate_internalCallback, A._AsyncRun__initializeScheduleImmediate_closure, A._awaitOnObject_closure, A.Future_wait_closure, A._Future__propagateToListeners_handleWhenCompleteCallback_closure, A._RootZone_bindUnaryCallbackGuarded_closure, A._CustomHashMap_closure, A.MapBase_entries_closure, A._BigIntImpl_hashCode_finish, A.jsify__convert, A.promiseToFuture_closure, A.promiseToFuture_closure0, A.dartify_convert, A.SqliteException_toString_closure, A.WasmBindings_closure, A.WasmBindings_closure0, A.WasmBindings_closure1, A.WasmBindings_closure2, A.Sqlite3Dao__toMainTableRows_closure, A._extension_0__$getOperations_closure, A._extension_0__$getOperations_closure0, A._extension_0__$getOperations_closure1, A._extension_0__$getOperations_closure2, A._extension_0__$getOperations_closure3, A._extension_0__$getOperations_closure4, A._extension_0__$getOperations_closure5, A._extension_0__$getOperations_closure6, A._$Deser_$1_closure, A._$Deser_$4_closure, A._$Ser_$0_closure, A.bootstrap_closure0, A.bootstrap_closure, A.$jsify_closure, A.$jsify_closure0, A.$dartify_closure, A.JsWorkerRunnerExt_get_handle_closure, A.WorkerRunner__checkOperations_closure, A.WorkerRunner_connect_closure, A.ContextAwareConverter_value_closure, A.ContextAwareConverter_list_closure, A.ContextAwareConverter_list_closure0, A.ContextAwareConverter_map_closure, A.ContextAwareConverter_map_closure0, A.ContextAwareConverter_map_closure1, A.ContextAwareConverter_map__closure, A.Converter__mapList_closure, A.Converter__mapMap_closure, A.LazyInPlaceMap_entries_closure, A.SquadronCanceledException_SquadronCanceledException$from_closure, A.SquadronCanceledExceptions_message_closure, A.SquadronCanceledExceptions_serialize_closure, A._wrapNodeFunc_closure, A.WASI__nosysImport_closure, A.WASI__procExitImport_closure, A.WASI__fdWriteImport_closure, A.WASI__argsSizesGetImport_closure, A.WASI__argsGetImport_closure, A.WASI__environSizesGetImport_closure, A.WASI__environGetImport_closure, A.WASI__randomGetImport_closure, A.WASI__fdReadImport_closure, A.WASI__fdFdstatGetImport_closure, A.WASI__fdFilestatGetImport_closure, A.WASI__fdCloseImport_closure, A.WASI__fdSeekImport_closure, A.WASI__clockTimeGetImport_closure, A.WASI__schedYieldImport_closure, A.WASI__fdPrestatGetImport_closure, A.WASI__fdPrestatDirNameImport_closure, A.WASI__pathOpenImport_closure, A.WASI__pathFilestatGetImport_closure, A.WASI__pollOneoffImport_closure, A._buildVirtualDirectorySet_addDirectoryAndParents, A._buildVirtualDirectorySet_addParentDirectories]);
     _inheritMany(A.Closure2Args, [A.CastMap_forEach_closure, A.ConstantMap_map_closure, A.Primitives_functionNoSuchMethod_closure, A.initHooks_closure0, A._awaitOnObject_closure0, A._wrapJsFunctionForAsync_closure, A.Future_wait_handleError, A._Future__propagateToListeners_handleWhenCompleteCallback_closure0, A.MapBase_mapToString_closure, A._JsonStringifier_writeMap_closure, A._JsonPrettyPrintMixin_writeMap_closure, A._BigIntImpl_hashCode_combine, A.NoSuchMethodError_toString_closure, A.Uri_parseIPv6Address_error, A.Converter__mapMap__closure, A.WASI__argsSizesGetImport__closure, A.WASI__environSizesGetImport__closure]);
     _inheritMany(A.Error, [A.LateError, A.TypeError, A.JsNoSuchMethodError, A.UnknownJsTypeError, A.RuntimeError, A._Error, A.JsonUnsupportedObjectError, A.AssertionError, A.ArgumentError, A.NoSuchMethodError, A.UnsupportedError, A.UnimplementedError, A.StateError, A.ConcurrentModificationError, A._WasiExit]);
     _inheritMany(A.EfficientLengthIterable, [A.ListIterable, A.EmptyIterable, A.LinkedHashMapKeysIterable, A.LinkedHashMapValuesIterable, A.LinkedHashMapEntriesIterable, A._HashMapKeyIterable]);
@@ -18710,7 +18754,7 @@
     _inherit(A.Utf8Codec, A.Encoding);
     _inheritMany(A.ArgumentError, [A.RangeError, A.IndexError]);
     _inherit(A._DataUri, A._Uri);
-    _inheritMany(A._Enum, [A.Level, A.OpenMode, A.Tokenizer, A.WASIVersion, A.ImportExportKind]);
+    _inheritMany(A._Enum, [A.Level, A.OpenMode, A.JiebaDictType, A.Tokenizer, A.WASIVersion, A.ImportExportKind]);
     _inherit(A.InternalStyle, A.Style);
     _inheritMany(A.InternalStyle, [A.UrlStyle, A.WindowsStyle]);
     _inherit(A.StatementImplementation, A.CommonPreparedStatement);
@@ -18759,7 +18803,7 @@
     typeUniverse: {eC: new Map(), tR: {}, eT: {}, tPV: {}, sEA: []},
     mangledGlobalNames: {int: "int", double: "double", num: "num", String: "String", bool: "bool", Null: "Null", List: "List", Object: "Object", Map: "Map", JSObject: "JSObject"},
     mangledNames: {},
-    types: ["~()", "int(List<Object?>)", "Object?(Object?)", "int(int,int)", "~(int)", "~(@)", "int(VirtualFileSystemFile,int)", "Future<~>(List<@>)", "~(~())", "~(Object?,Object?)", "~(RegisteredFunctionSet,int,int,int)", "String()", "~(String)", "@(@)", "Null(@)", "Null()", "@()", "int(int)", "int()", "int(VirtualFileSystem,int,int,int)", "int(VirtualFileSystem,int)", "int(VirtualFileSystemFile)", "int(VirtualFileSystemFile,int,int,JavaScriptBigInt)", "~(RegisteredFunctionSet,int)", "JSObject()", "int(int,int,int,int)", "Future<List<List<@>>>(List<@>)", "~(Object?)", "int(int,Uint8List)", "Uint8List()", "VirtualFileSystemFile?(VirtualFileSystem,int,int,int,int)", "bool(Object?)", "Set<0^>()<Object?>", "Null(~())", "int(VirtualFileSystemFile,JavaScriptBigInt)", "@(@,String)", "@(String)", "int(int())", "~(~(int,String,int),int,int,int,JavaScriptBigInt)", "~(String,@)", "~(Symbol0,@)", "int(RegisteredFunctionSet,int,int,int,int)", "int(int(int),int)", "int(SessionApplyCallbacks,int)", "int(SessionApplyCallbacks,int,int)", "0&()", "int(int,Object?,int)", "int(int,int,int)", "0&(String,int?)", "int(int,Object?,int,int)", "int(int,int,int,int,int,Object?,Object?,int,int)", "MainTableRow(int)", "Null(@,StackTrace)", "String(Object?)", "Future<int>(List<@>)", "bool(Object,Object)", "List<@>(@)", "~(WorkerRunner)", "Null(JSObject)", "~(int,@)", "~(LogEvent)", "~(JavaScriptBigInt,int)", "~(JSObject)", "bool(int)", "~(OutputEvent)", "CancelationTokenReference()", "SquadronCanceledException(CanceledException)", "String(SquadronCanceledException)", "List<@>(SquadronCanceledException)", "Object?(List<Object?>)", "~(Object,StackTrace)", "0&(List<Object?>)", "int(VirtualFileSystem,int,int)", "Null(Object,StackTrace)", "int(VirtualFileSystem?,int,int)", "int(Object?)", "WorkerService(List<@>)", "0^(@)<Object?>", "List<0^>(@)<Object?>", "Map<0^,1^>(@)<Object?,Object?>", "SquadronCanceledException?(List<@>?)", "FunctionImportExportValue(Object?(List<Object?>))", "DateTime()", "Tokenizer(@)"],
+    types: ["~()", "int(List<Object?>)", "Object?(Object?)", "int(int,int)", "~(int)", "~(@)", "int(VirtualFileSystemFile,int)", "Future<~>(List<@>)", "~(~())", "~(Object?,Object?)", "~(RegisteredFunctionSet,int,int,int)", "String()", "~(String)", "@(@)", "Null(@)", "Null()", "@()", "int(int)", "int()", "int(VirtualFileSystem,int,int,int)", "int(VirtualFileSystem,int)", "int(VirtualFileSystemFile)", "int(VirtualFileSystemFile,int,int,JavaScriptBigInt)", "~(RegisteredFunctionSet,int)", "JSObject()", "int(int,int,int,int)", "Future<List<List<@>>>(List<@>)", "~(Object?)", "int(int,Uint8List)", "Uint8List()", "int(VirtualFileSystem,int,int)", "bool(Object?)", "Set<0^>()<Object?>", "Null(~())", "int(VirtualFileSystemFile,JavaScriptBigInt)", "@(@,String)", "@(String)", "int(int())", "~(~(int,String,int),int,int,int,JavaScriptBigInt)", "~(String,@)", "~(Symbol0,@)", "int(RegisteredFunctionSet,int,int,int,int)", "int(int(int),int)", "int(SessionApplyCallbacks,int)", "int(SessionApplyCallbacks,int,int)", "0&()", "int(int,Object?,int)", "int(int,int,int)", "0&(String,int?)", "int(int,Object?,int,int)", "int(int,int,int,int,int,Object?,Object?,int,int)", "MainTableRow(int)", "Null(@,StackTrace)", "String(Object?)", "Future<int>(List<@>)", "JiebaDictType(@)", "bool(Object,Object)", "List<@>(@)", "~(WorkerRunner)", "Null(JSObject)", "~(int,@)", "~(LogEvent)", "~(JavaScriptBigInt,int)", "~(JSObject)", "bool(int)", "~(OutputEvent)", "CancelationTokenReference()", "SquadronCanceledException(CanceledException)", "String(SquadronCanceledException)", "List<@>(SquadronCanceledException)", "Object?(List<Object?>)", "VirtualFileSystemFile?(VirtualFileSystem,int,int,int,int)", "0&(List<Object?>)", "~(Object,StackTrace)", "Null(Object,StackTrace)", "int(VirtualFileSystem?,int,int)", "int(Object?)", "WorkerService(List<@>)", "0^(@)<Object?>", "List<0^>(@)<Object?>", "Map<0^,1^>(@)<Object?,Object?>", "SquadronCanceledException?(List<@>?)", "FunctionImportExportValue(Object?(List<Object?>))", "DateTime()", "Tokenizer(@)"],
     interceptorsByTag: null,
     leafTags: null,
     arrayRti: Symbol("$ti"),
@@ -18823,6 +18867,7 @@
       JavaScriptBigInt: findType("JavaScriptBigInt"),
       JavaScriptFunction: findType("JavaScriptFunction"),
       JavaScriptIndexingBehavior_dynamic: findType("JavaScriptIndexingBehavior<@>"),
+      JiebaDictType: findType("JiebaDictType"),
       JsLinkedHashMap_Symbol_dynamic: findType("JsLinkedHashMap<Symbol0,@>"),
       List_List_dynamic: findType("List<List<@>>"),
       List_MainTableRow: findType("List<MainTableRow>"),
@@ -18838,7 +18883,7 @@
       List_nullable_num: findType("List<num?>"),
       MainTableRow: findType("MainTableRow"),
       MapEntry_dynamic_dynamic: findType("MapEntry<@,@>"),
-      Map_String_String: findType("Map<String,String>"),
+      Map_JiebaDictType_String: findType("Map<JiebaDictType,String>"),
       Map_dynamic_dynamic: findType("Map<@,@>"),
       Map_of_String_and_ImportValue_Object: findType("Map<String,ImportValue<Object>>"),
       Map_of_dynamic_and_nullable_BigInt: findType("Map<@,BigInt?>"),
@@ -19101,6 +19146,12 @@
     B.List_empty0 = makeConstList([], type$.JSArray_String);
     B.List_empty1 = makeConstList([], type$.JSArray_dynamic);
     B.List_empty = makeConstList([], type$.JSArray_nullable_Object);
+    B.JiebaDictType_OpU = new A.JiebaDictType("jieba.dict.utf8", 0, "jiebaDict");
+    B.JiebaDictType_GKi = new A.JiebaDictType("hmm_model.utf8", 1, "hmmModel");
+    B.JiebaDictType_Zjz = new A.JiebaDictType("user.dict.utf8", 2, "userDict");
+    B.JiebaDictType_l3z = new A.JiebaDictType("idf.utf8", 3, "idf");
+    B.JiebaDictType_Btb = new A.JiebaDictType("stop_words.utf8", 4, "stopWords");
+    B.List_fJ6 = makeConstList([B.JiebaDictType_OpU, B.JiebaDictType_GKi, B.JiebaDictType_Zjz, B.JiebaDictType_l3z, B.JiebaDictType_Btb], A.findType("JSArray<JiebaDictType>"));
     B.Object_empty = {};
     B.Map_empty0 = new A.ConstantStringMap(B.Object_empty, [], type$.ConstantStringMap_String_String);
     B.Map_empty2 = new A.ConstantStringMap(B.Object_empty, [], A.findType("ConstantStringMap<String,Uint8List>"));

@@ -24,18 +24,18 @@ extension on Sqlite3Wasm {
     _$closeDatabaseId: ($req) => closeDatabase(),
     _$initDatabaseId: ($req) {
       final $dsr = _$Deser(contextAware: false);
-      return initDatabase($dsr.$1($req.args[0]));
+      return initDatabase($dsr.$3($req.args[0]));
     },
     _$initFts5Id: ($req) => initFts5(),
     _$insertRandomDataId: ($req) {
       final $dsr = _$Deser(contextAware: false);
-      return insertRandomData($dsr.$2($req.args[0]));
+      return insertRandomData($dsr.$0($req.args[0]));
     },
     _$searchId: ($req) async {
       final List<MainTableRow> $res;
       try {
         final $dsr = _$Deser(contextAware: false);
-        $res = await search($dsr.$0($req.args[0]), $dsr.$3($req.args[1]));
+        $res = await search($dsr.$2($req.args[0]), $dsr.$4($req.args[1]));
       } finally {}
       try {
         final $sr = _$Ser(contextAware: false);
@@ -61,8 +61,10 @@ base mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
   Future<void> closeDatabase() => send(_$closeDatabaseId);
 
   @override
-  Future<void> initDatabase(Map<String, String> jiebaDictPath2Url) =>
-      send(_$initDatabaseId, args: [jiebaDictPath2Url]);
+  Future<void> initDatabase(Map<JiebaDictType, String> jiebaDictPath2Url) {
+    final $sr = _$Ser(contextAware: false);
+    return send(_$initDatabaseId, args: [$sr.$3(jiebaDictPath2Url)]);
+  }
 
   @override
   Future<void> initFts5() => send(_$initFts5Id);
@@ -76,11 +78,11 @@ base mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
     final dynamic $res;
     try {
       final $sr = _$Ser(contextAware: false);
-      $res = await send(_$searchId, args: [value, $sr.$2(tokenizer)]);
+      $res = await send(_$searchId, args: [value, $sr.$4(tokenizer)]);
     } finally {}
     try {
       final $dsr = _$Deser(contextAware: true);
-      return $dsr.$5($res);
+      return $dsr.$6($res);
     } finally {}
   }
 
@@ -89,7 +91,7 @@ base mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
     final dynamic $res = await send(_$selectAllId);
     try {
       final $dsr = _$Deser(contextAware: true);
-      return $dsr.$5($res);
+      return $dsr.$6($res);
     } finally {}
   }
 
@@ -98,7 +100,7 @@ base mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
     final dynamic $res = await send(_$selectCountId);
     try {
       final $dsr = _$Deser(contextAware: false);
-      return $dsr.$2($res);
+      return $dsr.$0($res);
     } finally {}
   }
 
@@ -219,7 +221,7 @@ base class Sqlite3WasmWorkerPool extends WorkerPool<Sqlite3WasmWorker>
   Future<void> closeDatabase() => execute((w) => w.closeDatabase());
 
   @override
-  Future<void> initDatabase(Map<String, String> jiebaDictPath2Url) =>
+  Future<void> initDatabase(Map<JiebaDictType, String> jiebaDictPath2Url) =>
       execute((w) => w.initDatabase(jiebaDictPath2Url));
 
   @override
@@ -245,12 +247,13 @@ base class Sqlite3WasmWorkerPool extends WorkerPool<Sqlite3WasmWorker>
 
 final class _$Deser extends MarshalingContext {
   _$Deser({super.contextAware});
-  late final $0 = value<String>();
-  late final $1 = map<String, String>(kcast: $0, vcast: $0);
-  late final $2 = value<int>();
-  late final $3 = (($) => Tokenizer.values[$2($)]);
-  late final $4 = (($) => MainTableRowSquadronMarshaling.unmarshal($, this));
-  late final $5 = list<MainTableRow>($4);
+  late final $0 = value<int>();
+  late final $1 = (($) => JiebaDictType.values[$0($)]);
+  late final $2 = value<String>();
+  late final $3 = map<JiebaDictType, String>(kcast: $1, vcast: $2);
+  late final $4 = (($) => Tokenizer.values[$0($)]);
+  late final $5 = (($) => MainTableRowSquadronMarshaling.unmarshal($, this));
+  late final $6 = list<MainTableRow>($5);
 }
 
 final class _$Ser extends MarshalingContext {
@@ -258,5 +261,7 @@ final class _$Ser extends MarshalingContext {
   late final $0 = (($) =>
       MainTableRowSquadronMarshaling($ as MainTableRow).marshal());
   late final $1 = list($0);
-  late final $2 = (($) => ($ as Tokenizer).index);
+  late final $2 = (($) => ($ as JiebaDictType).index);
+  late final $3 = map(kcast: $2);
+  late final $4 = (($) => ($ as Tokenizer).index);
 }

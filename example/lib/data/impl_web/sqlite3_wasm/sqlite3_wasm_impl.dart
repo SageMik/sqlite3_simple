@@ -1,7 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:sqlite3_simple/assets.dart';
 import 'package:squadron/squadron.dart';
-import 'package:web/web.dart';
 
 import '../../db_manager.dart';
 import '../../main_table_dao.dart';
@@ -9,7 +7,7 @@ import '../../main_table_row.dart';
 import 'sqlite3_wasm.dart';
 
 class Sqlite3WasmDbManager implements DbManager<Sqlite3WasmDao> {
-  /// 对 [Sqlite3Wasm] 的 Web Worker 封装
+  /// 将结巴分词字典文件的加载和数据库操作，放到由 [Squadron](https://github.com/d-markey/squadron) 管理的 Web Worker，避免阻塞主线程导致 UI 卡顿，具体见 [Sqlite3Wasm] 。
   final _pool = Sqlite3WasmWorkerPool(
     concurrencySettings: const ConcurrencySettings(
       minWorkers: 1,
@@ -23,11 +21,7 @@ class Sqlite3WasmDbManager implements DbManager<Sqlite3WasmDao> {
 
   @override
   Future<void> init() async {
-    final jiebaAssetPaths = await JiebaDictAssets.loadPaths();
-    final jiebaDictPath2Url = jiebaAssetPaths.map((k, v) =>
-        MapEntry("./dict/${k.filename}", "assets/$v"));
-    if (kDebugMode) print(jiebaDictPath2Url);
-    await _pool.initDatabase(jiebaDictPath2Url);
+    await _pool.initDatabase(await JiebaDictAssets.loadPaths());
   }
 
   @override

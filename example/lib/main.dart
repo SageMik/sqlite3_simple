@@ -40,7 +40,7 @@ class _MyAppState<T> extends State<MyApp> {
   /// 初始化数据库
   Future<void> initDbManger() async {
     results = null;
-    dbManager?.close();
+    await dbManager?.close();
     setState(() {});
     dbManager = DbManager.create(dbManagerKind);
     await dbManager!.init();

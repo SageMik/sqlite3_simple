@@ -5,6 +5,7 @@ import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
 import 'package:sqlite3/wasm.dart';
+import 'package:sqlite3_simple/jieba_dict.dart';
 import 'package:web/web.dart';
 
 import 'bridge_callbacks_default.dart';
@@ -22,11 +23,7 @@ final class DefaultSimpleWasmModuleLoader extends WasmModuleLoader {
   /// 传入「路径 → 字节」的映射 [files] 以供 Wasm 模块进行文件读写。
   /// 例如，如果自定义了 Simple 的拼音文件 `select pinyin_dict('/path/to/pinyin.txt')` ，则需要传入 `{ "/path/to/pinyin.txt": 拼音文件字节内容 }` 供扩展使用。
   ///
-  /// 如需使用结巴分词，可以通过 [JiebaDictBundle.resolve] 传入，例如：
-  /// ```dart
-  /// DefaultSimpleWasmModuleLoader.create(
-  ///   files: {...其他需要的文件, ...await const JiebaDictBundle().fetchPathBytesMap()},
-  /// )
+  /// 如需使用结巴分词，需要提供 [JiebaDictType] 中所有结巴分词字典文件的 [Uint8List] 。可以通过 [JiebaDictAssets.loadPaths] 获取内置字典路径，然后在 Web Worker 中通过 `fetch` 函数进行读取，避免堵塞主线程导致 UI 卡顿。
   /// ```
   static Future<DefaultSimpleWasmModuleLoader> create({
     Map<String, Uint8List> files = const {},
