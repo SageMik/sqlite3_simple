@@ -1,67 +1,24 @@
-import 'dart:async';
-
-import 'package:extended_text/extended_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sqlite3_simple_example/widget/search_input.dart';
 
-import 'data/db_manager.dart';
-import 'data/impl/kind.dart' if(dart.library.html) 'data/impl_web/kind.dart';
+import 'data/db_manager_kind.dart';
 import 'data/main_table_dao.dart';
-import 'data/main_table_row.dart';
-import 'widget/dropdown.dart';
+import 'main_provider.dart';
+import 'utils/padding.dart';
 import 'widget/highlight_text.dart';
+import 'widget/search_option_radio_row.dart';
+import 'widget/search_result_dialog.dart';
+import 'widget/search_result_list.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState<T> extends State<MyApp> {
-  DbManager? dbManager;
-
-  MainTableDao get dao => dbManager!.dao;
-
-  List<MainTableRowUiModel>? results;
-
-  @override
-  void initState() {
-    super.initState();
-    searchController.addListener(onSearchValueChanged);
-    initDbManger().then((_) => setState(() {}));
-  }
-
-  /// 初始化数据库
-  Future<void> initDbManger() async {
-    results = null;
-    await dbManager?.close();
-    setState(() {});
-    dbManager = DbManager.create(dbManagerKind);
-    await dbManager!.init();
-    await dao.insertRandomData(30);
-    results = await _toMainTableRowUiModel(await dao.selectAll());
-  }
-
-  /// 转为 UI 显示的数据类
-  Future<List<MainTableRowUiModel>> _toMainTableRowUiModel(
-      List<MainTableRow> rows) async {
-    final count = await dao.selectCount();
-    return rows
-        .map((r) => MainTableRowUiModel(
-              id: r.id,
-              idFormatted: "${r.id}".padLeft("$count".length, "0"),
-              title: r.title,
-              content: r.content,
-              insertDate: r.insertDate,
-            ))
-        .toList();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,8 +34,10 @@ class _MyAppState<T> extends State<MyApp> {
       // 通过国际化设置中文环境以让 Flutter 使用正确的中文字体
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Simple 分词器 示例',
-              style: TextStyle(fontWeight: FontWeight.bold)),
+          title: const Text(
+            'Simple 分词器 示例',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
         ),
@@ -87,15 +46,8 @@ class _MyAppState<T> extends State<MyApp> {
             mainAxisSize: MainAxisSize.max,
             children: [
               buildSearchBar(),
-              buildSearchOption(),
-              Expanded(
-                child: AnimatedSwitcher(
-                  duration: kThemeChangeDuration,
-                  child: results != null
-                      ? buildListView()
-                      : const CircularProgressIndicator(),
-                ),
-              ),
+              buildSearchOptions(context),
+              Expanded(child: buildSearchResult()),
             ],
           ),
         ),
@@ -105,247 +57,104 @@ class _MyAppState<T> extends State<MyApp> {
 
   /// 搜索栏
   Widget buildSearchBar() {
-    return Row(
-      children: [
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(
-                left: P.middle, right: P.middle, top: P.middle),
-            child: TapRegion(
-              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-              child: SearchBar(
-                controller: searchController,
-                leading: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4),
-                  child: Icon(Icons.search),
-                ),
-                trailing: [
-                  if (showClearButton)
-                    IconButton(
-                        onPressed: () => searchController.text = "",
-                        icon: const Icon(Icons.clear))
-                ],
-                elevation: const WidgetStatePropertyAll(0),
-                shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8))),
-              ),
-            ),
-          ),
-        )
-      ],
-    );
-  }
-
-  var showClearButton = false;
-
-  final searchController = SearchController();
-
-  Future<void> onSearchValueChanged() async {
-    final value = searchController.text;
-    showClearButton = value.isNotEmpty;
-    results = await _toMainTableRowUiModel(showClearButton
-        ? await dao.search(value.trim(), tokenizer)
-        : await dao.selectAll());
-    setState(() {});
-  }
-
-  /// 搜索栏下方选项
-  Widget buildSearchOption() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: P.middle),
-      child: Row(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(vertical: P.middle),
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  Dropdown<Tokenizer>(
-                    label: "分词器：",
-                    initValue: tokenizer,
-                    map: tokenizer2uiString,
-                    onChanged: (value) => setState(() {
-                      tokenizer = value!;
-                      onSearchValueChanged();
-                    }),
-                  ),
-                  const SizedBox(width: P.small),
-                  Dropdown<DbManagerKind>(
-                    label: "数据库实现：",
-                    initValue: dbManagerKind,
-                    map: type2uiString,
-                    onChanged: (value) => setState(() {
-                      dbManagerKind = value!;
-                      if(kDebugMode) {
-                        print("\n");
-                        print("切换数据库至：${type2uiString[value]}");
-                      }
-                      initDbManger().then((_) => onSearchValueChanged());
-                    }),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: P.small),
-          IconButton(
-            style: ButtonStyle(
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(P.small)))),
-            onPressed: () => setState(() {
-              results = null;
-              dao.updateAll().then((_) => onSearchValueChanged());
-            }),
-            icon: const Icon(Icons.refresh),
-          )
-        ],
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.only(
+        left: P.middle,
+        right: P.middle,
+        top: P.middle,
+      ),
+      child: Consumer(
+        builder: (context, ref, _) {
+          return SearchInput(
+            onChanged: ref.read(searchQueryProvider.notifier).update,
+          );
+        },
       ),
     );
   }
 
-  static const tokenizer2uiString = {
-    Tokenizer.jieba: "结巴",
-    Tokenizer.simple: "Simple"
-  };
-  Tokenizer tokenizer = tokenizer2uiString.keys.first;
+  /// 搜索栏下方选项
+  Widget buildSearchOptions(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(P.middle),
+      child: Consumer(
+        builder: (context, ref, _) {
+          return Table(
+            key: UniqueKey(), /// TODO: Web 平台首次加载，首列 [IntrinsicColumnWidth] 有问题，无法计算出正确宽度，原因不明
+            columnWidths: const {
+              0: IntrinsicColumnWidth(),
+              1: FlexColumnWidth(),
+            },
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            children: [
+              SearchOptionRadioRow<Tokenizer>(
+                label: "分词器：",
+                value: ref.watch(tokenizerProvider),
+                options: tokenizer2uiString,
+                onChanged: (v) =>
+                    ref.read(tokenizerProvider.notifier).update(v),
+              ),
+              SearchOptionRadioRow<DbManagerKind>(
+                label: "数据库实现：",
+                value: ref.watch(dbManagerKindProvider),
+                options: kind2uiString,
+                onChanged: (v) async {
+                  if (ref.read(dbManagerKindProvider) == v) {
+                    // 重复点击刷新为新的随机数据
+                    await ref.read(dbManagerProvider).value?.dao.updateAll();
+                    ref.invalidate(searchResultProvider);
+                  } else {
+                    if (kDebugMode) {
+                      print("\n");
+                      print("切换数据库至：${kind2uiString[v]}");
+                    }
+                    ref.read(dbManagerKindProvider.notifier).update(v);
+                  }
+                },
+                isLast: true,
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
 
-  static final type2uiString = {
-    for (final t in DbManagerKind.values) t: t.name,
-  };
-  DbManagerKind dbManagerKind = type2uiString.keys.first;
+  /// 高亮文本构建器
+  static final highlightTextBuilder = HighlightTextSpanBuilder(
+    (src) => src.copyWith(color: Colors.red),
+  );
 
   /// 搜索结果
-  Widget buildListView() {
-    return ListView.builder(
-      itemCount: results!.length,
-      itemBuilder: (context, index) {
-        final r = results![index];
-        return Material( // 水波纹特效超出列表：https://github.com/flutter/flutter/issues/73315
-          child: InkWell(
-            onTap: () => showDialog(
-                context: context, builder: (context) => buildDialog(context, r)),
-            child: Padding(
-              padding: const EdgeInsets.only(
-                  left: P.middle,
-                  right: P.middle,
-                  top: P.extraSmall,
-                  bottom: P.extraSmall),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    r.idFormatted,
-                    style: const TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.w600,
-                        height: 1,
-                        letterSpacing: -1,
-                        fontFeatures: [FontFeature.tabularFigures()]), // 数字等宽
+  Widget buildSearchResult() {
+    return Consumer(
+      builder: (context, ref, _) {
+        final result = ref.watch(searchResultProvider);
+        return result.when(
+          skipLoadingOnRefresh: true,
+          skipLoadingOnReload: true,
+          data: (results) => AnimatedSwitcher(
+            duration: kThemeAnimationDuration,
+            child: results == null
+                ? const Center(child: CircularProgressIndicator())
+                : SearchResultList(
+                    results: results,
+                    highlightTextBuilder: highlightTextBuilder,
+                    onItemTap: (context, row) {
+                      showDialog(
+                        context: context,
+                        builder: (context) =>
+                            SearchResultDialog(row, highlightTextBuilder),
+                      );
+                    },
                   ),
-                  const SizedBox(width: P.small),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ExtendedText(r.title,
-                                  specialTextSpanBuilder: highlightTextBuilder,
-                                  style: const TextStyle(fontSize: 20)),
-                              ExtendedText(r.content,
-                                  specialTextSpanBuilder: highlightTextBuilder),
-                            ],
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text("${r.insertDate}",
-                                textAlign: TextAlign.end,
-                                style: const TextStyle(
-                                    fontSize: 12, color: Colors.grey)),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ),
+          loading: () => const SizedBox.shrink(),
+          error: (error, stack) => Text('错误: $error'),
         );
       },
     );
   }
-
-  /// 对话框
-  AlertDialog buildDialog(BuildContext context, MainTableRowUiModel r) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return AlertDialog(
-      insetPadding: const EdgeInsets.all(0),
-      contentPadding: const EdgeInsets.all(0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
-      content: Container(
-        width: 420,
-        padding: const EdgeInsets.all(P.middle),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              r.idFormatted,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                  height: 1,
-                  letterSpacing: -1,
-                  fontFeatures: [FontFeature.tabularFigures()]),
-            ),
-            const SizedBox(height: P.small),
-            ExtendedText(
-              r.title,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
-              textAlign: TextAlign.center,
-              specialTextSpanBuilder: highlightTextBuilder,
-            ),
-            const SizedBox(height: P.extraSmall),
-            ExtendedText(
-              r.content,
-              specialTextSpanBuilder: highlightTextBuilder,
-              style: const TextStyle(fontSize: 18, height: 1.3),
-            ),
-            const SizedBox(height: P.middle),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(P.small),
-                ),
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: const Text("确定"),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  final highlightTextBuilder =
-      HighlightTextSpanBuilder((src) => src.copyWith(color: Colors.red));
-}
-
-class P {
-  static const middle = 16.0;
-  static const small = 8.0;
-  static const extraSmall = 4.0;
 }

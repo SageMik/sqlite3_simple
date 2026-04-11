@@ -1,4 +1,4 @@
-import 'impl/kind.dart' if(dart.library.html) 'impl_web/kind.dart';
+import 'db_manager_kind.dart';
 import 'main_table_dao.dart';
 
 abstract interface class DbManager<TDao extends MainTableDao> {

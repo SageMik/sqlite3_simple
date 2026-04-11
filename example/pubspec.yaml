@@ -14,13 +14,14 @@ dependencies:
 
   cupertino_icons: ^1.0.6
   path: ^1.9.0
+  meta: ^1.17.0
   flutter_localizations:
     sdk: flutter
   intl: any
   extended_text: ^15.0.2
   path_provider: ^2.1.5
+  flutter_riverpod: ^3.3.1
   web: ^1.1.1
-  meta: ^1.17.0
   squadron: ^7.4.3
 
   sqlite3: ^3.3.0
