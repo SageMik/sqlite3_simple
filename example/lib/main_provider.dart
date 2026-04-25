@@ -48,9 +48,10 @@ final searchResultProvider = FutureProvider<List<MainTableRowUiModel>?>((
   final tokenizer = ref.watch(tokenizerProvider);
 
   final dao = dbManager.dao;
-  final rows = query.isEmpty
+  final actualQuery = query.trim();
+  final rows = actualQuery.isEmpty
       ? await dao.selectAll()
-      : await dao.search(query.trim(), tokenizer);
+      : await dao.search(actualQuery, tokenizer);
   final idDigitLength = "${await dao.selectCount()}".length;
   return rows
       .map(
