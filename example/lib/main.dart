@@ -152,7 +152,14 @@ class MyApp extends StatelessWidget {
                   ),
           ),
           loading: () => const SizedBox.shrink(),
-          error: (error, stack) => Text('错误: $error'),
+          error: (error, stack) => Container(
+            height: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: P.middle),
+            width: double.infinity,
+            child: SingleChildScrollView(
+              child: SelectionArea(child: Text('错误: $error\n\n堆栈：$stack')),
+            ),
+          ),
         );
       },
     );

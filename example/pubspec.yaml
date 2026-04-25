@@ -25,6 +25,7 @@ dependencies:
   squadron: ^7.4.3
 
   sqlite3: ^3.3.0
+  sqlite3_web: ^0.7.0
 
   sqflite_common_ffi: ^2.4.0
 

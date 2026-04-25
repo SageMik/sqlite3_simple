@@ -27,9 +27,9 @@ final dbManagerProvider = AsyncNotifierProvider(DbManagerNotifier.new);
 class DbManagerNotifier extends AsyncNotifier<DbManager> {
   @override
   Future<DbManager> build() async {
-    await state.value?.close();
     final kind = ref.watch(dbManagerKindProvider);
     final dbManager = DbManager.create(kind);
+    ref.onDispose(dbManager.close); // 如果初始化抛出异常，调用 `close` 可能触发 `dao` 未初始化报错
     await dbManager.init();
     await dbManager.dao.insertRandomData(30);
     return dbManager;

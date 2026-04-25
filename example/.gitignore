@@ -24,8 +24,8 @@ migrate_working_dir/
 #.vscode/
 
 # dart compile js (worker) 附属产物
-web/*.js.deps
-web/*.js.map
+web/**/*.js.deps
+web/**/*.js.map
 
 # Flutter/Dart/Pub related
 **/doc/api/

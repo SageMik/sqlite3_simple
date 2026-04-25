@@ -5,9 +5,9 @@ import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
 import 'package:sqlite3/wasm.dart';
-import 'package:sqlite3_simple/jieba_dict.dart';
 import 'package:web/web.dart';
 
+import '../common/jieba_dict_type.dart';
 import 'bridge_callbacks_default.dart';
 
 /// 用于支持 Simple 扩展在 Web 上正常运行的默认加载器实现，主要职责如下：
@@ -23,22 +23,15 @@ final class DefaultSimpleWasmModuleLoader extends WasmModuleLoader {
   /// 传入「路径 → 字节」的映射 [files] 以供 Wasm 模块进行文件读写。
   /// 例如，如果自定义了 Simple 的拼音文件 `select pinyin_dict('/path/to/pinyin.txt')` ，则需要传入 `{ "/path/to/pinyin.txt": 拼音文件字节内容 }` 供扩展使用。
   ///
-  /// 如需使用结巴分词，需要提供 [JiebaDictType] 中所有结巴分词字典文件的 [Uint8List] 。可以通过 [JiebaDictAssets.loadPaths] 获取内置字典路径，然后在 Web Worker 中通过 `fetch` 函数进行读取，避免堵塞主线程导致 UI 卡顿。
-  /// ```
-  static Future<DefaultSimpleWasmModuleLoader> create({
+  /// 如需使用结巴分词，需要提供 [JiebaDictType] 中所有结巴分词字典文件的 [Uint8List] 。可以通过 [JiebaDictAssets.loadPaths] 获取内置字典路径，然后在 Web Worker 中通过 `fetch` 函数进行读取，避免阻塞主线程导致 UI 卡顿。
+  DefaultSimpleWasmModuleLoader({
     Map<String, Uint8List> files = const {},
-  }) async {
-    return DefaultSimpleWasmModuleLoader._(
-      DefaultSimpleBridgeCallbacks(files),
-    );
-  }
+  }) : this._(DefaultSimpleBridgeCallbacks(files));
 
   /// 需要更新 Wasm 模块读写的文件时调用此函数。
   ///
   /// 例如，在运行时调用 `select pinyin_dict('/path/to/new_pinyin.txt')` 更新了 Simple 的拼音文件，需要向 [files] 传入 `{ "/path/to/new_pinyin.txt": 拼音文件字节内容 }`。
-  Future<void> updateFiles({
-    required Map<String, Uint8List> files
-  }) async {
+  Future<void> updateFiles({required Map<String, Uint8List> files}) async {
     _callbacks.updateFiles(files);
   }
 

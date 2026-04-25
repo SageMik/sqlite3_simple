@@ -752,6 +752,14 @@ packages:
       relative: true
     source: path
     version: "2.0.0"
+  sqlite3_web:
+    dependency: "direct main"
+    description:
+      name: sqlite3_web
+      sha256: "857e913bd27ec7d1d9eb517c87ea43d1d851f5ad4c7334b7a4f6114b9929584b"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.7.0"
   sqlparser:
     dependency: transitive
     description:

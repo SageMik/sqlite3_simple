@@ -13,7 +13,7 @@ import '../../db_manager.dart';
 import 'custom_expression.dart';
 import 'database.dart';
 
-class DriftDbManager implements DbManager<DriftDao> {
+final class DriftDbManager extends DbManager<DriftDao> {
   @override
   late final DriftDao dao;
 

@@ -10,7 +10,7 @@ import '../../db_manager.dart';
 import '../../main_table_dao.dart';
 import '../../main_table_row.dart';
 
-class SqfliteCommonFfiDbManager implements DbManager<SqfliteCommonFfiDao> {
+final class SqfliteCommonFfiDbManager extends DbManager<SqfliteCommonFfiDao> {
   @override
   late final SqfliteCommonFfiDao dao;
 

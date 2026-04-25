@@ -39,6 +39,8 @@ extension Sqlite3SimpleEx on Sqlite3 {
   /// 将结巴分词所需字典文件保存到指定目录 [dir] ，
   /// 当字典文件存在时，通过 [overwriteWhenExist] 控制是否覆盖，默认不覆盖。
   /// 使用结巴分词功能务必调用该函数，并执行本方法返回的SQL语句。
+  ///
+  /// 由于涉及访问 [AssetBundle] 的资源，该方法需要在主隔离（Main Isolate）中调用。
   Future<String> saveJiebaDict(
     String dir, {
     bool overwriteWhenExist = false,
