@@ -22,16 +22,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+
+    /// 通过国际化设置中文环境以让 Flutter 使用正确的中文字体，主要是 Windows 平台
+    const localizationsDelegates = [
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ];
+    const supportedLocales = [Locale('zh', 'CN')];
+
+    /// 自定义中文字体，避免 Flutter 默认加载字体的方式导致短时间的乱码
+    const fontFamily = 'HarmonyOS Sans SC';
+
+    final theme = ThemeData(fontFamily: fontFamily);
+    final colorScheme = theme.colorScheme;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [Locale('zh', 'CN')],
-      // 通过国际化设置中文环境以让 Flutter 使用正确的中文字体
+      theme: theme,
+      localizationsDelegates: localizationsDelegates,
+      supportedLocales: supportedLocales,
       home: Scaffold(
         appBar: AppBar(
           title: const Text(
@@ -82,7 +91,6 @@ class MyApp extends StatelessWidget {
       child: Consumer(
         builder: (context, ref, _) {
           return Table(
-            key: UniqueKey(), /// TODO: Web 平台首次加载，首列 [IntrinsicColumnWidth] 有问题，无法计算出正确宽度，原因不明
             columnWidths: const {
               0: IntrinsicColumnWidth(),
               1: FlexColumnWidth(),
@@ -107,7 +115,6 @@ class MyApp extends StatelessWidget {
                     ref.invalidate(searchResultProvider);
                   } else {
                     if (kDebugMode) {
-                      print("\n");
                       print("切换数据库至：${kind2uiString[v]}");
                     }
                     ref.read(dbManagerKindProvider.notifier).update(v);
