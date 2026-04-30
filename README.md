@@ -15,13 +15,13 @@
 
 基于 [Simple](https://github.com/wangfenjin/simple) (支持中文和拼音的 SQLite fts5 全文搜索扩展) 和 [sqlite3.dart](https://github.com/simolus3/sqlite3.dart) 的 Flutter 库，用于 SQLite 中文和拼音全文搜索。
 
-| 支持平台                                                                                                        | 示例                          |
-|-------------------------------------------------------------------------------------------------------------|-----------------------------|
-| **Android ([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v2.0.0/example.apk))** | ![Android](img/android.png) |
-| **iOS**                                                                                                     | ![iOS](img/ios.png)         |
-| **Windows**                                                                                                 | ![Windows](img/windows.png) |
-| **MacOS**                                                                                                   | ![MacOS](img/macos.png)     |
-| **Linux**                                                                                                   | ![Linux](img/linux.png)     |
+| 支持平台                                                                                                        | 示例                              |
+|-------------------------------------------------------------------------------------------------------------|---------------------------------|
+| **Android ([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v2.0.0/example.apk))** | ![Android](doc/img/android.png) |
+| **iOS**                                                                                                     | ![iOS](doc/img/ios.png)         |
+| **Windows**                                                                                                 | ![Windows](doc/img/windows.png) |
+| **MacOS**                                                                                                   | ![MacOS](doc/img/macos.png)     |
+| **Linux**                                                                                                   | ![Linux](doc/img/linux.png)     |
 
 ## 目录
 

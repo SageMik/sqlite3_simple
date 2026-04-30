@@ -7,7 +7,7 @@ import '../../main_table_row.dart';
 import 'sqlite3_wasm.dart';
 
 final class Sqlite3WasmDbManager extends DbManager<Sqlite3WasmDao> {
-  /// 将结巴分词字典文件的加载和数据库操作，放到由 [Squadron](https://github.com/d-markey/squadron) 管理的 Web Worker，避免阻塞主线程导致 UI 卡顿，具体见 [Sqlite3Wasm] 。
+  /// 将结巴分词字典文件的加载和数据库操作，放到由 [Squadron](https://github.com/d-markey/squadron) 管理的 Web Worker，具体见 [Sqlite3Wasm] 。
   final _pool = Sqlite3WasmWorkerPool(
     concurrencySettings: const ConcurrencySettings(
       minWorkers: 1,

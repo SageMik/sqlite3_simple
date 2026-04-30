@@ -1,13 +1,16 @@
+import 'dart:js_interop';
+
 import 'package:flutter/foundation.dart';
 import 'package:sqlite3/common.dart';
 import 'package:sqlite3_simple/assets.dart';
+import 'package:sqlite3_simple/jieba_dict_type.dart';
+import 'package:sqlite3_simple_example/data/impl_web/sqlite3_web/sqlite3_web_worker.dart';
 import 'package:sqlite3_web/sqlite3_web.dart';
 
 import '../../../utils/zero_width.dart';
 import '../../db_manager.dart';
 import '../../main_table_dao.dart';
 import '../../main_table_row.dart';
-import 'sqlite3_web_request.dart';
 
 final class Sqlite3WebDbManager extends DbManager<Sqlite3WebDao> {
   late final WebSqlite _webSqlite3;
@@ -30,13 +33,16 @@ final class Sqlite3WebDbManager extends DbManager<Sqlite3WebDao> {
       DatabaseImplementation.inMemoryShared,
     );
 
-    final jiebaDictPaths = await JiebaDictAssets.loadPaths();
+    final Map<JiebaDictType, String> jiebaDictPaths = await JiebaDictAssets.loadPaths();
     const jiebaDictDir = '.dict';
     await db.customRequest(
-      UpdateJiebaDictRequest({
-        for (final e in jiebaDictPaths.entries)
-          '$jiebaDictDir/${e.key.filename}': e.value,
-      }).toJs(),
+      {
+        'type': 'updateJiebaDict',
+        'path2url': {
+          for (final e in jiebaDictPaths.entries)
+            '$jiebaDictDir/${e.key.filename}': e.value,
+        }
+      }.jsify(),
     );
     await db.execute("SELECT jieba_dict(?)", parameters: [jiebaDictDir]);
     final init = await db.select(

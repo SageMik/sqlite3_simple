@@ -1,11 +1,11 @@
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 
 import 'package:sqlite3/wasm.dart';
 import 'package:sqlite3_simple/web.dart';
 import 'package:sqlite3_web/sqlite3_web.dart';
 
 import '../fetch.dart';
-import 'sqlite3_web_request.dart';
 
 /// 调整代码后，在 `example` 目录下执行如下命令重新生成：
 /// ```
@@ -57,15 +57,18 @@ final class Sqlite3WebDb extends WorkerDatabase {
     ClientConnection connection,
     CustomClientDatabaseRequest request,
   ) async {
+    // 将内置的结巴分词文件传递给 Wasm 模块以供运行时读取，不需要结巴分词直接 `return null` 即可
     try {
-      switch (Sqlite3WebRequest.fromJs(request.request as JSObject)) {
-        case UpdateJiebaDictRequest r:
-          await _loader.updateFiles(
-            files: {
-              for (final e in r.path2url.entries)
-                e.key: await fetchFromBase(e.value),
-            },
-          );
+      final requestJO = request.request as JSObject;
+      final type = (requestJO['type'] as JSString).toDart;
+      switch(type) {
+        case 'updateJiebaDict': // 自定义消息 { 'type': 'updateJiebaDict', 'path2url': 虚拟路径 → 文件内容 }
+          final path2url = (requestJO['path2url'].dartify() as Map).cast<String, String>();
+          final jiebaDictFiles = {
+            for (final e in path2url.entries)
+              e.key: await fetchFromBase(e.value),
+          };
+          _loader.updateFiles((it) => it..addAll(jiebaDictFiles)); // 更新结巴分词文件，其他已有文件继续保留
       }
     } catch (e) {
       return null;
