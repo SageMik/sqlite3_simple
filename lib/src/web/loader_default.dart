@@ -39,7 +39,7 @@ final class DefaultSimpleWasmModuleLoader extends WasmModuleLoader {
   /// ```
   void updateFiles(
       Map<String, Uint8List> Function(Map<String, Uint8List> files) apply,
-  ) async {
+  ) {
     _files = apply(_files);
     _callbacks.updateFiles(_files);
   }

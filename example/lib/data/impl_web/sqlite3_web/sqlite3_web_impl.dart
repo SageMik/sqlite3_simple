@@ -4,15 +4,16 @@ import 'package:flutter/foundation.dart';
 import 'package:sqlite3/common.dart';
 import 'package:sqlite3_simple/assets.dart';
 import 'package:sqlite3_simple/jieba_dict_type.dart';
-import 'package:sqlite3_simple_example/data/impl_web/sqlite3_web/sqlite3_web_worker.dart';
 import 'package:sqlite3_web/sqlite3_web.dart';
 
 import '../../../utils/zero_width.dart';
 import '../../db_manager.dart';
 import '../../main_table_dao.dart';
 import '../../main_table_row.dart';
+import '../../main_table_schema.dart';
 
-final class Sqlite3WebDbManager extends DbManager<Sqlite3WebDao> {
+final class Sqlite3WebDbManager extends DbManager<Sqlite3WebDao>
+    implements Fts5Creator<Database> {
   late final WebSqlite _webSqlite3;
 
   @override
@@ -32,6 +33,7 @@ final class Sqlite3WebDbManager extends DbManager<Sqlite3WebDao> {
       'database',
       DatabaseImplementation.inMemoryShared,
     );
+    dao = Sqlite3WebDao(db);
 
     final Map<JiebaDictType, String> jiebaDictPaths = await JiebaDictAssets.loadPaths();
     const jiebaDictDir = '.dict';
@@ -50,29 +52,17 @@ final class Sqlite3WebDbManager extends DbManager<Sqlite3WebDao> {
     );
     if (kDebugMode) print(init.result);
 
-    dao = Sqlite3WebDao(db);
-    await dao.initFts5();
+    final version = (await db.select("PRAGMA user_version")).result.first['user_version'];
+    if(version == 0) {
+      await createMainAndFts5(db);
+      db.execute("PRAGMA user_version = 1");
+    }
   }
 
   @override
-  Future<void> close() {
-    return dao.db.dispose();
-  }
-}
-
-class Sqlite3WebDao extends MainTableDaoBase<Database> {
-  Sqlite3WebDao(super.db);
-
-  final fts5Tokenizer = "simple";
-  final mainTable = "custom";
-  final id = "id",
-      title = "title",
-      content = "content",
-      insertDate = "insert_date";
-  final fts5Table = "t1";
-
-  @override
-  Future<void> initFts5() async {
+  @protected
+  Future<void> createMainAndFts5(Database db) async {
+    /// 主表
     await db.execute('''
       CREATE TABLE $mainTable (
         $id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -82,6 +72,7 @@ class Sqlite3WebDao extends MainTableDaoBase<Database> {
       );
     ''');
 
+    /// FTS5虚表
     await db.execute('''
       CREATE VIRTUAL TABLE $fts5Table USING fts5(
         $title, $content, $insertDate UNINDEXED, 
@@ -91,14 +82,12 @@ class Sqlite3WebDao extends MainTableDaoBase<Database> {
       );
     ''');
 
-    final newInsert =
-        '''
-      INSERT INTO $fts5Table(rowid, $title, $content, $insertDate) 
+    const newInsert = '''
+      INSERT INTO $fts5Table(rowid, $title, $content, $insertDate)
         VALUES (new.$id, new.$title, new.$content, new.$insertDate);
     ''';
-    final deleteInsert =
-        '''
-      INSERT INTO $fts5Table($fts5Table, rowid, $title, $content, $insertDate) 
+    const deleteInsert = '''
+      INSERT INTO $fts5Table($fts5Table, rowid, $title, $content, $insertDate)
         VALUES ('delete', old.$id, old.$title, old.$content, old.$insertDate);
     ''';
     await db.execute('''
@@ -118,6 +107,15 @@ class Sqlite3WebDao extends MainTableDaoBase<Database> {
       END;
     ''');
   }
+
+  @override
+  Future<void> close() {
+    return dao.db.dispose();
+  }
+}
+
+class Sqlite3WebDao extends MainTableDaoBase<Database> {
+  Sqlite3WebDao(super.db);
 
   @override
   Future<void> insertRandomData(int length) async {

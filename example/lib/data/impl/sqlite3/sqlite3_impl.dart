@@ -1,13 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sqlite3/common.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:sqlite3_simple/sqlite3_simple.dart';
 
 import '../../db_manager.dart';
 import 'sqlite3_dao.dart';
 
-final class Sqlite3DbManager extends DbManager<Sqlite3Dao> {
+final class Sqlite3DbManager extends DbManager<Sqlite3Dao>
+    with Sqlite3Fts5Creator
+    implements Fts5Creator<CommonDatabase> {
   @override
   late final Sqlite3Dao dao;
 
@@ -28,7 +31,11 @@ final class Sqlite3DbManager extends DbManager<Sqlite3Dao> {
     final init = db.select("SELECT jieba_query('Jieba分词初始化（提前加载避免后续等待）')");
     if (kDebugMode) print(init);
 
-    await dao.initFts5();
+    final version = db.select("PRAGMA user_version").first['user_version'];
+    if (version == 0) {
+      await createMainAndFts5(db);
+      db.execute("PRAGMA user_version = 1");
+    }
   }
 
   @override

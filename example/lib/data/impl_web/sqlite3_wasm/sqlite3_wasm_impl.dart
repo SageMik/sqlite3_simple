@@ -38,9 +38,6 @@ class Sqlite3WasmDao implements MainTableDao {
   Sqlite3WasmDao(this._pool);
 
   @override
-  Future<void> initFts5() => _pool.initFts5();
-
-  @override
   Future<void> insertRandomData(int length) => _pool.insertRandomData(length);
 
   @override

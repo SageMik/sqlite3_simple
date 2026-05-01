@@ -18,7 +18,7 @@ final kind2uiString = {for (final t in DbManagerKind.values) t: t.name};
 
 /// [DbManager] 具体实现。
 ///  - 非 Web 平台： `data\impl\kind.dart`；
-///  - Web 平台：`dart\impl_web\kind.dart`。
+///  - Web 平台：`data\impl_web\kind.dart`。
 final dbManagerKindProvider = mutable(kind2uiString.keys.first);
 
 /// [DbManager] 数据库管理类

@@ -1,25 +1,14 @@
-
-
+import 'package:meta/meta.dart';
 import 'package:sqlite3/common.dart';
 
 import '../../../utils/zero_width.dart';
 import '../../main_table_dao.dart';
 import '../../main_table_row.dart';
+import '../../main_table_schema.dart';
 
-class Sqlite3Dao extends MainTableDaoBase<CommonDatabase> {
-  Sqlite3Dao(super.db);
-
-  // final fts5Tokenizer = "simple 0";  // 关闭拼音搜索
-  final fts5Tokenizer = "simple";
-  final mainTable = "custom";
-  final id = "id",
-      title = "title",
-      content = "content",
-      insertDate = "insert_date";
-  final fts5Table = "t1";
-
-  @override
-  Future<void> initFts5() async {
+mixin Sqlite3Fts5Creator {
+  @protected
+  Future<void> createMainAndFts5(CommonDatabase db) async {
     /// 主表
     db.execute('''
       CREATE TABLE $mainTable (
@@ -41,11 +30,11 @@ class Sqlite3Dao extends MainTableDaoBase<CommonDatabase> {
     ''');
 
     /// 触发器
-    final newInsert = '''
+    const newInsert = '''
       INSERT INTO $fts5Table(rowid, $title, $content, $insertDate) 
         VALUES (new.$id, new.$title, new.$content, new.$insertDate);
     ''';
-    final deleteInsert = '''
+    const deleteInsert = '''
       INSERT INTO $fts5Table($fts5Table, rowid, $title, $content, $insertDate) 
         VALUES ('delete', old.$id, old.$title, old.$content, old.$insertDate);
     ''';
@@ -66,6 +55,10 @@ class Sqlite3Dao extends MainTableDaoBase<CommonDatabase> {
       END;
     ''');
   }
+}
+
+class Sqlite3Dao extends MainTableDaoBase<CommonDatabase> {
+  Sqlite3Dao(super.db);
 
   @override
   Future<void> insertRandomData(int length) async {

@@ -9,9 +9,9 @@ import '../fetch.dart';
 
 /// 调整代码后，在 `example` 目录下执行如下命令重新生成：
 /// ```
-/// dart compile js lib\data\impl_web\sqlite3_web\sqlite3_web_worker.dart -o web\sqlite3_web_worker.dart.js -O4
+/// dart compile js lib\data\impl_web\sqlite3_web\sqlite3_web_worker.dart -o web\sqlite3_web_worker.dart.js
 /// ```
-/// 调试可以不加编译优化等级，最终发布时再使用 `-O4` 。
+/// 建议最终发布时使用 `-O4` 编译优化等级。
 void main() {
   WebSqlite.workerEntrypoint(controller: Sqlite3WebDbController());
 }

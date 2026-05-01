@@ -11,12 +11,11 @@ part of 'sqlite3_wasm.dart';
 /// Command ids used in operations map
 const int _$closeDatabaseId = 1;
 const int _$initDatabaseId = 2;
-const int _$initFts5Id = 3;
-const int _$insertRandomDataId = 4;
-const int _$searchId = 5;
-const int _$selectAllId = 6;
-const int _$selectCountId = 7;
-const int _$updateAllId = 8;
+const int _$insertRandomDataId = 3;
+const int _$searchId = 4;
+const int _$selectAllId = 5;
+const int _$selectCountId = 6;
+const int _$updateAllId = 7;
 
 /// WorkerService operations for Sqlite3Wasm
 extension on Sqlite3Wasm {
@@ -26,7 +25,6 @@ extension on Sqlite3Wasm {
       final $dsr = _$Deser(contextAware: false);
       return initDatabase($dsr.$3($req.args[0]));
     },
-    _$initFts5Id: ($req) => initFts5(),
     _$insertRandomDataId: ($req) {
       final $dsr = _$Deser(contextAware: false);
       return insertRandomData($dsr.$0($req.args[0]));
@@ -56,7 +54,7 @@ extension on Sqlite3Wasm {
 
 /// Invoker for Sqlite3Wasm, implements the public interface to invoke the
 /// remote service.
-base mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
+mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
   @override
   Future<void> closeDatabase() => send(_$closeDatabaseId);
 
@@ -65,9 +63,6 @@ base mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
     final $sr = _$Ser(contextAware: false);
     return send(_$initDatabaseId, args: [$sr.$3(jiebaDictPath2Url)]);
   }
-
-  @override
-  Future<void> initFts5() => send(_$initFts5Id);
 
   @override
   Future<void> insertRandomData(int length) =>
@@ -110,7 +105,11 @@ base mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
 
 /// Facade for Sqlite3Wasm, implements other details of the service unrelated to
 /// invoking the remote service.
-base mixin _$Sqlite3Wasm$Facade implements Sqlite3Wasm {
+mixin _$Sqlite3Wasm$Facade implements Sqlite3Wasm {
+  @override
+  Future<void> createMainAndFts5(CommonDatabase db) =>
+      throw UnimplementedError();
+
   @override
   // ignore: unused_element
   Sqlite3Dao get _dao => throw UnimplementedError();
@@ -149,8 +148,7 @@ extension $Sqlite3WasmLocalWorkerExt on Sqlite3Wasm {
 }
 
 /// WorkerService class for Sqlite3Wasm
-base class _$Sqlite3Wasm$WorkerService extends Sqlite3Wasm
-    implements WorkerService {
+class _$Sqlite3Wasm$WorkerService extends Sqlite3Wasm implements WorkerService {
   _$Sqlite3Wasm$WorkerService() : super();
 
   @override
@@ -223,9 +221,6 @@ base class Sqlite3WasmWorkerPool extends WorkerPool<Sqlite3WasmWorker>
   @override
   Future<void> initDatabase(Map<JiebaDictType, String> jiebaDictPath2Url) =>
       execute((w) => w.initDatabase(jiebaDictPath2Url));
-
-  @override
-  Future<void> initFts5() => execute((w) => w.initFts5());
 
   @override
   Future<void> insertRandomData(int length) =>

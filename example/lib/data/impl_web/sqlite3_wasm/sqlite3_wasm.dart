@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'package:meta/meta.dart';
 import 'package:sqlite3/wasm.dart';
 import 'package:sqlite3_simple/jieba_dict_type.dart';
 import 'package:sqlite3_simple/web.dart';
@@ -17,11 +18,11 @@ part 'sqlite3_wasm.worker.g.dart';
 /// 调整代码后，在 `example` 目录下执行如下命令重新生成：
 /// ```shell
 /// dart run build_runner build -d
-/// dart compile js lib\data\impl_web\sqlite3_wasm\sqlite3_wasm.web.g.dart -o web\sqlite3_wasm.web.g.dart.js -O4
+/// dart compile js lib\data\impl_web\sqlite3_wasm\sqlite3_wasm.web.g.dart -o web\sqlite3_wasm.web.g.dart.js
 /// ```
-/// 调试可以不加编译优化等级，最终发布时再使用 `-O4` 。
+/// 建议最终发布时使用 `-O4` 编译优化等级。
 @SquadronService(baseUrl: "~", targetPlatform: TargetPlatform.js)
-base class Sqlite3Wasm implements MainTableDao {
+class Sqlite3Wasm with Sqlite3Fts5Creator implements MainTableDao {
   late final Sqlite3Dao _dao;
 
   late WasmSqlite3 _wasmSqlite3;
@@ -55,20 +56,28 @@ base class Sqlite3Wasm implements MainTableDao {
     final init = db.select("SELECT jieba_query('Jieba分词初始化（提前加载避免后续等待）')");
     print(init);
 
+    final version = db.select("PRAGMA user_version").first['user_version'];
+    if (version == 0) {
+      await createMainAndFts5(db);
+      db.execute("PRAGMA user_version = 1");
+    }
+
     stopWatch.stop();
     print("数据库初始化耗时：${(stopWatch.elapsedMilliseconds)}ms");
+  }
 
-    await _dao.initFts5();
+  /// 避免 `squadron` 生成报错
+  @override
+  @protected
+  Future<void> createMainAndFts5(CommonDatabase db) {
+    return super.createMainAndFts5(db);
   }
 
   @SquadronMethod()
   Future<void> closeDatabase() async {
+    _dao.db.close();
     _wasmSqlite3.unregisterVirtualFileSystem(_inMemoryFileSystem);
   }
-
-  @override
-  @SquadronMethod()
-  Future<void> initFts5() => _dao.initFts5();
 
   @override
   @SquadronMethod()

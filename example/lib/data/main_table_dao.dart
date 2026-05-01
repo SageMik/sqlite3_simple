@@ -6,10 +6,6 @@ import 'main_table_row.dart';
 enum Tokenizer { jieba, simple }
 
 abstract interface class MainTableDao {
-
-  /// 初始化 SQLite FTS5 虚表，官方说明：https://sqlite.org/fts5.html
-  Future<void> initFts5();
-
   /// 插入 [length] 行随机中文词组数据
   Future<void> insertRandomData(int length);
 

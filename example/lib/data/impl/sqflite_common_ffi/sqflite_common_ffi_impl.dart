@@ -9,8 +9,10 @@ import '../../../utils/zero_width.dart';
 import '../../db_manager.dart';
 import '../../main_table_dao.dart';
 import '../../main_table_row.dart';
+import '../../main_table_schema.dart';
 
-final class SqfliteCommonFfiDbManager extends DbManager<SqfliteCommonFfiDao> {
+final class SqfliteCommonFfiDbManager extends DbManager<SqfliteCommonFfiDao>
+    implements Fts5Creator<Database> {
   @override
   late final SqfliteCommonFfiDao dao;
 
@@ -26,35 +28,25 @@ final class SqfliteCommonFfiDbManager extends DbManager<SqfliteCommonFfiDao> {
         await sqlite3.saveJiebaDict(jiebaDictPath, overwriteWhenExist: true);
     if (kDebugMode) print("用于设置结巴分词字典路径：$jiebaDictSql");
 
-    final db = await databaseFactoryFfi.openDatabase(inMemoryDatabasePath);
+    final db = await databaseFactoryFfi.openDatabase(
+      inMemoryDatabasePath,
+      options: OpenDatabaseOptions(
+        version: 1,
+        onCreate: (db, version) => createMainAndFts5(db),
+      ),
+    );
     dao = SqfliteCommonFfiDao(db);
 
     db.execute(jiebaDictSql);
-    final init =
-        await db.rawQuery("SELECT jieba_query('Jieba分词初始化（提前加载避免后续等待）')");
+    final init = await db.rawQuery(
+      "SELECT jieba_query('Jieba分词初始化（提前加载避免后续等待）')",
+    );
     if (kDebugMode) print(init);
-
-    await dao.initFts5();
   }
 
   @override
-  Future<void> close() => dao.db.close();
-}
-
-class SqfliteCommonFfiDao extends MainTableDaoBase<Database> {
-  SqfliteCommonFfiDao(super.db);
-
-  // final fts5Tokenizer = "simple 0";  // 关闭拼音搜索
-  final fts5Tokenizer = "simple";
-  final mainTable = "custom";
-  final id = "id",
-      title = "title",
-      content = "content",
-      insertDate = "insert_date";
-  final fts5Table = "t1";
-
-  @override
-  Future<void> initFts5() async {
+  @protected
+  Future<void> createMainAndFts5(Database db) async {
     /// 主表
     await db.execute('''
       CREATE TABLE $mainTable (
@@ -76,11 +68,11 @@ class SqfliteCommonFfiDao extends MainTableDaoBase<Database> {
     ''');
 
     /// 触发器
-    final newInsert = '''
+    const newInsert = '''
       INSERT INTO $fts5Table(rowid, $title, $content, $insertDate) 
         VALUES (new.$id, new.$title, new.$content, new.$insertDate);
     ''';
-    final deleteInsert = '''
+    const deleteInsert = '''
       INSERT INTO $fts5Table($fts5Table, rowid, $title, $content, $insertDate) 
         VALUES ('delete', old.$id, old.$title, old.$content, old.$insertDate);
     ''';
@@ -101,6 +93,13 @@ class SqfliteCommonFfiDao extends MainTableDaoBase<Database> {
       END;
     ''');
   }
+
+  @override
+  Future<void> close() => dao.db.close();
+}
+
+class SqfliteCommonFfiDao extends MainTableDaoBase<Database> {
+  SqfliteCommonFfiDao(super.db);
 
   @override
   Future<void> insertRandomData(int length) async {

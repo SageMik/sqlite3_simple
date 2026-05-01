@@ -48,11 +48,6 @@ class DriftDao extends MainTableDaoBase<AppDatabase> {
 
   T1 get fts5Table => db.t1;
 
-  /// 见 [AppDatabase.buildFts5Triggers]
-  @override
-  @Deprecated("不需要手动调用")
-  Future<void> initFts5() async {}
-
   @override
   Future<void> insertRandomData(int length) {
     return db.batch((b) {

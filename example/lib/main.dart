@@ -14,7 +14,13 @@ import 'widget/search_result_dialog.dart';
 import 'widget/search_result_list.dart';
 
 void main() {
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(
+    ProviderScope(
+      child: const MyApp(),
+      retry: (retryCount, error) =>
+          ProviderContainer.defaultRetry(retryCount, error, maxRetries: 0),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -22,7 +28,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     /// 通过国际化设置中文环境以让 Flutter 使用正确的中文字体，主要是 Windows 平台
     const localizationsDelegates = [
       GlobalMaterialLocalizations.delegate,
