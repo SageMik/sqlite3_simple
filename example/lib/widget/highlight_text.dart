@@ -12,14 +12,16 @@ class HighlightText extends RegExpSpecialText {
   @override
   InlineSpan finishText(int start, Match match,
       {TextStyle? textStyle, SpecialTextGestureTapCallback? onTap}) {
-    final value = match[0] ?? "";
+    final actualText = match[0] ?? "";
+    // 使用正则表达式清除零宽字符，避免实际渲染零宽字符导致文本宽高发生微小的变动
+    final showingText = actualText.replaceAll(RegExp('[${ZeroWidth.start}${ZeroWidth.end}]'), '');
     return SpecialTextSpan(
-      text: value.replaceAll('[${ZeroWidth.start}${ZeroWidth.end}]', ''),
-      actualText: value,
+      text: showingText,
+      actualText: actualText,
       style: highLightTextStyle(textStyle ?? const TextStyle()),
       recognizer: (TapGestureRecognizer()
         ..onTap = () {
-          onTap?.call(value);
+          onTap?.call(actualText);
         }),
       mouseCursor: SystemMouseCursors.text,
     );
