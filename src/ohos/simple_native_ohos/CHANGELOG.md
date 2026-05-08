@@ -1,6 +1,10 @@
+## 2.1.0
+
+- 更新原生库至 [simple v0.7.1](https://github.com/wangfenjin/simple/releases/tag/v0.7.1) 。`Nv1.0.6` 基于当时原生库的最新提交进行构建，以修复 [结巴分词搜索 `C#` 出错](https://github.com/wangfenjin/simple/issues/176) 的问题，但 `Nv2.0.0` 又将版本降回至 [v0.5.2](https://github.com/wangfenjin/simple/releases/tag/v0.5.2) 导致问题复现，现重新升级以解决此问题。
+
 ## 2.0.0+1
 
-- 将替换拼音文件的操作由 GitHub Actions 迁移至最外层 CMakeLists.txt ，以便直接引用 CMakeLists.txt 的项目也使用替换的拼音文件，更新测试用例以验证替换生效
+- 将替换拼音文件的操作由 GitHub Actions 迁移至最外层 CMakeLists.txt ，以便直接引用 CMakeLists.txt 的项目也使用替换的拼音文件，更新测试用例以验证替换生效。
 
 ## 2.0.0
 

@@ -1,6 +1,6 @@
 {
   "name": "simple-native-ohos",
-  "version": "2.0.0+1",
+  "version": "2.1.0",
   "description": "Simple (支持中文和拼音的 SQLite fts5 全文搜索扩展) 的 HarmonyOS NEXT 原生库。",
   "main": "Index.ets",
   "author": "SageMik",

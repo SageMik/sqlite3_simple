@@ -2,8 +2,6 @@ name: 编译 Simple 原生库
 
 on:
   push:
-#    branches:
-#      - simple-native
     tags:
       - Nv*
   workflow_dispatch:
@@ -17,7 +15,6 @@ env:
 
 jobs:
   Windows:
-#    if: false
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -74,7 +71,6 @@ jobs:
 
 
   MacOS-iOS:
-#    if: false
     runs-on: macos-latest
 
     steps:
@@ -145,7 +141,6 @@ jobs:
 
 
   Android:
-#    if: false
     runs-on: ubuntu-latest
     environment: simple-native-android
 
@@ -181,7 +176,6 @@ jobs:
 
 
   HarmonyOS:
-#    if: false
     runs-on: ubuntu-latest
     environment: simple-native-ohos
 
@@ -224,7 +218,6 @@ jobs:
 
 
   Package:
-#    if: false
     runs-on: ubuntu-latest
     needs: [Windows, MacOS-iOS, Android, HarmonyOS]
     steps:
@@ -271,11 +264,20 @@ jobs:
           cd dist && zip -r ../libsimple.zip .
         shell: bash
 
+      - name: '提取 CHANGELOG 对应版本内容'
+        id: changelog
+        run: |
+          echo "release_notes<<EOF" >> "$GITHUB_OUTPUT"
+          python .github/scripts/extract_changelog.py "${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+        shell: bash
+
       - name: '上传最终产物到 Release'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG_NAME }}
           draft: true
+          body: ${{ steps.changelog.outputs.release_notes }}
           files: |
             libsimple.zip
             upload/*
