@@ -60,7 +60,7 @@ jobs:
 
       - name: '重命名编译产物'
         run: |
-          Copy-Item "../../_temp/windows/simple/src/release/simple.dll" simple.dll
+          Copy-Item "../../_temp/windows-x64/simple/src/release/simple.dll" simple.dll
         shell: pwsh
 
       - name: '上传 Windows 产物'
