@@ -67,14 +67,16 @@ class LibSimpleTest {
             )
         )
 
-        /** 将结巴分词字典文件保存到可以路径访问的目录，调用 `SELECT jieba_dict() 指定以便 Simple 扩展读取` */
+        /** 将结巴分词字典文件保存到可以路径访问的目录，调用 `SELECT jieba_dict()` 指定以便 Simple 扩展读取 */
         val assetDir = "cpp_jieba_dict"
         val dictDir = File(context.filesDir, assetDir)
-        dictDir.mkdirs()
-        context.assets.list(assetDir)!!.forEach { fileName ->
-            context.assets.open("$assetDir/$fileName").use { inputStream ->
-                FileOutputStream(File(dictDir, fileName)).use { outputStream ->
-                    inputStream.copyTo(outputStream)
+        if(!dictDir.exists()) {
+            dictDir.mkdirs()
+            for(fileName in arrayOf("jieba.dict.utf8", "hmm_model.utf8", "idf.utf8", "stop_words.utf8", "user.dict.utf8")) {
+                context.assets.open("$assetDir/$fileName").use { inputStream ->
+                    FileOutputStream(File(dictDir, fileName)).use { outputStream ->
+                        inputStream.copyTo(outputStream)
+                    }
                 }
             }
         }
@@ -103,9 +105,8 @@ class LibSimpleTest {
     private fun Cursor.checkFirstAndClose(expected: String) {
         moveToFirst()
         val result = getString(0)
-        println(result)
-        assertThat(result).isEqualTo(expected)
         close()
+        assertThat(result).isEqualTo(expected)
     }
 
     @After

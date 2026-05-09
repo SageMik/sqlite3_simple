@@ -10,4 +10,6 @@ ohpm install simple-native-ohos
 
 将 [`resolveLibSimplePath()`](src/main/ets/lib.ets) 的返回值作为 [@ohos.data.relationalStore (关系型数据库)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-data-relationalstore) 中 [`StoreConfig.pluginLibs`](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/arkts-apis-data-relationalstore-i#pluginlibs%E7%9A%84%E4%BD%BF%E7%94%A8%E7%BA%A6%E6%9D%9F%E5%92%8C%E7%A4%BA%E4%BE%8B) 配置项传入即可使用本扩展，具体示例见 [`LibSimple.test.ets`](src/ohosTest/ets/test/LibSimple.test.ets) 。
 
-若要使用结巴分词 `jieba_query()`，请参考 [Simple](https://github.com/wangfenjin/simple) 的说明和 [sqlite_simple 的实现](https://github.com/SageMik/sqlite3_simple/blob/main/lib/src/sqlite3_simple.dart)，自行获取 [cppjieba 字典文件](https://github.com/yanyiwu/cppjieba/tree/master/dict) 并调用 `jieba_dict()` 指定字典文件路径。
+若要使用结巴分词 `jieba_query()`，参考 [`LibSimple.test.ets`](src/ohosTest/ets/test/LibSimple.test.ets) 的 `testJiebaQuery()`。这个示例根据 [Simple](https://github.com/wangfenjin/simple) 的说明和 [`sqlite_simple` 的实现](https://github.com/SageMik/sqlite3_simple/blob/main/lib/src/sqlite3_simple.dart)，读写 [`cppjieba` 字典文件](https://github.com/yanyiwu/cppjieba/tree/master/dict) 并调用 `jieba_dict()` 指定字典路径，从而成功启用结巴分词。
+
+使用结巴分词时，建议正式查询前执行一次 `SELECT jieba_query()` ，避免后续加载等待。
