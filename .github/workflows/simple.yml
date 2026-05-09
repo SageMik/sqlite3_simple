@@ -270,7 +270,7 @@ jobs:
         id: changelog
         run: |
           echo "release_notes<<EOF" >> "$GITHUB_OUTPUT"
-          python .github/scripts/extract_changelog.py "${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          python scripts/extract_changelog.py "${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
         shell: bash
 
