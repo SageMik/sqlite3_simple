@@ -7,6 +7,8 @@ import 'package:archive/archive.dart';
 const version = "2.0.0+1";
 
 void main() async {
+  Directory.current = File(Platform.script.toFilePath()).parent.parent.path;
+
   final file2versionUpdated = {
     File('android/build.gradle'): (
       RegExp(r'simple-native-android:[^"]+'),
