@@ -30,7 +30,6 @@ void main(List<String> args) async {
   final releaseUrl = Uri.parse(
     'https://github.com/SageMik/sqlite3_simple/releases/download/Nv$version/libsimple.zip',
   );
-  print("开始下载 Simple 原生库：$releaseUrl");
   final remote2local = {
     'windows/simple.dll': File('$r/windows/simple.dll'),
     'macos/libsimple.dylib': File('$r/darwin/libsimple.dylib'),
@@ -45,10 +44,10 @@ void main(List<String> args) async {
       if (!await localZip.exists()) {
         throw Exception("本地文件不存在：$localZipPath");
       }
-      print("使用本地文件：$localZipPath");
+      print("[本地文件] $localZipPath");
       bytes.addAll(await localZip.readAsBytes());
     } else {
-      print("开始下载 Simple 原生库：$releaseUrl");
+      print("[开始下载] $releaseUrl");
       final request = await client.getUrl(releaseUrl);
       final response = await request.close();
       if (response.statusCode == 200) {
@@ -56,7 +55,7 @@ void main(List<String> args) async {
           bytes.addAll(chunk);
         }
       } else {
-        throw Exception("响应状态码错误：${response.statusCode}");
+        throw Exception("响应状态码错误 ${response.statusCode}");
       }
     }
     final archive = ZipDecoder().decodeBytes(bytes);
@@ -70,10 +69,11 @@ void main(List<String> args) async {
         await localFile.writeAsBytes(file.content as List<int>);
       }
     }
-    print("更新完成");
+    print("[更新完成] $version");
   } catch (e) {
-    print("更新失败：$e");
+    print("[更新失败] $e");
   } finally {
     client.close();
+    exit(0);
   }
 }
