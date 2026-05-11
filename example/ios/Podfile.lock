@@ -2,7 +2,7 @@ PODS:
   - Flutter (1.0.0)
   - integration_test (0.0.1):
     - Flutter
-  - sqlite3_simple (2.0.0):
+  - sqlite3_simple (2.1.0):
     - Flutter
     - FlutterMacOS
 
@@ -22,7 +22,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
-  sqlite3_simple: 835a9a30ef44fa8e240f19069ca595f905087109
+  sqlite3_simple: 4fb28e153dd615749ebab3cf73b76ecff6f158ec
 
 PODFILE CHECKSUM: 13ef514beecdb0dc5d3f5ec77eedc252f0003363
 

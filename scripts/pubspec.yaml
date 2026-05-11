@@ -1,0 +1,8 @@
+name: simple_scripts
+description: "Simple 原生库发布工具"
+environment:
+  sdk: '>=3.10.0 <4.0.0'
+dependencies:
+  archive: ^3.4.10
+  http: ^1.2.0
+  path: ^1.9.0

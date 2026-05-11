@@ -1,3 +1,9 @@
+## 2.1.0
+
+- **[ 原生库版本 ]** 更新至 [simple v0.7.1](https://github.com/wangfenjin/simple/releases/tag/v0.7.1) 。`Nv1.0.6` 基于当时原生库的最新提交进行构建，以修复 [结巴分词搜索 `C#` 出错](https://github.com/wangfenjin/simple/issues/176) 的问题，但 `Nv2.0.0` 又将版本降回至 [v0.5.2](https://github.com/wangfenjin/simple/releases/tag/v0.5.2) 导致问题复现，现重新升级以解决此问题。
+- **[修复]** 修复示例程序高亮文本相比原文本有宽高上有微小变化的问题，正确替换零宽字符（[#20](https://github.com/SageMik/sqlite3_simple/issues/20)）。
+- **[修复]** 修复错误依赖 `package:archive` 的问题，该依赖只用于开发时下载原生库（[#22](https://github.com/SageMik/sqlite3_simple/issues/22)）。
+
 ## 2.0.0
 
 * 迁移至 sqlite3: ^3.0.0 即 v3 版本，使用 Dart Hooks 构建 SQLite 原生库。
