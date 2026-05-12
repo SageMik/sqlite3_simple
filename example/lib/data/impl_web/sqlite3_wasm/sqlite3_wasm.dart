@@ -1,14 +1,18 @@
 // ignore_for_file: avoid_print
 
+import 'dart:typed_data';
+
 import 'package:meta/meta.dart';
 import 'package:sqlite3/wasm.dart';
 import 'package:sqlite3_simple/jieba_dict_type.dart';
 import 'package:sqlite3_simple/web.dart';
 import 'package:squadron/squadron.dart';
 
+import '../../db_manager.dart';
 import '../../impl/sqlite3/sqlite3_dao.dart';
 import '../../main_table_dao.dart';
 import '../../main_table_row.dart';
+import '../../pinyin_dict_kind.dart';
 import '../fetch.dart';
 import 'main_table_row_marshaler.dart';
 import 'sqlite3_wasm.activator.g.dart';
@@ -22,22 +26,28 @@ part 'sqlite3_wasm.worker.g.dart';
 /// ```
 /// 建议最终发布时使用 `-O4` 编译优化等级。
 @SquadronService(baseUrl: "~", targetPlatform: TargetPlatform.js)
-class Sqlite3Wasm with Sqlite3Fts5Creator implements MainTableDao {
+class Sqlite3Wasm extends IDbManager<CommonDatabase> with Sqlite3Fts5Creator implements MainTableDao {
   late final Sqlite3Dao _dao;
+  late final DefaultSimpleWasmModuleLoader _loader;
 
   late WasmSqlite3 _wasmSqlite3;
   final _inMemoryFileSystem = InMemoryFileSystem();
 
+  /// 使用 [initWithJiebaDict] 初始化数据库
+  @override
+  @Deprecated("")
+  Future<void> init() => initWithJiebaDict(const {});
+
   @SquadronMethod()
-  Future<void> initDatabase(
+  Future<void> initWithJiebaDict(
     Map<JiebaDictType, String> jiebaDictPath2Url,
   ) async {
     final stopWatch = Stopwatch()..start();
 
-    const jiebaDictDir = ".dict";
+    const jiebaDictDir = "sqlite3_simple_example/jieba_dict";
     _wasmSqlite3 = await WasmSqlite3.loadFromUrl(
       Uri.parse('sqlite3.wasm'),
-      loader: DefaultSimpleWasmModuleLoader(
+      loader: _loader = DefaultSimpleWasmModuleLoader(
         files: {
           for (final e in jiebaDictPath2Url.entries)
             "$jiebaDictDir/${e.key.filename}": await fetchFromBase(e.value),
@@ -73,8 +83,33 @@ class Sqlite3Wasm with Sqlite3Fts5Creator implements MainTableDao {
     return super.createMainAndFts5(db);
   }
 
+  @override
   @SquadronMethod()
-  Future<void> closeDatabase() async {
+  Future<Map<PinyinDictKind, String>> savePinyinDict() async {
+    const pinyinDictDir = "sqlite3_simple_example/pinyin_dict";
+    final Map<PinyinDictKind, String> kind2path = {};
+    final Map<String, Uint8List> path2asset = {};
+    final existingFiles = _loader.files;
+    for (final kind in PinyinDictKind.values) {
+      if(kind.assetName == null) {
+        kind2path[kind] = '';
+      } else {
+        final path = "$pinyinDictDir/${kind.assetName!}";
+        if (!existingFiles.containsKey(path)) {
+          kind2path[kind] = path;
+          path2asset[path] = await fetchFromBase(kind.assetPath!);
+        }
+      }
+    }
+    if (path2asset.isNotEmpty) {
+      _loader.updateFiles((it) => it..addAll(path2asset));
+    }
+    return kind2path;
+  }
+
+  @override
+  @SquadronMethod()
+  Future<void> close() async {
     _dao.db.close();
     _wasmSqlite3.unregisterVirtualFileSystem(_inMemoryFileSystem);
   }
@@ -87,6 +122,10 @@ class Sqlite3Wasm with Sqlite3Fts5Creator implements MainTableDao {
   @SquadronMethod()
   Future<List<MainTableRow>> search(String value, Tokenizer tokenizer) =>
       _dao.search(value, tokenizer);
+
+  @override
+  @SquadronMethod()
+  Future<void> updatePinyinDict(String newPath) => _dao.updatePinyinDict(newPath);
 
   @override
   @SquadronMethod()

@@ -10,9 +10,10 @@ import '../../db_manager.dart';
 import '../../main_table_dao.dart';
 import '../../main_table_row.dart';
 import '../../main_table_schema.dart';
+import '../pinyin_dict.dart';
 
-final class SqfliteCommonFfiDbManager extends DbManager<SqfliteCommonFfiDao>
-    implements Fts5Creator<Database> {
+final class SqfliteCommonFfiDbManager extends DbManager<SqfliteCommonFfiDao, Database>
+    with PinyinDictSaver {
   @override
   late final SqfliteCommonFfiDao dao;
 
@@ -23,7 +24,7 @@ final class SqfliteCommonFfiDbManager extends DbManager<SqfliteCommonFfiDao>
     sqlite3.loadSimpleExtension();
 
     final docDir = await getApplicationDocumentsDirectory();
-    final jiebaDictPath = join(docDir.path, "cpp_jieba");
+    final jiebaDictPath = join(docDir.path, "sqlite3_simple_example/jieba_dict");
     final jiebaDictSql =
         await sqlite3.saveJiebaDict(jiebaDictPath, overwriteWhenExist: true);
     if (kDebugMode) print("用于设置结巴分词字典路径：$jiebaDictSql");
@@ -45,7 +46,6 @@ final class SqfliteCommonFfiDbManager extends DbManager<SqfliteCommonFfiDao>
   }
 
   @override
-  @protected
   Future<void> createMainAndFts5(Database db) async {
     /// 主表
     await db.execute('''
@@ -149,6 +149,12 @@ class SqfliteCommonFfiDao extends MainTableDaoBase<Database> {
       whereArgs: [value],
     );
     return _toMainTableRows(result);
+  }
+
+  @override
+  Future<void> updatePinyinDict(String newPath) async {
+    await db.rawQuery("SELECT pinyin_dict(?)", [newPath]);
+    await db.execute("INSERT INTO $fts5Table($fts5Table) VALUES('rebuild');");
   }
 
   @override

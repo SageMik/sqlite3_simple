@@ -9,25 +9,34 @@ part of 'sqlite3_wasm.dart';
 
 // dart format width=80
 /// Command ids used in operations map
-const int _$closeDatabaseId = 1;
-const int _$initDatabaseId = 2;
+const int _$closeId = 1;
+const int _$initWithJiebaDictId = 2;
 const int _$insertRandomDataId = 3;
-const int _$searchId = 4;
-const int _$selectAllId = 5;
-const int _$selectCountId = 6;
-const int _$updateAllId = 7;
+const int _$savePinyinDictId = 4;
+const int _$searchId = 5;
+const int _$selectAllId = 6;
+const int _$selectCountId = 7;
+const int _$updateAllId = 8;
+const int _$updatePinyinDictId = 9;
 
 /// WorkerService operations for Sqlite3Wasm
 extension on Sqlite3Wasm {
   OperationsMap _$getOperations() => OperationsMap({
-    _$closeDatabaseId: ($req) => closeDatabase(),
-    _$initDatabaseId: ($req) {
+    _$closeId: ($req) => close(),
+    _$initWithJiebaDictId: ($req) {
       final $dsr = _$Deser(contextAware: false);
-      return initDatabase($dsr.$3($req.args[0]));
+      return initWithJiebaDict($dsr.$3($req.args[0]));
     },
     _$insertRandomDataId: ($req) {
       final $dsr = _$Deser(contextAware: false);
       return insertRandomData($dsr.$0($req.args[0]));
+    },
+    _$savePinyinDictId: ($req) async {
+      final Map<PinyinDictKind, String> $res = await savePinyinDict();
+      try {
+        final $sr = _$Ser(contextAware: false);
+        return $sr.$1($res);
+      } finally {}
     },
     _$searchId: ($req) async {
       final List<MainTableRow> $res;
@@ -37,18 +46,22 @@ extension on Sqlite3Wasm {
       } finally {}
       try {
         final $sr = _$Ser(contextAware: false);
-        return $sr.$1($res);
+        return $sr.$3($res);
       } finally {}
     },
     _$selectAllId: ($req) async {
       final List<MainTableRow> $res = await selectAll();
       try {
         final $sr = _$Ser(contextAware: false);
-        return $sr.$1($res);
+        return $sr.$3($res);
       } finally {}
     },
     _$selectCountId: ($req) => selectCount(),
     _$updateAllId: ($req) => updateAll(),
+    _$updatePinyinDictId: ($req) {
+      final $dsr = _$Deser(contextAware: false);
+      return updatePinyinDict($dsr.$2($req.args[0]));
+    },
   });
 }
 
@@ -56,12 +69,12 @@ extension on Sqlite3Wasm {
 /// remote service.
 mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
   @override
-  Future<void> closeDatabase() => send(_$closeDatabaseId);
+  Future<void> close() => send(_$closeId);
 
   @override
-  Future<void> initDatabase(Map<JiebaDictType, String> jiebaDictPath2Url) {
+  Future<void> initWithJiebaDict(Map<JiebaDictType, String> jiebaDictPath2Url) {
     final $sr = _$Ser(contextAware: false);
-    return send(_$initDatabaseId, args: [$sr.$3(jiebaDictPath2Url)]);
+    return send(_$initWithJiebaDictId, args: [$sr.$5(jiebaDictPath2Url)]);
   }
 
   @override
@@ -69,15 +82,24 @@ mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
       send(_$insertRandomDataId, args: [length]);
 
   @override
+  Future<Map<PinyinDictKind, String>> savePinyinDict() async {
+    final dynamic $res = await send(_$savePinyinDictId);
+    try {
+      final $dsr = _$Deser(contextAware: false);
+      return $dsr.$6($res);
+    } finally {}
+  }
+
+  @override
   Future<List<MainTableRow>> search(String value, Tokenizer tokenizer) async {
     final dynamic $res;
     try {
       final $sr = _$Ser(contextAware: false);
-      $res = await send(_$searchId, args: [value, $sr.$4(tokenizer)]);
+      $res = await send(_$searchId, args: [value, $sr.$6(tokenizer)]);
     } finally {}
     try {
       final $dsr = _$Deser(contextAware: true);
-      return $dsr.$6($res);
+      return $dsr.$8($res);
     } finally {}
   }
 
@@ -86,7 +108,7 @@ mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
     final dynamic $res = await send(_$selectAllId);
     try {
       final $dsr = _$Deser(contextAware: true);
-      return $dsr.$6($res);
+      return $dsr.$8($res);
     } finally {}
   }
 
@@ -101,11 +123,18 @@ mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
 
   @override
   Future<void> updateAll() => send(_$updateAllId);
+
+  @override
+  Future<void> updatePinyinDict(String newPath) =>
+      send(_$updatePinyinDictId, args: [newPath]);
 }
 
 /// Facade for Sqlite3Wasm, implements other details of the service unrelated to
 /// invoking the remote service.
 mixin _$Sqlite3Wasm$Facade implements Sqlite3Wasm {
+  @override
+  Future<void> init() => throw UnimplementedError();
+
   @override
   Future<void> createMainAndFts5(CommonDatabase db) =>
       throw UnimplementedError();
@@ -113,6 +142,10 @@ mixin _$Sqlite3Wasm$Facade implements Sqlite3Wasm {
   @override
   // ignore: unused_element
   Sqlite3Dao get _dao => throw UnimplementedError();
+
+  @override
+  // ignore: unused_element
+  DefaultSimpleWasmModuleLoader get _loader => throw UnimplementedError();
 
   @override
   // ignore: unused_element
@@ -125,6 +158,10 @@ mixin _$Sqlite3Wasm$Facade implements Sqlite3Wasm {
   @override
   // ignore: unused_element
   set _dao(void $value) => throw UnimplementedError();
+
+  @override
+  // ignore: unused_element
+  set _loader(void $value) => throw UnimplementedError();
 
   @override
   // ignore: unused_element
@@ -216,15 +253,20 @@ base class Sqlite3WasmWorkerPool extends WorkerPool<Sqlite3WasmWorker>
        );
 
   @override
-  Future<void> closeDatabase() => execute((w) => w.closeDatabase());
+  Future<void> close() => execute((w) => w.close());
 
   @override
-  Future<void> initDatabase(Map<JiebaDictType, String> jiebaDictPath2Url) =>
-      execute((w) => w.initDatabase(jiebaDictPath2Url));
+  Future<void> initWithJiebaDict(
+    Map<JiebaDictType, String> jiebaDictPath2Url,
+  ) => execute((w) => w.initWithJiebaDict(jiebaDictPath2Url));
 
   @override
   Future<void> insertRandomData(int length) =>
       execute((w) => w.insertRandomData(length));
+
+  @override
+  Future<Map<PinyinDictKind, String>> savePinyinDict() =>
+      execute((w) => w.savePinyinDict());
 
   @override
   Future<List<MainTableRow>> search(String value, Tokenizer tokenizer) =>
@@ -238,6 +280,10 @@ base class Sqlite3WasmWorkerPool extends WorkerPool<Sqlite3WasmWorker>
 
   @override
   Future<void> updateAll() => execute((w) => w.updateAll());
+
+  @override
+  Future<void> updatePinyinDict(String newPath) =>
+      execute((w) => w.updatePinyinDict(newPath));
 }
 
 final class _$Deser extends MarshalingContext {
@@ -247,16 +293,20 @@ final class _$Deser extends MarshalingContext {
   late final $2 = value<String>();
   late final $3 = map<JiebaDictType, String>(kcast: $1, vcast: $2);
   late final $4 = (($) => Tokenizer.values[$0($)]);
-  late final $5 = (($) => MainTableRowSquadronMarshaling.unmarshal($, this));
-  late final $6 = list<MainTableRow>($5);
+  late final $5 = (($) => PinyinDictKind.values[$0($)]);
+  late final $6 = map<PinyinDictKind, String>(kcast: $5, vcast: $2);
+  late final $7 = (($) => MainTableRowSquadronMarshaling.unmarshal($, this));
+  late final $8 = list<MainTableRow>($7);
 }
 
 final class _$Ser extends MarshalingContext {
   _$Ser({super.contextAware});
-  late final $0 = (($) =>
+  late final $0 = (($) => ($ as PinyinDictKind).index);
+  late final $1 = map(kcast: $0);
+  late final $2 = (($) =>
       MainTableRowSquadronMarshaling($ as MainTableRow).marshal());
-  late final $1 = list($0);
-  late final $2 = (($) => ($ as JiebaDictType).index);
-  late final $3 = map(kcast: $2);
-  late final $4 = (($) => ($ as Tokenizer).index);
+  late final $3 = list($2);
+  late final $4 = (($) => ($ as JiebaDictType).index);
+  late final $5 = map(kcast: $4);
+  late final $6 = (($) => ($ as Tokenizer).index);
 }

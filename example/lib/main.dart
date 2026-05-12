@@ -2,13 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sqlite3_simple_example/widget/search_input.dart';
 
 import 'data/db_manager_kind.dart';
 import 'data/main_table_dao.dart';
+import 'data/pinyin_dict_kind.dart';
 import 'main_provider.dart';
 import 'utils/padding.dart';
 import 'widget/highlight_text.dart';
+import 'widget/search_input.dart';
 import 'widget/search_option_radio_row.dart';
 import 'widget/search_result_dialog.dart';
 import 'widget/search_result_list.dart';
@@ -16,9 +17,9 @@ import 'widget/search_result_list.dart';
 void main() {
   runApp(
     ProviderScope(
-      child: const MyApp(),
       retry: (retryCount, error) =>
           ProviderContainer.defaultRetry(retryCount, error, maxRetries: 0),
+      child: const MyApp(),
     ),
   );
 }
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     /// 通过国际化设置中文环境以让 Flutter 使用正确的中文字体，主要是 Windows 平台
     const localizationsDelegates = [
       GlobalMaterialLocalizations.delegate,
@@ -112,7 +114,7 @@ class MyApp extends StatelessWidget {
               SearchOptionRadioRow<DbManagerKind>(
                 label: "数据库实现：",
                 value: ref.watch(dbManagerKindProvider),
-                options: kind2uiString,
+                options: dbManagerKind2uiString,
                 onChanged: (v) async {
                   if (ref.read(dbManagerKindProvider) == v) {
                     // 重复点击刷新为新的随机数据
@@ -120,12 +122,18 @@ class MyApp extends StatelessWidget {
                     ref.invalidate(searchResultProvider);
                   } else {
                     if (kDebugMode) {
-                      print("切换数据库至：${kind2uiString[v]}");
+                      print("切换数据库至：${dbManagerKind2uiString[v]}");
                     }
                     ref.read(dbManagerKindProvider.notifier).update(v);
                   }
                 },
-                isLast: true,
+              ),
+              SearchOptionRadioRow<PinyinDictKind>(
+                label: "拼音文件：",
+                value: ref.watch(pinyinDictKindProvider),
+                options: pinyinDictKind2uiString,
+                onChanged: (v) =>
+                    ref.read(pinyinDictKindProvider.notifier).update(v),
               ),
             ],
           );

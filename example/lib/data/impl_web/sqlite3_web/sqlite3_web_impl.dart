@@ -11,9 +11,9 @@ import '../../db_manager.dart';
 import '../../main_table_dao.dart';
 import '../../main_table_row.dart';
 import '../../main_table_schema.dart';
+import '../../pinyin_dict_kind.dart';
 
-final class Sqlite3WebDbManager extends DbManager<Sqlite3WebDao>
-    implements Fts5Creator<Database> {
+final class Sqlite3WebDbManager extends DbManager<Sqlite3WebDao, Database> {
   late final WebSqlite _webSqlite3;
 
   @override
@@ -109,6 +109,25 @@ final class Sqlite3WebDbManager extends DbManager<Sqlite3WebDao>
   }
 
   @override
+  Future<Map<PinyinDictKind, String>> savePinyinDict() async {
+    const pinyinDictDir = "sqlite3_simple_example/pinyin_dict";
+    final kind2path = Map.fromEntries(
+        PinyinDictKind.values
+            .map((e) => MapEntry(e, e.assetName == null ? '' : '$pinyinDictDir/${e.assetName}'))
+    );
+    await dao.db.customRequest(
+      {
+        'type': 'savePinyinDict',
+        'path2url': {
+          for (final e in kind2path.entries.where((e) => e.key.assetName != null))
+            e.value: e.key.assetPath!,
+        }
+      }.jsify()
+    );
+    return kind2path;
+  }
+
+  @override
   Future<void> close() {
     return dao.db.dispose();
   }
@@ -176,6 +195,12 @@ class Sqlite3WebDao extends MainTableDaoBase<Database> {
       parameters: [value],
     );
     return _toMainTableRows(resultSet.result);
+  }
+
+  @override
+  Future<void> updatePinyinDict(String newPath) async {
+    await db.select("SELECT pinyin_dict(?)", parameters: [newPath]);
+    await db.execute("INSERT INTO $fts5Table($fts5Table) VALUES('rebuild');");
   }
 
   @override

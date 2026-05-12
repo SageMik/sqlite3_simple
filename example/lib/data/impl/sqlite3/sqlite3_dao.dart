@@ -2,13 +2,15 @@ import 'package:meta/meta.dart';
 import 'package:sqlite3/common.dart';
 
 import '../../../utils/zero_width.dart';
+import '../../db_manager.dart';
 import '../../main_table_dao.dart';
 import '../../main_table_row.dart';
 import '../../main_table_schema.dart';
 
-mixin Sqlite3Fts5Creator {
+mixin Sqlite3Fts5Creator<TDb extends CommonDatabase> on IDbManager<TDb> {
+  @override
   @protected
-  Future<void> createMainAndFts5(CommonDatabase db) async {
+  Future<void> createMainAndFts5(TDb db) async {
     /// 主表
     db.execute('''
       CREATE TABLE $mainTable (
@@ -112,6 +114,12 @@ class Sqlite3Dao extends MainTableDaoBase<CommonDatabase> {
       WHERE $fts5Table MATCH ${tokenizer.name}_query(?);
     ''', [value]);
     return _toMainTableRows(resultSet);
+  }
+
+  @override
+  Future<void> updatePinyinDict(String newPath) async {
+    db.select("SELECT pinyin_dict(?)", [newPath]);
+    db.execute("INSERT INTO $fts5Table($fts5Table) VALUES('rebuild');");
   }
 
   @override

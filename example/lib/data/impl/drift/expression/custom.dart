@@ -1,41 +1,14 @@
 import 'package:drift/drift.dart';
 import 'package:flutter/cupertino.dart' hide Table;
 
-extension VT<TableDsl extends Table, D> on VirtualTableInfo<TableDsl, D> {
+import 'base.dart';
+
+extension VirtualTableInfoEx<TableDsl extends Table, D>
+    on VirtualTableInfo<TableDsl, D> {
   Expression<int> get fts5RowId => const CustomExpression("rowid");
 
   Expression<bool> match<T extends Object>(Expression<T> expr) =>
       VirtualTableMatch(this, expr);
-}
-
-class VirtualTableMatch<TableDsl extends Table, D, T extends Object>
-    extends Expression<bool> {
-  final VirtualTableInfo<TableDsl, D> table;
-  final Expression<T> expr;
-
-  @protected
-  VirtualTableMatch(this.table, this.expr);
-
-  @override
-  void writeInto(GenerationContext context) {
-    context.buffer.write("${table.actualTableName} MATCH ");
-    expr.writeInto(context);
-  }
-}
-
-abstract class AbstractQuery extends Expression<String> {
-  @protected
-  abstract final String queryPrefix;
-  final String value;
-
-  AbstractQuery(this.value);
-
-  @override
-  void writeInto(GenerationContext context) {
-    context.buffer.write("${queryPrefix}_query(");
-    Variable.withString(value).writeInto(context);
-    context.buffer.write(")");
-  }
 }
 
 class SimpleQuery extends AbstractQuery {
@@ -92,4 +65,17 @@ class SimpleHighlight<TableDsl extends Table, D>
     required super.start,
     required super.end,
   });
+}
+
+class PinyinDict extends Expression<String> {
+  final String dictPath;
+
+  PinyinDict(this.dictPath);
+
+  @override
+  void writeInto(GenerationContext context) {
+    context.buffer.write("pinyin_dict(");
+    Variable.withString(dictPath).writeInto(context);
+    context.buffer.write(")");
+  }
 }

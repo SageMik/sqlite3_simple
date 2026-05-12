@@ -18,6 +18,9 @@ abstract interface class MainTableDao {
   /// 根据 [value] 和 指定分词器 [tokenizer] 搜索， [tokenizer] 取值：[Tokenizer.jieba], [Tokenizer.simple]
   Future<List<MainTableRow>> search(String value, Tokenizer tokenizer);
 
+  /// 更换拼音文件为 [newPath] 路径所指向的文件，并重建 FTS5 的索引。[newPath] 为空时使用内置拼音文件
+  Future<void> updatePinyinDict(String newPath);
+
   /// 修改所有数据，测试触发器
   Future<void> updateAll();
 }

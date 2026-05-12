@@ -10,10 +10,13 @@ import '../../../utils/zero_width.dart';
 import '../../main_table_dao.dart';
 import '../../main_table_row.dart';
 import '../../db_manager.dart';
-import 'custom_expression.dart';
+import '../pinyin_dict.dart';
+import 'expression/custom.dart';
 import 'database.dart';
+import 'expression/fts5_insert_statement.dart';
 
-final class DriftDbManager extends DbManager<DriftDao> {
+class DriftDbManager extends DbManager<DriftDao, AppDatabase>
+    with PinyinDictSaver {
   @override
   late final DriftDao dao;
 
@@ -22,7 +25,7 @@ final class DriftDbManager extends DbManager<DriftDao> {
     sqlite3.loadSimpleExtension();
 
     final docDir = await getApplicationDocumentsDirectory();
-    final jiebaDictPath = join(docDir.path, "cpp_jieba");
+    final jiebaDictPath = join(docDir.path, "sqlite3_simple_example/jieba_dict");
     final jiebaDictSql =
         await sqlite3.saveJiebaDict(jiebaDictPath, overwriteWhenExist: true);
     if (kDebugMode) print("用于设置结巴分词字典路径：$jiebaDictSql");
@@ -32,9 +35,16 @@ final class DriftDbManager extends DbManager<DriftDao> {
 
     await db.customStatement(jiebaDictSql);
     final init = await db
-        .customSelect("SELECT jieba_query('Jieba分词初始化（提前加载避免后续等待）')")
+        .selectExpressions([JiebaQuery("Jieba分词初始化（提前加载避免后续等待）")])
         .getSingle();
-    if (kDebugMode) print(init.data);
+    if (kDebugMode) print(init.rawData.data);
+  }
+
+  /// 不需要手动调用，见 [AppDatabase.buildFts5Triggers]
+  @override
+  @Deprecated("不需要手动调用")
+  Future<void> createMainAndFts5(AppDatabase db) async {
+    throw UnimplementedError();
   }
 
   @override
@@ -96,6 +106,12 @@ class DriftDao extends MainTableDaoBase<AppDatabase> {
               insertDate: it.read(insertDateExpr)!,
             ))
         .toList();
+  }
+
+  @override
+  Future<void> updatePinyinDict(String newPath) async {
+    await db.selectExpressions([PinyinDict(newPath)]).getSingle();
+    await db.intoFts5(fts5Table).rebuild();
   }
 
   @override
