@@ -12,6 +12,9 @@ import 'data/pinyin_dict_kind.dart';
 /// 搜索文本
 final searchQueryProvider = mutable<String>("");
 
+/// 是否展开更多搜索选项
+final searchOptionsMoreOpenProvider = mutable(true);
+
 /// 分词器
 final tokenizerProvider = mutable<Tokenizer>(Tokenizer.jieba);
 const tokenizer2uiString = {Tokenizer.jieba: "结巴", Tokenizer.simple: "Simple"};
