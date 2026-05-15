@@ -8,11 +8,12 @@ import 'data/main_table_dao.dart';
 import 'data/pinyin_dict_kind.dart';
 import 'main_provider.dart';
 import 'utils/padding.dart';
+import 'widget/dialog/usage_dialog.dart';
 import 'widget/expand_collapse_strip.dart';
 import 'widget/highlight_text.dart';
 import 'widget/search_input.dart';
 import 'widget/search_option_radio_row.dart';
-import 'widget/search_result_dialog.dart';
+import 'widget/dialog/search_result_dialog.dart';
 import 'widget/search_result_list.dart';
 import 'widget/size_transition_expand_column.dart';
 
@@ -78,17 +79,22 @@ class MyApp extends StatelessWidget {
   /// 右上角功能按钮
   List<Widget> buildActions() {
     return [
-      Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Consumer(
-            builder: (context, ref, _) => IconButton(
-              tooltip: '刷新数据',
-              onPressed: () => refreshDbData(ref),
-              icon: const Icon(Icons.refresh),
-            ),
+      Consumer(
+        builder: (context, ref, _) => IconButton(
+          tooltip: '刷新数据',
+          onPressed: () => refreshDbData(ref),
+          icon: const Icon(Icons.refresh),
+        ),
+      ),
+      Builder(
+        builder: (context) => IconButton(
+          tooltip: '使用说明',
+          onPressed: () => showDialog(
+            context: context,
+            builder: (context) => const UsageDialog(),
           ),
-        ],
+          icon: const Icon(Icons.info_outline_rounded),
+        ),
       ),
     ];
   }
