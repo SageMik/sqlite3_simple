@@ -4,9 +4,7 @@ import 'dart:js_interop_unsafe';
 import 'package:sqlite3/wasm.dart';
 import 'package:sqlite3_simple/web.dart';
 import 'package:sqlite3_web/sqlite3_web.dart';
-import 'package:web/web.dart';
 
-import '../../pinyin_dict_kind.dart';
 import '../fetch.dart';
 
 /// 调整代码后，在 `example` 目录下执行如下命令重新生成：

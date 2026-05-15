@@ -1,3 +1,8 @@
+## 2.2.0
+
+- **[新增]** Web 平台支持。
+- **[优化]** 增加 `SELECT pinyin_dict()` 切换拼音文件示例，优化示例代码。
+
 ## 2.1.0
 
 - **[ 原生库版本 ]** 更新至 [simple v0.7.1](https://github.com/wangfenjin/simple/releases/tag/v0.7.1) 。`Nv1.0.6` 基于当时原生库的最新提交进行构建，以修复 [结巴分词搜索 `C#` 出错](https://github.com/wangfenjin/simple/issues/176) 的问题，但 `Nv2.0.0` 又将版本降回至 [v0.5.2](https://github.com/wangfenjin/simple/releases/tag/v0.5.2) 导致问题复现，现重新升级以解决此问题。
