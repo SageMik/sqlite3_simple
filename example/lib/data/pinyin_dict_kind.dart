@@ -12,4 +12,6 @@ enum PinyinDictKind {
 
   const PinyinDictKind(this.assetName)
     : assetPath = assetName == null ? null : "$_dir/$assetName";
-}
+
+  bool get isBundled => this == bundled;
+ }

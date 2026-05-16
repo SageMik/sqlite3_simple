@@ -1,3 +1,3 @@
 library;
 
-export 'src/io/jieba_dict_assets.dart';
+export 'src/common/jieba_dict_assets.dart';

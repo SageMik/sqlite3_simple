@@ -18,6 +18,7 @@ const int _$selectAllId = 6;
 const int _$selectCountId = 7;
 const int _$updateAllId = 8;
 const int _$updatePinyinDictId = 9;
+const int _$updatePinyinKind2UrlId = 10;
 
 /// WorkerService operations for Sqlite3Wasm
 extension on Sqlite3Wasm {
@@ -61,6 +62,10 @@ extension on Sqlite3Wasm {
     _$updatePinyinDictId: ($req) {
       final $dsr = _$Deser(contextAware: false);
       return updatePinyinDict($dsr.$2($req.args[0]));
+    },
+    _$updatePinyinKind2UrlId: ($req) {
+      final $dsr = _$Deser(contextAware: false);
+      return updatePinyinKind2Url($dsr.$6($req.args[0]));
     },
   });
 }
@@ -127,6 +132,12 @@ mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
   @override
   Future<void> updatePinyinDict(String newPath) =>
       send(_$updatePinyinDictId, args: [newPath]);
+
+  @override
+  Future<void> updatePinyinKind2Url(Map<PinyinDictKind, String> kind2url) {
+    final $sr = _$Ser(contextAware: false);
+    return send(_$updatePinyinKind2UrlId, args: [$sr.$1(kind2url)]);
+  }
 }
 
 /// Facade for Sqlite3Wasm, implements other details of the service unrelated to
@@ -157,6 +168,10 @@ mixin _$Sqlite3Wasm$Facade implements Sqlite3Wasm {
 
   @override
   // ignore: unused_element
+  Map<PinyinDictKind, String> get _kind2url => throw UnimplementedError();
+
+  @override
+  // ignore: unused_element
   set _dao(void $value) => throw UnimplementedError();
 
   @override
@@ -166,6 +181,10 @@ mixin _$Sqlite3Wasm$Facade implements Sqlite3Wasm {
   @override
   // ignore: unused_element
   set _wasmSqlite3(void $value) => throw UnimplementedError();
+
+  @override
+  // ignore: unused_element
+  set _kind2url(void $value) => throw UnimplementedError();
 }
 
 /// WorkerClient for Sqlite3Wasm
@@ -284,6 +303,10 @@ base class Sqlite3WasmWorkerPool extends WorkerPool<Sqlite3WasmWorker>
   @override
   Future<void> updatePinyinDict(String newPath) =>
       execute((w) => w.updatePinyinDict(newPath));
+
+  @override
+  Future<void> updatePinyinKind2Url(Map<PinyinDictKind, String> kind2url) =>
+      execute((w) => w.updatePinyinKind2Url(kind2url));
 }
 
 final class _$Deser extends MarshalingContext {

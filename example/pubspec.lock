@@ -767,7 +767,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "2.1.0"
+    version: "2.2.0"
   sqlite3_web:
     dependency: "direct main"
     description:

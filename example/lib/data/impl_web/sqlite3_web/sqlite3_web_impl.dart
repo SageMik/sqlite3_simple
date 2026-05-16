@@ -12,6 +12,8 @@ import '../../main_table_dao.dart';
 import '../../main_table_row.dart';
 import '../../main_table_schema.dart';
 import '../../pinyin_dict_kind.dart';
+import '../pinyin_dict.dart';
+import 'sqlite3_web_worker.dart';
 
 final class Sqlite3WebDbManager extends DbManager<Sqlite3WebDao, Database> {
   late final WebSqlite _webSqlite3;
@@ -35,6 +37,7 @@ final class Sqlite3WebDbManager extends DbManager<Sqlite3WebDao, Database> {
     );
     dao = Sqlite3WebDao(db);
 
+    /// 传递结巴分词字典文件 URL 交由 `Sqlite3WebDb.handleCustomRequest` 处理
     final Map<JiebaDictType, String> jiebaDictPaths = await JiebaDictAssets.loadPaths();
     const jiebaDictDir = '.dict';
     await db.customRequest(
@@ -43,7 +46,7 @@ final class Sqlite3WebDbManager extends DbManager<Sqlite3WebDao, Database> {
         'path2url': {
           for (final e in jiebaDictPaths.entries)
             '$jiebaDictDir/${e.key.filename}': e.value,
-        }
+        },
       }.jsify(),
     );
     await db.execute("SELECT jieba_dict(?)", parameters: [jiebaDictDir]);
@@ -108,20 +111,22 @@ final class Sqlite3WebDbManager extends DbManager<Sqlite3WebDao, Database> {
     ''');
   }
 
+  /// 传递拼音字典文件 URL 交由 [Sqlite3WebDb.handleCustomRequest] 处理
   @override
   Future<Map<PinyinDictKind, String>> savePinyinDict() async {
     const pinyinDictDir = "sqlite3_simple_example/pinyin_dict";
-    final kind2path = Map.fromEntries(
-        PinyinDictKind.values
-            .map((e) => MapEntry(e, e.assetName == null ? '' : '$pinyinDictDir/${e.assetName}'))
-    );
+    final kind2url = PinyinDictKind.values.resolveUrl();
+    final kind2path = {
+      for (final k in kind2url.keys)
+        k: (k.isBundled ? '' : '$pinyinDictDir/${k.assetName}')
+    };
     await dao.db.customRequest(
       {
         'type': 'savePinyinDict',
         'path2url': {
-          for (final e in kind2path.entries.where((e) => e.key.assetName != null))
-            e.value: e.key.assetPath!,
-        }
+          for (final MapEntry(key: kind, value: url) in kind2url.entries.where((e) => !e.key.isBundled))
+            kind2path[kind]!: url,
+        },
       }.jsify()
     );
     return kind2path;

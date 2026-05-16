@@ -1,5 +1,8 @@
+import 'dart:ui_web';
+
 import 'package:sqlite3/common.dart';
 import 'package:sqlite3_simple/assets.dart';
+import 'package:sqlite3_simple_example/data/impl_web/pinyin_dict.dart';
 import 'package:squadron/squadron.dart';
 
 import '../../db_manager.dart';
@@ -33,7 +36,10 @@ final class Sqlite3WasmDbManager extends DbManager<Sqlite3WasmDao, CommonDatabas
   Future<void> createMainAndFts5(CommonDatabase db) => _pool.createMainAndFts5(db);
 
   @override
-  Future<Map<PinyinDictKind, String>> savePinyinDict() => _pool.savePinyinDict();
+  Future<Map<PinyinDictKind, String>> savePinyinDict() async {
+    await _pool.updatePinyinKind2Url(PinyinDictKind.values.resolveUrl());
+    return await _pool.savePinyinDict();
+  }
 
   @override
   Future<void> close() async {

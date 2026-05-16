@@ -83,6 +83,15 @@ class Sqlite3Wasm extends IDbManager<CommonDatabase> with Sqlite3Fts5Creator imp
     return super.createMainAndFts5(db);
   }
 
+  late Map<PinyinDictKind, String> _kind2url;
+
+  /// 通过在主线程调用 [assetManager.getAssetUrl] 获取拼音文件的 URL，并传递到 Web Worker 中。
+  /// 在 Web 上资源文件 URL 会加上 `assets` 前缀，例如 `assets/assets/pinyin_dict/simple_default.txt`，所以其实直接加上 `assets/` 也是可以的。
+  @SquadronMethod()
+  Future<void> updatePinyinKind2Url(Map<PinyinDictKind, String> kind2url) async {
+    _kind2url = kind2url;
+  }
+
   @override
   @SquadronMethod()
   Future<Map<PinyinDictKind, String>> savePinyinDict() async {
@@ -90,14 +99,14 @@ class Sqlite3Wasm extends IDbManager<CommonDatabase> with Sqlite3Fts5Creator imp
     final Map<PinyinDictKind, String> kind2path = {};
     final Map<String, Uint8List> path2asset = {};
     final existingFiles = _loader.files;
-    for (final kind in PinyinDictKind.values) {
-      if(kind.assetName == null) {
+    for (final MapEntry(key: kind, value: url) in _kind2url.entries) {
+      if(kind.isBundled) {
         kind2path[kind] = '';
       } else {
         final path = "$pinyinDictDir/${kind.assetName!}";
         if (!existingFiles.containsKey(path)) {
           kind2path[kind] = path;
-          path2asset[path] = await fetchFromBase(kind.assetPath!);
+          path2asset[path] = await fetchFromBase(url);
         }
       }
     }

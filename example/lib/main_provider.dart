@@ -62,7 +62,7 @@ final dbManagerProvider = AsyncNotifierProvider(DbManagerNotifier.new);
 class DbManagerNotifier extends AsyncNotifier<DbManager> {
   @override
   Future<DbManager> build() async {
-    final _DbBootstrapResult(:dbManager, :pinyinDictKind2path,) = await ref.watch(_dbBootstrapProvider.future);
+    final _DbBootstrapResult(:dbManager, :pinyinDictKind2path) = await ref.watch(_dbBootstrapProvider.future);
     final dao = dbManager.dao;
 
     /// 切换拼音文件

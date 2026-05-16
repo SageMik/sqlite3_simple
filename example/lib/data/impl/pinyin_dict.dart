@@ -15,7 +15,7 @@ mixin PinyinDictSaver<TDb> on IDbManager<TDb> {
     await Directory(pinyinDictDir).create(recursive: true);
     final entries = await Future.wait(
       PinyinDictKind.values.map((k) async {
-        if (k.assetName == null) {
+        if (k.isBundled) {
           return MapEntry(k, '');
         }
         final f = File(join(pinyinDictDir, k.assetName!));

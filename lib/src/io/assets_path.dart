@@ -1,0 +1,1 @@
+String resolveAssetPath(String path) => path;
