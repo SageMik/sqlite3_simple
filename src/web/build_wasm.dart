@@ -1,6 +1,3 @@
-// dart pub get && dart run build_wasm.dart --wasi-sdk=... [--binaryen=...]
-// 仅支持命名参数。传入 binaryen 时将其 bin 前置到 PATH 供 cmake。需要 git、cmake。
-
 import 'dart:io';
 
 import 'package:args/args.dart';
@@ -61,7 +58,7 @@ Future<void> main(List<String> argv) async {
     ),
   );
 
-  await shell.runScript(
+  await shell.runScriptInDir(
     '''
       git apply ../sqlite3_wasm_build.patch
       git add sqlite3 sqlite3_wasm_build
@@ -70,7 +67,7 @@ Future<void> main(List<String> argv) async {
   );
 
   const buildDir = '.dart_tool/sqlite3_build';
-  await shell.runScript(
+  await shell.runScriptInDir(
     '''
       cmake -S ./src -B $buildDir -Dwasi_sysroot=$sysroot -Dclang=$clang -Dclangxx=$clang_xx -DSIMPLE_WITH_JIEBA=ON -DFETCHCONTENT_QUIET=OFF
       cmake --build $buildDir -t output -j
@@ -151,7 +148,7 @@ extension ArgParserEx on ArgParser {
 }
 
 extension ShellEx on Shell {
-  Future<void> runScript(String script, {String? workingDirectory}) async {
+  Future<void> runScriptInDir(String script, {String? workingDirectory}) async {
     try {
       final sh = workingDirectory != null ? cd(workingDirectory) : this;
       await sh.run(script);
