@@ -20,3 +20,4 @@
 | **Windows**        | [`simple.dll`](https://github.com/SageMik/sqlite3_simple/blob/main/windows/simple.dll)                      | x64                                 | Flutter Windows 仅支持 x64        |
 | **MacOS**          | [`libsimple.dylib`](https://github.com/SageMik/sqlite3_simple/blob/main/darwin/libsimple.dylib)             | arm64, x86_64                       | arm64 为 Apple Silicon M 系列芯片架构 |
 | **Linux**          | [CMakeLists.txt](https://github.com/SageMik/sqlite3_simple/blob/main/linux/CMakeLists.txt)                  |                                     |                                |
+| **Web**            | [src/web](src/web)                                                                                          | WebAssembly                         |                                |

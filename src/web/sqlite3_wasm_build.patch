@@ -1,0 +1,258 @@
+Subject: [PATCH] WASM
+---
+Index: sqlite3_wasm_build/src/os_web.c
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqlite3_wasm_build/src/os_web.c b/sqlite3_wasm_build/src/os_web.c
+--- a/sqlite3_wasm_build/src/os_web.c	(revision 32eac80e47f4ca2822663730b6eeaa3c9b801833)
++++ b/sqlite3_wasm_build/src/os_web.c	(date 1776097766977)
+@@ -6,7 +6,12 @@
+ #include "bridge.h"
+ #include "sqlite3.h"
+ 
+-int sqlite3_os_init(void) { return SQLITE_OK; }
++int sqlite3_simple_init(sqlite3* db, char** pzErrMsg,
++                        const sqlite3_api_routines* pApi);
++
++int sqlite3_os_init(void) {
++  return sqlite3_auto_extension((void*)sqlite3_simple_init);
++}
+ 
+ int sqlite3_os_end(void) { return SQLITE_OK; }
+ 
+Index: sqlite3_wasm_build/src/simple_wasm.cmake
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqlite3_wasm_build/src/simple_wasm.cmake b/sqlite3_wasm_build/src/simple_wasm.cmake
+new file mode 100644
+--- /dev/null	(date 1776097753958)
++++ b/sqlite3_wasm_build/src/simple_wasm.cmake	(date 1776097753958)
+@@ -0,0 +1,41 @@
++get_filename_component(_repo_root ${CMAKE_CURRENT_SOURCE_DIR}/../../../../.. ABSOLUTE)
++set(simple_root ${_repo_root}/simple)
++
++file(INSTALL FILES ${_repo_root}/zdic.txt DESTINATION ${CMAKE_BINARY_DIR}/contrib RENAME pinyin.txt) # 替换拼音文件
++include(${simple_root}/contrib/CMakeRC.cmake)
++cmrc_add_resource_library(PINYIN_TEXT TYPE OBJECT NAMESPACE pinyin_text WHENCE ${CMAKE_BINARY_DIR} ${CMAKE_BINARY_DIR}/contrib/pinyin.txt)
++get_target_property(pinyin_cmrc_sources PINYIN_TEXT SOURCES)
++
++set(SIMPLE_WASM_SOURCES
++    ${simple_root}/src/entry.cc
++    ${simple_root}/src/simple_highlight.cc
++    ${simple_root}/src/simple_tokenizer.cc
++    ${simple_root}/src/pinyin.cc
++    ${pinyin_cmrc_sources}
++)
++
++set(SIMPLE_WASM_CPP_ARGS
++    -I ${CMAKE_CURRENT_BINARY_DIR}
++    -I ${simple_root}/src
++    -I ${CMRC_INCLUDE_DIR}
++)
++
++OPTION(SIMPLE_WITH_JIEBA "Option to build with cppjieba" ON)
++if(SIMPLE_WITH_JIEBA)
++  include(FetchContent)
++  FetchContent_Declare(
++    cppjieba
++    GIT_REPOSITORY https://github.com/yanyiwu/cppjieba.git
++    GIT_TAG 194c144d8b5ed1baf3190d07c5226e804454ab47
++  )
++  FetchContent_GetProperties(cppjieba)
++  if(NOT cppjieba_POPULATED)
++    FetchContent_Populate(cppjieba)
++  endif()
++  list(APPEND SIMPLE_WASM_CPP_ARGS
++    -DUSE_JIEBA=1
++    -I ${cppjieba_SOURCE_DIR}/include
++    -I ${cppjieba_SOURCE_DIR}/deps
++  )
++  message(STATUS "cppjieba source dir: ${cppjieba_SOURCE_DIR}")
++endif()
+Index: sqlite3_wasm_build/src/cpp_exception_stubs.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqlite3_wasm_build/src/cpp_exception_stubs.cc b/sqlite3_wasm_build/src/cpp_exception_stubs.cc
+new file mode 100644
+--- /dev/null	(date 1776097753954)
++++ b/sqlite3_wasm_build/src/cpp_exception_stubs.cc	(date 1776097753954)
+@@ -0,0 +1,8 @@
++#include <cstddef>
++#include <cstdlib>
++
++extern "C" void *__cxa_allocate_exception(size_t thrown_size) { return malloc(thrown_size); }
++
++extern "C" void __cxa_free_exception(void *thrown_exception) { free(thrown_exception); }
++
++extern "C" void __cxa_throw(void *, void *, void (*)(void *)) { abort(); }
+Index: sqlite3_wasm_build/src/CMakeLists.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqlite3_wasm_build/src/CMakeLists.txt b/sqlite3_wasm_build/src/CMakeLists.txt
+--- a/sqlite3_wasm_build/src/CMakeLists.txt	(revision 32eac80e47f4ca2822663730b6eeaa3c9b801833)
++++ b/sqlite3_wasm_build/src/CMakeLists.txt	(date 1776097766971)
+@@ -1,11 +1,14 @@
+ cmake_minimum_required(VERSION 3.24)
+ 
+ set(PROJECT_NAME "sqlite3_web")
+-project(${PROJECT_NAME} LANGUAGES C)
++project(${PROJECT_NAME} LANGUAGES C CXX)
+ 
+-set(triple wasm32-unknown-wasi)
++set(triple wasm32-wasip1)
+ set(wasi_sysroot "/usr/share/wasi-sysroot" CACHE PATH "Path to wasi sysroot")
+ set(clang "clang" CACHE FILEPATH "Path to wasm-capable clang executable")
++set(clangxx "clang++" CACHE FILEPATH "Path to wasm-capable clang++ executable")
++
++include(simple_wasm.cmake)
+ 
+ include(FetchContent)
+ 
+@@ -44,7 +47,11 @@
+     ${CMAKE_CURRENT_SOURCE_DIR}/helpers.c
+     ${CMAKE_CURRENT_SOURCE_DIR}/external_objects.c
+   )
+-  set(flags -Wall -Wextra -Wno-unused-parameter -Wno-unused-function)
++  set(cpp_sources
++    ${CMAKE_CURRENT_SOURCE_DIR}/cpp_exception_stubs.cc
++    ${SIMPLE_WASM_SOURCES}
++  )
++  set(flags -Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable)
+ 
+   if(${crypto})
+     list(APPEND sources "${sqlite3mc_SOURCE_DIR}/sqlite3mc_amalgamation.c")
+@@ -70,23 +77,81 @@
+     list(APPEND flags "-Oz" "-DNDEBUG" "-flto")
+   endif()
+ 
+-  add_custom_command(
+-    OUTPUT ${clang_output}
+-    COMMAND ${clang} --target=${triple} -std=c23
+-      ${flags}
+-      -o ${clang_output}
+-      -I ${PROJECT_SOURCE_DIR} -I ${sqlite3_SOURCE_DIR}
+-      -DSQLITE_ENABLE_SESSION
+-      -DSQLITE_ENABLE_PREUPDATE_HOOK
+-      -D_HAVE_SQLITE_CONFIG_H
+-      -D__WASM__
++  set(common_compile_flags
++    --target=${triple}
++    -mcpu=generic
++    -fno-stack-protector -fno-stack-clash-protection
++    --sysroot ${wasi_sysroot}
++    -DSQLITE_ENABLE_SESSION
++    -DSQLITE_ENABLE_PREUPDATE_HOOK
++    -D_HAVE_SQLITE_CONFIG_H
++    -D__WASM__
++    ${flags}
++  )
++
++  # C 中间产物
++  set(c_objects)
++  foreach(source IN LISTS sources)
++    get_filename_component(source_name "${source}" NAME)
++    string(REPLACE "." "_" source_token "${source_name}")
++    set(object "${CMAKE_CURRENT_BINARY_DIR}/${name}_${source_token}.o")
++    add_custom_command(
++      OUTPUT ${object}
++      COMMAND ${clang}
++        ${common_compile_flags}
++        -x c -std=c23 -c
++        -I ${CMAKE_CURRENT_BINARY_DIR}
++        -I ${PROJECT_SOURCE_DIR}
++        -I ${sqlite3_SOURCE_DIR}
++        -o ${object}
++        ${source}
++      DEPENDS ${source}
++      VERBATIM
++    )
++    list(APPEND c_objects ${object})
++  endforeach()
++
++  # C++ 中间产物
++  set(cpp_objects)
++  foreach(source IN LISTS cpp_sources)
++    get_filename_component(source_name "${source}" NAME)
++    string(REPLACE "." "_" source_token "${source_name}")
++    set(object "${CMAKE_CURRENT_BINARY_DIR}/${name}_${source_token}.o")
++    add_custom_command(
++      OUTPUT ${object}
++      COMMAND ${clangxx}
++        ${common_compile_flags}
++        -fno-rtti
++        -DSQLITE_CORE
++        # -fwasm-exceptions -mllvm -wasm-use-legacy-eh=false # C++ 异常支持：https://github.com/WebAssembly/wasi-sdk/pull/606
++        -x c++ -std=c++14 -c
++        ${SIMPLE_WASM_CPP_ARGS}
++        -iquote ${sqlite3_SOURCE_DIR} # include <VERSION> 导致包含版本文件：https://github.com/nmap/nmap/issues/2747
++        -o ${object}
++        ${source}
++      DEPENDS ${source}
++      VERBATIM
++    )
++    list(APPEND cpp_objects ${object})
++  endforeach()
++
++  # 链接编译
++  add_custom_command(
++    OUTPUT ${clang_output}
++    COMMAND ${clangxx}
++      --target=${triple}
+       -mcpu=generic
+       -mexec-model=reactor
+       -fno-stack-protector -fno-stack-clash-protection
+       --sysroot ${wasi_sysroot}
+-      ${sources}
++      -o ${clang_output}
++      ${c_objects}
++      ${cpp_objects}
++      # -lunwind # C++ 异常支持：https://github.com/WebAssembly/wasi-sdk/blob/main/CppExceptions.md
++      -lc++
++      -lc++abi
+       @${CMAKE_CURRENT_BINARY_DIR}/required_symbols.txt
+-    DEPENDS ${sources} required_symbols
++    DEPENDS ${c_objects} ${cpp_objects} required_symbols
+     VERBATIM
+   )
+ 
+@@ -115,9 +180,12 @@
+ base_sqlite3_target(sqlite3_opt false false)
+ base_sqlite3_target(sqlite3mc false true)
+ 
++get_filename_component(_final_out_dir "${_repo_root}/src/web/out" ABSOLUTE)
++
+ add_custom_target(output)
+-add_custom_command(TARGET output COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/sqlite3_opt.wasm ${PROJECT_SOURCE_DIR}/../out/sqlite3.wasm)
+-add_custom_command(TARGET output COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/sqlite3_debug.clang.wasm ${PROJECT_SOURCE_DIR}/../out/sqlite3.debug.wasm)
+-add_custom_command(TARGET output COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/sqlite3mc.wasm ${PROJECT_SOURCE_DIR}/../out/sqlite3mc.wasm)
++add_custom_command(TARGET output COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/sqlite3_opt.wasm ${_final_out_dir}/sqlite3.wasm)
++add_custom_command(TARGET output COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/sqlite3_debug.clang.wasm ${_final_out_dir}/sqlite3.debug.wasm)
++add_custom_command(TARGET output COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/sqlite3mc.wasm ${_final_out_dir}/sqlite3mc.wasm)
++add_custom_command(TARGET output POST_BUILD COMMAND ${CMAKE_COMMAND} -E echo "Final wasm outputs were copied to: ${_final_out_dir}")
+ add_dependencies(output sqlite3_debug sqlite3_opt sqlite3mc)
+ add_dependencies(output sqlite3_debug)
+Index: sqlite3_wasm_build/src/sqlite_cfg.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqlite3_wasm_build/src/sqlite_cfg.h b/sqlite3_wasm_build/src/sqlite_cfg.h
+--- a/sqlite3_wasm_build/src/sqlite_cfg.h	(revision 32eac80e47f4ca2822663730b6eeaa3c9b801833)
++++ b/sqlite3_wasm_build/src/sqlite_cfg.h	(date 1776097766981)
+@@ -47,7 +47,7 @@
+ #define SQLITE_OMIT_AUTHORIZATION
+ #define SQLITE_UNTESTABLE
+ #define SQLITE_OMIT_COMPILEOPTION_DIAGS
+-#define SQLITE_OMIT_LOAD_EXTENSION
++//#define SQLITE_OMIT_LOAD_EXTENSION
+ #define SQLITE_OMIT_TCL_VARIABLE
+ #define SQLITE_OMIT_UTF16
+ #define SQLITE_OMIT_DESERIALIZE
