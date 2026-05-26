@@ -184,6 +184,9 @@ jobs:
         with:
           submodules: true
 
+      - name: '配置允许 node-pty 构建脚本'
+        run: echo 'only-built-dependencies[]=node-pty' >> ~/.npmrc
+
       - name: '设置 HarmonyOS 环境'
         uses: ErBWs/setup-ohos@v1
         with:
@@ -194,16 +197,14 @@ jobs:
         run: hvigorw --mode module -p product=default -p module=simple_native_ohos@default -p buildMode=release assembleHar --analyze=normal --parallel --incremental --daemon
         working-directory: src/ohos
 
-      - name: '安装 expect'
-        run: sudo apt-get update && sudo apt-get install -y expect
-
       - name: '发布至 OpenHarmony 三方库'
         if: env.SNAPSHOT == 'false'
-        run: src/ohos/publish.exp
+        run: hvigorw ohpmPublish --mode module -p product=default -p module=simple_native_ohos@default -p buildMode=release --analyze=normal --parallel --incremental --daemon
         env:
-          OHPM_PASSPHRASE: ${{ secrets.OHPM_PASSPHRASE }}
-          OHPM_PUBLISH_ID: ${{ secrets.OHPM_PUBLISH_ID }}
           OHPM_KEY: ${{ secrets.OHPM_KEY }}
+          OHPM_KEY_PASSPHRASE: ${{ secrets.OHPM_KEY_PASSPHRASE }}
+          OHPM_PUBLISH_ID: ${{ secrets.OHPM_PUBLISH_ID }}
+        working-directory: src/ohos
 
       - name: '解压 har 提取 so 库'
         run: |
