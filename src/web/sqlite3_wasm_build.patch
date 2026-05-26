@@ -129,7 +129,7 @@ diff --git a/sqlite3_wasm_build/src/CMakeLists.txt b/sqlite3_wasm_build/src/CMak
  
    if(${crypto})
      list(APPEND sources "${sqlite3mc_SOURCE_DIR}/sqlite3mc_amalgamation.c")
-@@ -70,23 +77,81 @@
+@@ -70,23 +77,82 @@
      list(APPEND flags "-Oz" "-DNDEBUG" "-flto")
    endif()
  
@@ -187,6 +187,7 @@ diff --git a/sqlite3_wasm_build/src/CMakeLists.txt b/sqlite3_wasm_build/src/CMak
 +      OUTPUT ${object}
 +      COMMAND ${clangxx}
 +        ${common_compile_flags}
++        -v -mllvm -stats
 +        -fno-rtti
 +        -DSQLITE_CORE
 +        # -fwasm-exceptions -mllvm -wasm-use-legacy-eh=false # C++ 异常支持：https://github.com/WebAssembly/wasi-sdk/pull/606
