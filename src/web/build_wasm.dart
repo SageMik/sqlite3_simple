@@ -73,6 +73,7 @@ Future<void> main(List<String> argv) async {
       cmake --build $buildDir -t output -j
     ''',
     workingDirectory: 'sqlite3.dart/sqlite3_wasm_build',
+    throwOnError: true,
   );
 }
 
@@ -148,10 +149,18 @@ extension ArgParserEx on ArgParser {
 }
 
 extension ShellEx on Shell {
-  Future<void> runScriptInDir(String script, {String? workingDirectory}) async {
-    try {
-      final sh = workingDirectory != null ? cd(workingDirectory) : this;
-      await sh.run(script);
-    } on ShellException {}
+  Future<void> runScriptInDir(
+    String script, {
+    String? workingDirectory,
+    bool throwOnError = false,
+  }) async {
+    var sh = this;
+    if (options.throwOnError != throwOnError) {
+      sh = cloneWithOptions(options.clone(throwOnError: throwOnError));
+    }
+    if (workingDirectory != null) {
+      sh = sh.cd(workingDirectory);
+    }
+    await sh.run(script);
   }
 }
