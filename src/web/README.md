@@ -41,20 +41,20 @@ SQLite 早在 2007 年的 [3.5.0](https://www.sqlite.org/34to35.html) 版本就�
 
 在 `sqlite3.dart` 目录下执行 `git apply ../sqlite3_wasm_build.patch` 应用 Patch ，可以看到为集成 Simple 扩展在 `sqlite3_wasm_build` 中所做的调整，具体而言：
 
-| 操作 | 文件                      | 说明                                                                     |
-| ---- | ------------------------- | ------------------------------------------------------------------------ |
-| 新增 | `simple_wasm.cmake`       | 引入 Simple 源码、cppjiba 结巴分词依赖、cmrc 内嵌资源依赖                |
-| 新增 | `cpp_exceptions_stubs.cc` | 提供 C++ 异常处理的桩函数                                                |
-| 修改 | `CMakeLists.txt`          | 启用 C/C++ 分步编译 和 libc++ 链接，引入 `simple_wasm.cmake`         |
-| 修改 | `os_web.c`                | 注册 `sqlite3_auto_extension` 自动初始化 Simple                          |
-| 修改 | `sqlite_cfg.h`            | 取消 `SQLITE_OMIT_LOAD_EXTENSION` 宏，解除 SQLite 扩展加载接口的禁用限制 |
+| 操作 | 文件                                                           | 说明                                                      |
+|----|--------------------------------------------------------------|---------------------------------------------------------|
+| 新增 | [`simple.cmake`](extension/simple.cmake)                     | 引入 Simple 源码、cppjiba 结巴分词依赖、cmrc 内嵌资源依赖（主仓库，非子模块）       |
+| 新增 | [`cpp_exception_stubs.cc`](extension/cpp_exception_stubs.cc) | 提供 C++ 异常处理的桩函数（主仓库，非子模块）                               |
+| 修改 | `CMakeLists.txt`                                             | 启用 C/C++ 分步编译和 libc++ 链接，自动引用同级 extension 目录下的集成文件      |
+| 修改 | `os_web.c`                                                   | 注册 `sqlite3_auto_extension` 自动初始化 Simple                |
+| 修改 | `sqlite_cfg.h`                                               | 取消 `SQLITE_OMIT_LOAD_EXTENSION` 宏，解除 SQLite 扩展加载接口的禁用限制 |
 
 <details>
 <summary><b> 💡 为何不启用 <code>wasi-sdk</code> 的 C++ 异常支持？</b></summary>
 
 <br />
 
-`wasi-sdk` 支持 [启用 C++ 异常处理](https://github.com/WebAssembly/wasi-sdk/blob/main/CppExceptions.md) ，会将 C++ 异常处理为新版异常类型 `exnref` 。该类型需要高版本浏览器内核支持（详见 WASM 3.0 发布说明的 [Exception handling 部分](https://webassembly.org/news/2025-09-17-wasm-3.0/) ），因此本项目还是通过 `cpp_exceptions_stubs.cc` 桩函数的方式确保兼容性。
+`wasi-sdk` 支持 [启用 C++ 异常处理](https://github.com/WebAssembly/wasi-sdk/blob/main/CppExceptions.md) ，会将 C++ 异常处理为新版异常类型 `exnref` 。该类型需要高版本浏览器内核支持（详见 WASM 3.0 发布说明的 [Exception handling 部分](https://webassembly.org/news/2025-09-17-wasm-3.0/) ），因此本项目还是通过 [`cpp_exception_stubs.cc`](extension/cpp_exception_stubs.cc) 桩函数的方式确保兼容性。
 
 </details>
 

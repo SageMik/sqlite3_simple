@@ -61,7 +61,6 @@ Future<void> main(List<String> argv) async {
   await shell.runScriptInDir(
     '''
       git apply ../sqlite3_wasm_build.patch
-      git add sqlite3 sqlite3_wasm_build
     ''',
     workingDirectory: 'sqlite3.dart',
   );
