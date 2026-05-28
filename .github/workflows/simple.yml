@@ -199,7 +199,7 @@ jobs:
 
       - name: '发布至 OpenHarmony 三方库'
         if: env.SNAPSHOT == 'false'
-        run: hvigorw ohpmPublish --mode module -p product=default -p module=simple_native_ohos@default -p buildMode=release --analyze=normal --parallel --incremental --daemon
+        run: hvigorw ohpmPublish --mode module -p product=default -p module=simple_native_ohos@default -p buildMode=release --analyze=normal --parallel --incremental --no-daemon
         env:
           OHPM_KEY: ${{ secrets.OHPM_KEY }}
           OHPM_KEY_PASSPHRASE: ${{ secrets.OHPM_KEY_PASSPHRASE }}
