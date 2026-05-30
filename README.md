@@ -86,6 +86,7 @@ sqlite3.loadSimpleExtension();
 
 ```dart
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart';
 
 final docDir = await getApplicationDocumentsDirectory();
 final jiebaDictPath = join(docDir.path, "cpp_jieba");
@@ -186,17 +187,17 @@ Future<void> createMainAndFts5(CommonDatabase db) async {
 
 ```dart
 /// 通过指定分词器 [tokenizer] 搜索， [tokenizer] 取值：jieba, simple
-List<MainTableRow> search(String value, String tokenizer) {
+Future<List<MainTableRow>> search(String value, Tokenizer tokenizer) async {
   const wrapperSql = "'${ZeroWidth.start}', '${ZeroWidth.end}'";
   final resultSet = db.select('''
-      SELECT 
-        rowid AS $id, 
-        simple_highlight($fts5Table, 0, $wrapperSql) AS $title, 
-        simple_highlight($fts5Table, 1, $wrapperSql) AS $content, 
-        $insertDate 
-      FROM $fts5Table 
-      WHERE $fts5Table MATCH ${tokenizer}_query(?);
-    ''', [value]);
+    SELECT 
+      rowid AS $id, 
+      simple_highlight($fts5Table, 0, $wrapperSql) AS $title, 
+      simple_highlight($fts5Table, 1, $wrapperSql) AS $content, 
+      $insertDate 
+    FROM $fts5Table 
+    WHERE $fts5Table MATCH ${tokenizer.name}_query(?);
+  ''', [value]);
   return _toMainTableRows(resultSet);
 }
 ```

@@ -31,7 +31,7 @@ SQLite 是基于文件的嵌入式数据库，但在 Web 环境中无法直接�
 flutter pub add sqlite3_simple
 ```
 
-随后到本仓库的 [Release](https://github.com/SageMik/sqlite3_simple/releases) 中下载由 `simple-native` 分支维护的 [`sqlite3.wasm`](https://github.com/SageMik/sqlite3_simple/releases/download/Nv2.2.0/sqlite3.wasm) 或 [`sqlite3mc.wasm`](https://github.com/SageMik/sqlite3_simple/releases/download/Nv2.1.0/sqlite3mc.wasm) (内置 [SQLite3 Multiple Ciphers](https://github.com/utelle/SQLite3MultipleCiphers) 扩展) ，置于项目的 `web` 或者资源等可访问目录下，以便后续加载使用。
+随后到本仓库的 [Release](https://github.com/SageMik/sqlite3_simple/releases) 中下载 [`sqlite3.wasm`](https://github.com/SageMik/sqlite3_simple/releases/download/Nv2.2.0/sqlite3.wasm) 或 [`sqlite3mc.wasm`](https://github.com/SageMik/sqlite3_simple/releases/download/Nv2.2.0/sqlite3mc.wasm) (内置 [SQLite3 Multiple Ciphers](https://github.com/utelle/SQLite3MultipleCiphers) 扩展) ，置于项目的 `web` 或者资源等可访问目录下，以便后续加载使用。
 
 > [!TIP]
 > `sqlite3` 使用 [WASI SDK](https://github.com/WebAssembly/wasi-sdk) 通过 [sqlite3_wasm_build](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3_wasm_build) 将 SQLite 编译为 WebAssembly 文件以在 Web 上使用。
@@ -105,7 +105,7 @@ final class Sqlite3WebDbController extends DatabaseController {
 </details>
 
 #### 通过主线程传递自定义消息，加载结巴分词字典文件
-本库内置了结巴分词所需的字典文件，可通过 [`JiebaDictAssets.loadPaths()`](../lib/src/io/jieba_dict_assets.dart) 获取其路径。**由于涉及对 Flutter 资源的访问，该方法需要在主线程中调用。** 因此，使用结巴分词，需要自定义消息将路径传递到 Worker 中，然后使用 JS 的 `fetch` 函数进行加载：
+本库内置了结巴分词所需的字典文件，可通过 [`JiebaDictAssets.loadPaths()`](../lib/src/common/jieba_dict_assets.dart) 获取其路径。**由于涉及对 Flutter 资源的访问，该方法需要在主线程中调用。** 因此，使用结巴分词，需要自定义消息将路径传递到 Worker 中，然后使用 JS 的 `fetch` 函数进行加载，例如：
 
 ```dart
 final class Sqlite3WebDb extends WorkerDatabase {
@@ -135,7 +135,7 @@ final class Sqlite3WebDb extends WorkerDatabase {
           _loader.updateFiles((it) => it..addAll(jiebaDictFiles)); // 更新结巴分词文件，其他已有文件继续保留
       }
     } catch (e) {
-      return null;
+      rethrow;
     }
     return null;
   }
@@ -145,27 +145,36 @@ final class Sqlite3WebDb extends WorkerDatabase {
 `fetchFromBase` 来自 [`impl_web/fetch.dart`](../example/lib/data/impl_web/fetch.dart)：
 
 ```dart
-@JS()
-external JSPromise<Response> fetch(URL resource, [RequestInit? options]);
+import 'dart:js_interop';
+import 'dart:typed_data';
 
-/// 用于在 Web Worker 中读取结巴分词字典文件
-Future<Uint8List> fetchFromBase(String url) async {
-  final response = await fetch(URL(url, Uri.base.toString())).toDart;
+import 'package:web/web.dart';
+
+@JS("fetch")
+external JSPromise<Response> jsFetch(URL resource, [RequestInit? options]);
+
+Future<Uint8List> fetch(String url, [String? base]) async {
+  final jsURL = base != null ? URL(url, base) : URL(url);
+  final response = await jsFetch(jsURL).toDart;
   return (await response.bytes().toDart).toDart;
 }
+
+Future<Uint8List> fetchFromBase(String url) => fetch(url, Uri.base.toString());
 ```
 
 `_loader.updateFiles` 用于更新提供给 Wasm 模块读取的文件。在 `DefaultSimpleWasmModuleLoader` 的实现中，文件读写通过内存中的「虚拟路径 → 文件内容 `Uint8List`」映射关系来模拟实现。
 
 #### 编译为 JavaScript
 
-上述代码通过 `dart compile js` 编译为 JavaScript 后才能使用，注意**不能间接或直接包含以 `package:flutter` 开头的依赖。**
-
-参考示例代码在 `example` 目录下执行如下命令，即可编译成 `sqlite3_web_worker.dart.js` 供后续使用：
+上述代码通过 `dart compile js` 编译为 JavaScript 后才能使用。参考示例代码在 `example` 目录下执行如下命令，即可编译成 `sqlite3_web_worker.dart.js` 供后续使用：
 
 ```dart
 dart compile js lib\data\impl_web\sqlite3_web\sqlite3_web_worker.dart -o web\sqlite3_web_worker.dart.js -O4
 ```
+
+> [!IMPORTANT]
+>
+> Flutter 相关的依赖不支持编译为 JS，注意不要被直接或间接依赖。
 
 调试阶段建议省略 `-O4` 优化选项，以保留更清晰的错误信息和调用栈，方便问题定位。
 

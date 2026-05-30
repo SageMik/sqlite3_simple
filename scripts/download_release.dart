@@ -20,8 +20,12 @@ void main(List<String> args) async {
       'GIT_TAG Nv$version',
     ),
     File('$r/doc/web.md'): (
-      RegExp(r'releases/download/Nv[^/]+/'),
-      'releases/download/Nv$version/',
+      RegExp(r'releases/download/Nv[^/]+/sqlite3.wasm'),
+      'releases/download/Nv$version/sqlite3.wasm',
+    ),
+    File('$r/doc/web.md'): (
+      RegExp(r'releases/download/Nv[^/]+/sqlite3mc.wasm'),
+      'releases/download/Nv$version/sqlite3mc.wasm',
     ),
   };
   for (final entry in file2versionUpdated.entries) {
