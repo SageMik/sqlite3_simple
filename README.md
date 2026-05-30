@@ -16,14 +16,14 @@
 >
 > `sqlite3` 在 [`3.0.0`](https://github.com/simolus3/sqlite3.dart/releases/tag/sqlite3-3.0.0) 即 v3 版本引入了 [Dart Hooks](https://dart.dev/tools/hooks) 管理 SQLite 原生库（Native Library），与 v2 版本不再兼容。本库基于 v3 版本，v2 请查看 [`v1` 分支](https://github.com/SageMik/sqlite3_simple/tree/v1)，使用 `sqlite3_simple: ^2.0.0` 以下的版本。
 
-| 支持平台                                                                                                        | 示例                              |
-|-------------------------------------------------------------------------------------------------------------|---------------------------------|
-| **Android ([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v2.2.0/example.apk))** | ![Android](doc/img/android.png) |
-| **iOS**                                                                                                     | ![iOS](doc/img/ios.png)         |
-| **Windows**                                                                                                 | ![Windows](doc/img/windows.png) |
-| **MacOS**                                                                                                   | ![MacOS](doc/img/macos.png)     |
-| **Linux**                                                                                                   | ![Linux](doc/img/linux.png)     |
-| **Web**                                                                                                     | ![Web](doc/img/web.png)         |
+| 支持平台                                                                                                        | 示例                               |
+|-------------------------------------------------------------------------------------------------------------|----------------------------------|
+| **Android ([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v2.2.0/example.apk))** | ![Android](doc/img/android.webp) |
+| **iOS**                                                                                                     | ![iOS](doc/img/ios.webp)         |
+| **Windows**                                                                                                 | ![Windows](doc/img/windows.webp) |
+| **MacOS**                                                                                                   | ![MacOS](doc/img/macos.webp)     |
+| **Linux**                                                                                                   | ![Linux](doc/img/linux.webp)     |
+| **Web**                                                                                                     | ![Web](doc/img/web.webp)         |
 
 ## 目录
 
