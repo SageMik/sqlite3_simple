@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:archive/archive.dart';
 
-const version = "2.1.0";
+const version = "2.2.0";
 
 void main(List<String> args) async {
   const r = "../";
@@ -18,6 +18,10 @@ void main(List<String> args) async {
     File('$r/linux/CMakeLists.txt'): (
       RegExp(r'GIT_TAG Nv.*'),
       'GIT_TAG Nv$version',
+    ),
+    File('$r/doc/web.md'): (
+      RegExp(r'releases/download/Nv[^/]+/'),
+      'releases/download/Nv$version/',
     ),
   };
   for (final entry in file2versionUpdated.entries) {
@@ -35,6 +39,7 @@ void main(List<String> args) async {
     'macos/libsimple.dylib': File('$r/darwin/libsimple.dylib'),
     'ios/libsimple.a': File('$r/darwin/libsimple.a'),
     'ios/libsimple-simulator.a': File('$r/darwin/libsimple-simulator.a'),
+    'web/sqlite3.wasm': File('$r/example/web/sqlite3.wasm')
   };
   final client = HttpClient()..findProxy = HttpClient.findProxyFromEnvironment;
   try {

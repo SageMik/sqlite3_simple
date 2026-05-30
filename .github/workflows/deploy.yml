@@ -3,7 +3,7 @@ name: 部署示例至 GitHub Pages
 on:
   push:
     branches:
-      - web
+      - main
   workflow_dispatch:
 
 permissions:
