@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'data/db_manager_kind.dart';
 import 'data/main_table_dao.dart';
@@ -52,7 +54,7 @@ class MyApp extends StatelessWidget {
       supportedLocales: supportedLocales,
       home: Scaffold(
         appBar: AppBar(
-          centerTitle: true,
+          centerTitle: MediaQuery.of(context).size.width > 420,
           title: const Text(
             'Simple 分词器 示例',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
@@ -95,6 +97,14 @@ class MyApp extends StatelessWidget {
           ),
           icon: const Icon(Icons.info_outline_rounded),
         ),
+      ),
+      IconButton(
+        tooltip: 'Github 仓库',
+        onPressed: () => launchUrl(
+          Uri.parse('https://github.com/SageMik/sqlite3_simple'),
+          webOnlyWindowName: '_blank',
+        ),
+        icon: const FaIcon(FontAwesomeIcons.github, size: 20),
       ),
     ];
   }
