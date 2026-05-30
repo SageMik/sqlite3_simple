@@ -5,15 +5,18 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:sqlite3_simple/sqlite3_simple.dart';
-import 'package:sqlite3_simple_example/utils/zero_width.dart';
 
-import '../../../data/main_table_dao.dart';
-import '../../../data/main_table_row.dart';
+import '../../../utils/zero_width.dart';
+import '../../main_table_dao.dart';
+import '../../main_table_row.dart';
 import '../../db_manager.dart';
-import 'custom_expression.dart';
+import '../pinyin_dict.dart';
+import 'expression/custom.dart';
 import 'database.dart';
+import 'expression/fts5_insert_statement.dart';
 
-class DriftDbManager extends DbManager<DriftDao> {
+class DriftDbManager extends DbManager<DriftDao, AppDatabase>
+    with PinyinDictSaver {
   @override
   late final DriftDao dao;
 
@@ -22,7 +25,7 @@ class DriftDbManager extends DbManager<DriftDao> {
     sqlite3.loadSimpleExtension();
 
     final docDir = await getApplicationDocumentsDirectory();
-    final jiebaDictPath = join(docDir.path, "cpp_jieba");
+    final jiebaDictPath = join(docDir.path, "sqlite3_simple_example/jieba_dict");
     final jiebaDictSql =
         await sqlite3.saveJiebaDict(jiebaDictPath, overwriteWhenExist: true);
     if (kDebugMode) print("用于设置结巴分词字典路径：$jiebaDictSql");
@@ -32,32 +35,34 @@ class DriftDbManager extends DbManager<DriftDao> {
 
     await db.customStatement(jiebaDictSql);
     final init = await db
-        .customSelect("SELECT jieba_query('Jieba分词初始化（提前加载避免后续等待）')")
+        .selectExpressions([JiebaQuery("Jieba分词初始化（提前加载避免后续等待）")])
         .getSingle();
-    if (kDebugMode) print(init.data);
+    if (kDebugMode) print(init.rawData.data);
+  }
+
+  /// 不需要手动调用，见 [AppDatabase.buildFts5Triggers]
+  @override
+  @Deprecated("不需要手动调用")
+  Future<void> createMainAndFts5(AppDatabase db) async {
+    throw UnimplementedError();
   }
 
   @override
-  Future<void> dispose() => dao.db.close();
+  Future<void> close() => dao.db.close();
 }
 
-class DriftDao extends MainTableDao<AppDatabase> {
+class DriftDao extends MainTableDaoBase<AppDatabase> {
   DriftDao(super.db);
 
   $MainTable get mainTable => db.main;
 
   T1 get fts5Table => db.t1;
 
-  /// 见 [AppDatabase.buildFts5Triggers]
-  @override
-  @Deprecated("不需要手动调用")
-  Future<void> initFts5() async {}
-
   @override
   Future<void> insertRandomData(int length) {
     return db.batch((b) {
       b.insertAll(mainTable,
-          Iterable.generate(length, (i) => buildRow(i).toCompanion()));
+          Iterable.generate(length, (i) => createRandomRow(i).toCompanion()));
     });
   }
 
@@ -104,6 +109,12 @@ class DriftDao extends MainTableDao<AppDatabase> {
   }
 
   @override
+  Future<void> updatePinyinDict(String newPath) async {
+    await db.selectExpressions([PinyinDict(newPath)]).getSingle();
+    await db.intoFts5(fts5Table).rebuild();
+  }
+
+  @override
   Future<List<MainTableRow>> selectAll() async {
     final items = await mainTable.select().get();
     return items
@@ -131,7 +142,7 @@ class DriftDao extends MainTableDao<AppDatabase> {
       for (int i = 0; i < mainTableRowList.length; i++) {
         b.update(
           mainTable,
-          buildRow(i).toCompanion(),
+          createRandomRow(i).toCompanion(),
           where: (t) => t.id.equals(mainTableRowList[i].id),
         );
       }

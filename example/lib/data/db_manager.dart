@@ -1,30 +1,24 @@
-import 'package:sqlite3_simple_example/data/main_table_dao.dart';
+import 'package:meta/meta.dart';
 
-import 'impl/drift/drift_impl.dart';
-import 'impl/sqflite_common_ffi_impl.dart';
-import 'impl/sqlite3_impl.dart';
+import 'main_table_dao.dart';
+import 'pinyin_dict_kind.dart';
 
-abstract class DbManager<TDao extends MainTableDao> {
-  abstract final TDao dao;
+abstract class IDbManager<TDb> {
 
-  /// 初始化 Simple 分词器，并将结巴分词字典文件保存到本地
+  /// 初始化数据库
   Future<void> init();
 
-  /// 关闭数据库
-  Future<void> dispose();
+  /// 创建主表、FTS5 虚表及其触发器，官方说明：https://sqlite.org/fts5.html
+  @protected
+  Future<void> createMainAndFts5(TDb db);
 
-  static DbManager create(DbManagerKind kind) {
-    return switch (kind) {
-      DbManagerKind.sqlite3 => Sqlite3DbManager(),
-      DbManagerKind.sqflite_common_ffi => SqfliteCommonFfiDbManager(),
-      DbManagerKind.drift => DriftDbManager(),
-    };
-  }
+  /// 保存拼音文件到可访问的路径
+  Future<Map<PinyinDictKind, String>> savePinyinDict();
+
+  /// 关闭数据库
+  Future<void> close();
 }
 
-enum DbManagerKind {
-  sqlite3,
-  // ignore: constant_identifier_names
-  sqflite_common_ffi,
-  drift,
+abstract class DbManager<TDao extends MainTableDao, TDb> implements IDbManager<TDb> {
+  abstract final TDao dao;
 }

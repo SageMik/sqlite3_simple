@@ -1,1 +1,3 @@
-export 'src/sqlite3_simple.dart';
+library;
+
+export 'src/io/sqlite3_simple.dart';
