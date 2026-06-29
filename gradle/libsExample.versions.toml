@@ -1,0 +1,16 @@
+[versions]
+kotlin = "2.4.0"
+sqlite = "2.6.2"
+kotlinx-resources = "0.15.0"
+
+[libraries]
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version = "1.7.0" }
+androidx-sqlite = { module = "androidx.sqlite:sqlite", version.ref = "sqlite" }
+androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
+okio = { module = "com.squareup.okio:okio", version = "3.17.0" }
+multiplatform-path-provider = { module = "io.github.loshine:multiplatform-path-provider", version = "0.0.1" }
+kotlinx-resources = { module = "com.goncalossilva:resources", version.ref = "kotlinx-resources" }
+
+[plugins]
+kotlinx-resources = { id = "com.goncalossilva.resources", version.ref = "kotlinx-resources" }
