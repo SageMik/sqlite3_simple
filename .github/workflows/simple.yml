@@ -10,7 +10,6 @@ permissions:
   contents: write
 
 env:
-  TAG_NAME: simple-native ${{ github.ref_name }}
   SNAPSHOT: ${{ !startsWith(github.ref, 'refs/tags/Nv') }}
 
 jobs:
@@ -38,10 +37,6 @@ jobs:
         with:
           vcpkgDirectory: simple/vcpkg
           vcpkgGitCommitId: ${{ steps.vcpkg_commit.outputs.commit_id }}
-      - run: |
-          echo "RUNVCPKG_NO_CACHE=1" >> $GITHUB_ENV
-        if: ${{ failure() || cancelled() }}
-        shell: bash
 
       - name: '复制 CMakePresets.json'
         run: |
@@ -76,34 +71,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: true
 
-      - name: '[MacOS] 安装 CMake'
+      - name: '安装 CMake'
         uses: lukka/get-cmake@v3.31.6
 
-      - name: '[MacOS] 获取 simple/vcpkg 的 commit id'
-        id: vcpkg_commit
-        run: |
-          cd simple
-          COMMIT_ID=$(git ls-tree HEAD vcpkg | awk '{print $3}')
-          echo "commit_id=$COMMIT_ID" >> $GITHUB_OUTPUT
-          echo "vcpkg commit id: $COMMIT_ID"
-        shell: bash
-
-      - name: '[MacOS] 安装并配置 vcpkg'
-        uses: lukka/run-vcpkg@v10
-        with:
-          vcpkgDirectory: simple/vcpkg
-          vcpkgGitCommitId: ${{ steps.vcpkg_commit.outputs.commit_id }}
-      - run: |
-          echo "RUNVCPKG_NO_CACHE=1" >> $GITHUB_ENV
-        if: ${{ failure() || cancelled() }}
-        shell: bash
-
-      - name: '[MacOS] 复制 CMakePresets.json'
-        run: |
-          cp "simple/CMakePresets.json" "CMakePresets.json"
-          sed -i '' 's|${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake|${sourceDir}/simple/vcpkg/scripts/buildsystems/vcpkg.cmake|g' "CMakePresets.json"
+      - name: '复制 CMakePresets.json 到根目录'
+        run: cp simple/CMakePresets.json CMakePresets.json
         shell: bash
 
       - name: '[MacOS] 通过 CMake 编译'
@@ -224,7 +198,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: true
 
       - name: '安装 WASI SDK'
         id: wasi-sdk
@@ -326,10 +300,16 @@ jobs:
           echo "EOF" >> "$GITHUB_OUTPUT"
         shell: bash
 
+      - name: '准备 Release 名称'
+        id: release_meta
+        run: echo "name=simple-native ${GITHUB_REF_NAME#N}" >> "$GITHUB_OUTPUT"
+        shell: bash
+
       - name: '上传最终产物到 Release'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.TAG_NAME }}
+          tag_name: ${{ github.ref_name }}
+          name: ${{ steps.release_meta.outputs.name }}
           draft: true
           body: ${{ steps.changelog.outputs.release_notes }}
           files: |
