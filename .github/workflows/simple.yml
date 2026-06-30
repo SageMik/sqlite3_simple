@@ -106,10 +106,14 @@ jobs:
 
       - name: '[XCFramework] 打包 Apple 平台静态库'
         run: |
+          mkdir -p xcf/ios xcf/ios-simulator xcf/macos
+          cp libsimple-ios.a            xcf/ios/libsimple.a
+          cp libsimple-ios-simulator.a  xcf/ios-simulator/libsimple.a
+          cp libsimple-macos.a          xcf/macos/libsimple.a
           xcodebuild -create-xcframework \
-            -library libsimple-ios.a \
-            -library libsimple-ios-simulator.a \
-            -library libsimple-macos.a \
+            -library xcf/ios/libsimple.a \
+            -library xcf/ios-simulator/libsimple.a \
+            -library xcf/macos/libsimple.a \
             -output libsimple.xcframework
           zip -r libsimple.xcframework.zip libsimple.xcframework
 
