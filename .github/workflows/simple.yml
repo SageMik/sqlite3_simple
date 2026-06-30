@@ -65,7 +65,7 @@ jobs:
           path: simple.dll
 
 
-  MacOS-iOS:
+  Darwin:
     runs-on: macos-latest
 
     steps:
@@ -80,38 +80,49 @@ jobs:
         run: cp simple/CMakePresets.json CMakePresets.json
         shell: bash
 
-      - name: '[MacOS] 通过 CMake 编译'
+      - name: '[MacOS] 编译动态库'
         uses: lukka/run-cmake@v10
-        continue-on-error: false
         with:
           configurePreset: 'macos-ninja'
           buildPreset: 'macos-ninja-release'
 
-      - name: '[MacOS] 重命名编译产物'
-        run: cp ../../_temp/macos/simple/src/libsimple.dylib libsimple.dylib
-
-      - name: '[iOS] 执行脚本，通过 CMake 编译'
+      - name: '[MacOS] 保存动态库并清理缓存'
         run: |
-          ./build-ios.sh
-          cp out/bin/libsimple.a libsimple.a
-        env:
-          IOS_SIMULATOR: false
+          cp ../../_temp/macos/simple/src/libsimple.dylib libsimple-macos.dylib
+          rm -rf ../../_temp/macos
 
-      - name: '[iOS Simulator] 执行脚本，通过 CMake 编译'
+      - name: '[MacOS] 编译静态库'
+        uses: lukka/run-cmake@v10
+        with:
+          configurePreset: 'macos-ninja'
+          configurePresetAdditionalArgs: "['-DBUILD_STATIC=ON']"
+          buildPreset: 'macos-ninja-release'
+
+      - name: '[MacOS] 保存静态库'
+        run: cp ../../_temp/macos/simple/src/libsimple.a libsimple-macos.a
+
+      - name: '[iOS] 编译真机和模拟器原生库'
+        run: ./build-ios.sh
+
+      - name: '[XCFramework] 打包 Apple 平台静态库'
         run: |
-          ./build-ios.sh
-          cp out-simulator/bin/libsimple.a libsimple-simulator.a
-        env:
-          IOS_SIMULATOR: true
+          xcodebuild -create-xcframework \
+            -library libsimple-ios.a \
+            -library libsimple-ios-simulator.a \
+            -library libsimple-macos.a \
+            -output libsimple.xcframework
+          zip -r libsimple.xcframework.zip libsimple.xcframework
 
-      - name: '上传 MacOS/iOS 产物'
+      - name: '上传 Darwin 产物'
         uses: actions/upload-artifact@v4
         with:
-          name: macos-ios
+          name: darwin
           path: |
-            libsimple.dylib
-            libsimple.a
-            libsimple-simulator.a
+            libsimple-macos.dylib
+            libsimple-macos.a
+            libsimple-ios.a
+            libsimple-ios-simulator.a
+            libsimple.xcframework.zip
 
 
   Android:
@@ -237,7 +248,7 @@ jobs:
 
   Package:
     runs-on: ubuntu-latest
-    needs: [Windows, MacOS-iOS, Android, HarmonyOS, WebAssembly]
+    needs: [Windows, Darwin, Android, HarmonyOS, WebAssembly]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -250,22 +261,21 @@ jobs:
 
       - name: '整理并打包'
         run: |
-          mkdir -p dist/{windows,macos,ios,android,ohos,web}
+          mkdir -p dist/{windows,darwin,android,ohos,web}
           mkdir -p upload
           
           # Windows
-          cp artifacts/windows/simple.dll dist/windows/simple.dll
-          cp artifacts/windows/simple.dll upload/simple-windows-x64.dll
+          cp artifacts/windows/simple.dll   dist/windows/simple.dll
+          cp artifacts/windows/simple.dll   upload/simple-windows-x64.dll
 
-          # MacOS
-          cp artifacts/macos-ios/libsimple.dylib dist/macos/libsimple.dylib
-          cp artifacts/macos-ios/libsimple.dylib upload/libsimple-macos-universal.dylib
-
-          # iOS
-          cp artifacts/macos-ios/libsimple.a dist/ios/libsimple.a
-          cp artifacts/macos-ios/libsimple-simulator.a dist/ios/libsimple-simulator.a
-          cp artifacts/macos-ios/libsimple.a upload/libsimple-ios-arm64.a
-          cp artifacts/macos-ios/libsimple-simulator.a upload/libsimple-ios-simulator-universal.a
+          # Darwin
+          cp artifacts/darwin/libsimple-macos.dylib       dist/darwin/libsimple-macos.dylib
+          cp artifacts/darwin/libsimple.xcframework.zip   dist/darwin/libsimple.xcframework.zip
+          cp artifacts/darwin/libsimple-macos.dylib       upload/libsimple-macos-universal.dylib
+          cp artifacts/darwin/libsimple-macos.a           upload/libsimple-macos-universal.a
+          cp artifacts/darwin/libsimple-ios.a             upload/libsimple-ios-arm64.a
+          cp artifacts/darwin/libsimple-ios-simulator.a   upload/libsimple-ios-simulator-universal.a
+          cp artifacts/darwin/libsimple.xcframework.zip   upload/libsimple.xcframework.zip
           
           # Android
           cp -r artifacts/android/* dist/android/
@@ -285,9 +295,9 @@ jobs:
           
           # WebAssembly
           cp -r artifacts/web/* dist/web/
-          cp artifacts/web/sqlite3.wasm upload/sqlite3.wasm
-          cp artifacts/web/sqlite3.debug.wasm upload/sqlite3.debug.wasm
-          cp artifacts/web/sqlite3mc.wasm upload/sqlite3mc.wasm
+          cp artifacts/web/sqlite3.wasm         upload/sqlite3.wasm
+          cp artifacts/web/sqlite3.debug.wasm   upload/sqlite3.debug.wasm
+          cp artifacts/web/sqlite3mc.wasm       upload/sqlite3mc.wasm
           
           cd dist && zip -r ../libsimple.zip .
         shell: bash
