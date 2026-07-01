@@ -111,11 +111,11 @@ jobs:
           cp libsimple-ios-simulator.a  xcf/ios-simulator/libsimple.a
           cp libsimple-macos.a          xcf/macos/libsimple.a
           xcodebuild -create-xcframework \
-            -library xcf/ios/libsimple.a \
-            -library xcf/ios-simulator/libsimple.a \
-            -library xcf/macos/libsimple.a \
-            -output libsimple.xcframework
-          zip -r libsimple.xcframework.zip libsimple.xcframework
+            -library xcf/ios/libsimple.a -headers src/darwin/include \
+            -library xcf/ios-simulator/libsimple.a -headers src/darwin/include \
+            -library xcf/macos/libsimple.a -headers src/darwin/include \
+            -output CSimple.xcframework
+          zip -r CSimple.xcframework.zip CSimple.xcframework
 
       - name: '上传 Darwin 产物'
         uses: actions/upload-artifact@v4
@@ -126,7 +126,7 @@ jobs:
             libsimple-macos.a
             libsimple-ios.a
             libsimple-ios-simulator.a
-            libsimple.xcframework.zip
+            CSimple.xcframework.zip
 
 
   Android:
@@ -274,12 +274,12 @@ jobs:
 
           # Darwin
           cp artifacts/darwin/libsimple-macos.dylib       dist/darwin/libsimple-macos.dylib
-          cp artifacts/darwin/libsimple.xcframework.zip   dist/darwin/libsimple.xcframework.zip
+          cp artifacts/darwin/CSimple.xcframework.zip     dist/darwin/CSimple.xcframework.zip
           cp artifacts/darwin/libsimple-macos.dylib       upload/libsimple-macos-universal.dylib
           cp artifacts/darwin/libsimple-macos.a           upload/libsimple-macos-universal.a
           cp artifacts/darwin/libsimple-ios.a             upload/libsimple-ios-arm64.a
           cp artifacts/darwin/libsimple-ios-simulator.a   upload/libsimple-ios-simulator-universal.a
-          cp artifacts/darwin/libsimple.xcframework.zip   upload/libsimple.xcframework.zip
+          cp artifacts/darwin/CSimple.xcframework.zip     upload/CSimple.xcframework.zip
           
           # Android
           cp -r artifacts/android/* dist/android/
