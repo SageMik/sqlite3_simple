@@ -2,7 +2,7 @@
 
 import 'dart:io';
 
-import 'package:archive/archive.dart';
+import 'package:archive/archive_io.dart';
 
 const version = "2.2.0";
 
@@ -38,12 +38,10 @@ void main(List<String> args) async {
   final releaseUrl = Uri.parse(
     'https://github.com/SageMik/sqlite3_simple/releases/download/Nv$version/libsimple.zip',
   );
-  final remote2local = {
+  final remote2local = <String, FileSystemEntity>{
     'windows/simple.dll': File('$r/windows/simple.dll'),
-    'macos/libsimple.dylib': File('$r/darwin/libsimple.dylib'),
-    'ios/libsimple.a': File('$r/darwin/libsimple.a'),
-    'ios/libsimple-simulator.a': File('$r/darwin/libsimple-simulator.a'),
-    'web/sqlite3.wasm': File('$r/example/web/sqlite3.wasm')
+    'darwin/CSimple.xcframework.zip': Directory('$r/darwin/sqlite3_simple/CSimple.xcframework',),
+    'web/sqlite3.wasm': File('$r/example/web/sqlite3.wasm'),
   };
   final client = HttpClient()..findProxy = HttpClient.findProxyFromEnvironment;
   try {
@@ -72,10 +70,18 @@ void main(List<String> args) async {
       if (!file.isFile) {
         continue;
       }
-      final localFile = remote2local[file.name.replaceAll('\\', '/')];
-      if (localFile != null) {
-        await localFile.parent.create(recursive: true);
-        await localFile.writeAsBytes(file.content as List<int>);
+      final target = remote2local[file.name];
+      if (target is File) {
+        await target.parent.create(recursive: true);
+        await target.writeAsBytes(file.content as List<int>);
+      } else if (target is Directory) {
+        if (await target.exists()) {
+          await target.delete(recursive: true);
+        }
+        await extractArchiveToDisk(
+          ZipDecoder().decodeBytes(file.content as List<int>),
+          target.parent.path,
+        );
       }
     }
     print("[更新完成] $version");

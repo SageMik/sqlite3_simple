@@ -1,0 +1,4 @@
+module CSimple {
+    header "CSimple.h"
+    export *
+}

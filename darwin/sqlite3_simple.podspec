@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'SageMik' => 'sagemik@163.com' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+  s.source_files = 'sqlite3_simple/Sources/sqlite3_simple/**/*'
   s.swift_version = '5.0'
 
   s.ios.dependency 'Flutter'
@@ -17,19 +17,10 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '12.0'
   s.osx.deployment_target = '10.14'
 
-  # Flutter.framework does not contain a i386 slice.
-  
-  # 通过 s.vendored_libraries 加载 libsimple.a 失败，
-  # 推测是因为 Dart FFI 直接调用，iOS 原生没有调用，而被优化，
-  # 故通过 force_load 强制加载
-  s.ios.pod_target_xcconfig = {
+  s.vendored_frameworks = 'sqlite3_simple/CSimple.xcframework'
+
+  s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',
     'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386',
-    "OTHER_LDFLAGS[sdk=iphonesimulator*]" => "-force_load $(PODS_TARGET_SRCROOT)/libsimple-simulator.a",
-    "OTHER_LDFLAGS" => "-force_load $(PODS_TARGET_SRCROOT)/libsimple.a" ,
   }
-  s.osx.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
-
-  s.osx.vendored_libraries = 'libsimple.dylib'
-
 end
