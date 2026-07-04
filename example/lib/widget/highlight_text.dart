@@ -19,11 +19,9 @@ class HighlightText extends RegExpSpecialText {
       text: showingText,
       actualText: actualText,
       style: highLightTextStyle(textStyle ?? const TextStyle()),
-      recognizer: (TapGestureRecognizer()
-        ..onTap = () {
-          onTap?.call(actualText);
-        }),
-      mouseCursor: SystemMouseCursors.text,
+      recognizer: onTap == null
+          ? null
+          : (TapGestureRecognizer()..onTap = () { onTap.call(actualText); }),
     );
   }
 
