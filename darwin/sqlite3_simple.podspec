@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'SageMik' => 'sagemik@163.com' }
   s.source           = { :path => '.' }
-  s.source_files = 'sqlite3_simple/Sources/sqlite3_simple/**/*'
+  s.source_files = 'sqlite3_simple/Sources/sqlite3_simple/**/*.swift', 'sqlite3_simple/Sources/sqlite3_simple_anchor/**/*.c'
   s.swift_version = '5.0'
 
   s.ios.dependency 'Flutter'

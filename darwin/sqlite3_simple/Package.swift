@@ -20,12 +20,17 @@ let package = Package(
             name: "sqlite3_simple",
             dependencies: [
                 .product(name: "FlutterFramework", package: "FlutterFramework"),
-                "CSimple"
+                "CSimple",
+                "sqlite3_simple_anchor"
             ]
         ),
         .binaryTarget(
             name: "CSimple",
             path: "CSimple.xcframework"
+        ),
+        .target(
+            name: "sqlite3_simple_anchor",
+            dependencies: ["CSimple"]
         )
     ]
 )
