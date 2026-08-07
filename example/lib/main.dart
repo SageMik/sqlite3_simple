@@ -20,7 +20,7 @@ import 'widget/search_input.dart';
 import 'widget/search_option_radio_row.dart';
 import 'widget/dialog/search_result_dialog.dart';
 import 'widget/search_result_list.dart';
-import 'widget/size_transition_expand_column.dart';
+import 'widget/expandable_table.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -140,65 +140,52 @@ class MyApp extends StatelessWidget {
       child: Consumer(
         builder: (context, ref, _) {
           final moreOpen = ref.watch(searchOptionsMoreOpenProvider);
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Table(
-                columnWidths: searchOptionTableColumnWidths,
-                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                children: [
-                  SearchOptionRadioRow<DbManagerKind>(
-                    label: "数据库实现：",
-                    value: ref.watch(dbManagerKindProvider),
-                    options: dbManagerKind2uiString,
-                    onChanged: (v) async {
-                      if (ref.read(dbManagerKindProvider) == v) {
-                        // 重复点击刷新为新的随机数据
-                        await refreshDbData(ref);
-                      } else {
-                        if (kDebugMode) {
-                          print("切换数据库至：${dbManagerKind2uiString[v]}");
-                        }
-                        ref.read(dbManagerKindProvider.notifier).update(v);
+          return ExpandableTable(
+            expanded: moreOpen,
+            pinnedRowCount: 1,
+            trailing: ExpandCollapseStrip(
+              expanded: moreOpen,
+              onTap: () => ref
+                  .read(searchOptionsMoreOpenProvider.notifier)
+                  .update(!ref.read(searchOptionsMoreOpenProvider)),
+            ),
+            child: Table(
+              columnWidths: searchOptionTableColumnWidths,
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              children: [
+                SearchOptionRadioRow<DbManagerKind>(
+                  label: "数据库实现：",
+                  value: ref.watch(dbManagerKindProvider),
+                  options: dbManagerKind2uiString,
+                  onChanged: (v) async {
+                    if (ref.read(dbManagerKindProvider) == v) {
+                      // 重复点击刷新为新的随机数据
+                      await refreshDbData(ref);
+                    } else {
+                      if (kDebugMode) {
+                        print("切换数据库至：${dbManagerKind2uiString[v]}");
                       }
-                    },
-                  ),
-                ],
-              ),
-              SizeTransitionExpandColumn(
-                expanded: moreOpen,
-                expandingChild: Padding(
-                  padding: const EdgeInsets.only(top: P.extraSmall),
-                  child: Table(
-                    columnWidths: searchOptionTableColumnWidths,
-                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                    children: [
-                      SearchOptionRadioRow<Tokenizer>(
-                        label: "分词器：",
-                        value: ref.watch(tokenizerProvider),
-                        options: tokenizer2uiString,
-                        onChanged: (v) =>
-                            ref.read(tokenizerProvider.notifier).update(v),
-                      ),
-                      SearchOptionRadioRow<PinyinDictKind>(
-                        label: "拼音文件：",
-                        value: ref.watch(pinyinDictKindProvider),
-                        options: pinyinDictKind2uiString,
-                        isLast: true,
-                        onChanged: (v) =>
-                            ref.read(pinyinDictKindProvider.notifier).update(v),
-                      ),
-                    ],
-                  ),
+                      ref.read(dbManagerKindProvider.notifier).update(v);
+                    }
+                  },
                 ),
-                trailing: ExpandCollapseStrip(
-                  expanded: moreOpen,
-                  onTap: () => ref
-                      .read(searchOptionsMoreOpenProvider.notifier)
-                      .update(!ref.read(searchOptionsMoreOpenProvider)),
+                SearchOptionRadioRow<Tokenizer>(
+                  label: "分词器：",
+                  value: ref.watch(tokenizerProvider),
+                  options: tokenizer2uiString,
+                  onChanged: (v) =>
+                      ref.read(tokenizerProvider.notifier).update(v),
                 ),
-              ),
-            ],
+                SearchOptionRadioRow<PinyinDictKind>(
+                  label: "拼音文件：",
+                  value: ref.watch(pinyinDictKindProvider),
+                  options: pinyinDictKind2uiString,
+                  isLast: true,
+                  onChanged: (v) =>
+                      ref.read(pinyinDictKindProvider.notifier).update(v),
+                ),
+              ],
+            ),
           );
         },
       ),
