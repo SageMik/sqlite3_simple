@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -9,6 +11,7 @@ import 'data/db_manager_kind.dart';
 import 'data/main_table_dao.dart';
 import 'data/pinyin_dict_kind.dart';
 import 'main_provider.dart';
+import 'utils/font/font_loader.dart';
 import 'utils/padding.dart';
 import 'widget/dialog/usage_dialog.dart';
 import 'widget/expand_collapse_strip.dart';
@@ -19,7 +22,9 @@ import 'widget/dialog/search_result_dialog.dart';
 import 'widget/search_result_list.dart';
 import 'widget/size_transition_expand_column.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await AppFontLoader.instance.loadFirstScreen();
   runApp(
     ProviderScope(
       retry: (retryCount, error) =>
@@ -27,6 +32,7 @@ void main() {
       child: const MyApp(),
     ),
   );
+  unawaited(AppFontLoader.instance.loadFull());
 }
 
 class MyApp extends StatelessWidget {
@@ -43,9 +49,7 @@ class MyApp extends StatelessWidget {
     const supportedLocales = [Locale('zh', 'CN')];
 
     /// 自定义中文字体，避免 Flutter 默认加载字体的方式导致短时间的乱码
-    const fontFamily = 'HarmonyOS Sans SC';
-
-    final theme = ThemeData(fontFamily: fontFamily);
+    final theme = ThemeData(fontFamily: HarmonyOsSansSC);
     final colorScheme = theme.colorScheme;
     return MaterialApp(
       debugShowCheckedModeBanner: false,

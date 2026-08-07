@@ -1,0 +1,5 @@
+name: sqlite3_simple_example_subset_font
+description: "字体子集化"
+environment:
+  sdk: '>=3.10.0 <4.0.0'
+dependencies:

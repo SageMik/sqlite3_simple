@@ -49,8 +49,4 @@ flutter:
   uses-material-design: true
   assets:
     - assets/pinyin_dict/
-
-  fonts:
-    - family: HarmonyOS Sans SC
-      fonts:
-        - asset: font/HarmonyOS_Sans_SC_Regular.ttf
+    - assets/font/HarmonyOS_Sans_SC_Regular.subset.ttf
