@@ -1,3 +1,8 @@
+## 2.3.0
+
+- **[ 优化 ]** 调整 iOS 集成方式为 XCFramework，以配合 Flutter 进行 [Swift Package Manager 适配](https://docs.flutter.cn/packages-and-plugins/swift-package-manager/for-plugin-authors)。
+- **[ 新增 ]** 新增 Linux x86_64 和 arm64 集成。[sqlite3_simple](https://github.com/SageMik/sqlite3_simple) Linux 平台仍通过 [CMakeLists.txt](https://github.com/SageMik/sqlite3_simple/blob/main/linux/CMakeLists.txt) 实现，不使用该集成。
+
 ## 2.2.0
 
 - **[ 新增 ]** 新增 Web 支持，可编译内置 Simple 扩展的 SQLite WASM 文件。

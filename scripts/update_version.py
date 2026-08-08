@@ -3,7 +3,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
-version = "2.2.0"
+version = "2.3.0"
 files = [
     (ROOT / "src/android/simple-native-android/build.gradle.kts", r'(?m)^version = "[\d\.\+]+"', f'version = "{version}"'),
     (ROOT / "src/android/README.md", r'simple-native-android:[\d\.\+]+', f'simple-native-android:{version}'),

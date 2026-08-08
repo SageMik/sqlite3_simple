@@ -1,3 +1,7 @@
+## 2.3.0
+
+- 其他平台调整，同步更新版本。
+
 ## 2.2.0
 
 - 引入 [`hvigor-ohpm-publish`](https://github.com/SageMik/hvigor-ohpm-publish) Hvigor 插件用于 Github Actions 一键自动发布。
