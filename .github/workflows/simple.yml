@@ -129,6 +129,67 @@ jobs:
             CSimple.xcframework.zip
 
 
+  Linux:
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: '安装 CMake'
+        uses: lukka/get-cmake@v3.31.6
+
+      - name: '安装 Linux 编译工具'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build build-essential gcc g++
+        shell: bash
+
+      - name: '获取 simple/vcpkg 的 commit id'
+        id: vcpkg_commit
+        run: |
+          cd simple
+          COMMIT_ID=$(git ls-tree HEAD vcpkg | awk '{print $3}')
+          echo "commit_id=$COMMIT_ID" >> $GITHUB_OUTPUT
+          echo "vcpkg commit id: $COMMIT_ID"
+        shell: bash
+
+      - name: '安装并配置 vcpkg'
+        uses: lukka/run-vcpkg@v10
+        with:
+          vcpkgDirectory: simple/vcpkg
+          vcpkgGitCommitId: ${{ steps.vcpkg_commit.outputs.commit_id }}
+
+      - name: '复制 CMakePresets.json'
+        run: |
+          Copy-Item "simple/CMakePresets.json" "CMakePresets.json"
+          $content = Get-Content "CMakePresets.json" -Raw
+          $content = $content -replace '\$\{sourceDir\}/vcpkg/scripts/buildsystems/vcpkg\.cmake', '${sourceDir}/simple/vcpkg/scripts/buildsystems/vcpkg.cmake'
+          Set-Content "CMakePresets.json" -Value $content -NoNewline
+        shell: pwsh
+
+      - name: '通过 CMake 编译'
+        uses: lukka/run-cmake@v10
+        with:
+          configurePreset: 'ninja-vcpkg-release'
+          buildPreset: 'ninja-vcpkg-release'
+
+      - name: '上传 Linux ${{ matrix.arch }} 产物'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.arch }}
+          path: build/simple/src/libsimple.so
+
+
   Android:
     runs-on: ubuntu-latest
     environment: simple-native-android
@@ -252,7 +313,7 @@ jobs:
 
   Package:
     runs-on: ubuntu-latest
-    needs: [Windows, Darwin, Android, HarmonyOS, WebAssembly]
+    needs: [Windows, Darwin, Linux, Android, HarmonyOS, WebAssembly]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -266,6 +327,7 @@ jobs:
       - name: '整理并打包'
         run: |
           mkdir -p dist/{windows,darwin,android,ohos,web}
+          mkdir -p dist/linux/{x86_64,arm64}
           mkdir -p upload
           
           # Windows
@@ -280,6 +342,12 @@ jobs:
           cp artifacts/darwin/libsimple-ios.a             upload/libsimple-ios-arm64.a
           cp artifacts/darwin/libsimple-ios-simulator.a   upload/libsimple-ios-simulator-universal.a
           cp artifacts/darwin/CSimple.xcframework.zip     upload/CSimple.xcframework.zip
+
+          # Linux
+          cp artifacts/linux-x86_64/libsimple.so dist/linux/x86_64/libsimple.so
+          cp artifacts/linux-arm64/libsimple.so  dist/linux/arm64/libsimple.so
+          cp artifacts/linux-x86_64/libsimple.so upload/libsimple-linux-x86_64.so
+          cp artifacts/linux-arm64/libsimple.so  upload/libsimple-linux-arm64.so
           
           # Android
           cp -r artifacts/android/* dist/android/

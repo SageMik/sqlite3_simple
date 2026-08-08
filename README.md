@@ -8,16 +8,15 @@
 
 标签 `NvX.Y.Z`。自 `Nv2.0.0` 开始，本库所用拼音文件替换为 [`zdic.txt`](zdic.txt) ，以解决原拼音文件存在大量不常用读音的问题（例如输入q，会匹配到 `示(U+793A, qí)`、`客(U+5BA2, qià)` 等）。
 
-通过 Github Actions 进行持续集成（CI），详见 [`.github/workflow/simple.yml`](.github/workflows/simple.yml) 。
+通过 Github Actions 进行持续集成（CI），详见 [`.github/workflow/simple.yml`](.github/workflows/simple.yml) 。可前往 [Release](https://github.com/SageMik/sqlite3_simple/releases) 页面查看编译产物，通过下载 `libsimple.zip` 一键获取所有平台的编译产物。
 
-
-| 平台                 | 持续集成                                                                                                        | 架构                                  | 备注                             |
-|--------------------|-------------------------------------------------------------------------------------------------------------|-------------------------------------|--------------------------------|
-| **Android**        | [src/android](src/android)                                                                                  | armeabi-v7a, arm64-v8a, x86, x86_64 | Flutter Android 不支持 x86        |
-| **iOS**            | [`libsimple.a`](https://github.com/SageMik/sqlite3_simple/blob/main/darwin/libsimple.a)                     | arm64                               |                                |
-| **iOS 模拟器**        | [`libsimple-simulator.a`](https://github.com/SageMik/sqlite3_simple/blob/main/darwin/libsimple-simulator.a) | arm64, x86_64                       | arm64 为 Apple Silicon M 系列芯片架构 |
-| **HarmonyOS NEXT** | [src/ohos](src/ohos)                                                                                        | arm64-v8a, x86_64                   |                                |
-| **Windows**        | [`simple.dll`](https://github.com/SageMik/sqlite3_simple/blob/main/windows/simple.dll)                      | x64                                 | Flutter Windows 仅支持 x64        |
-| **MacOS**          | [`libsimple.dylib`](https://github.com/SageMik/sqlite3_simple/blob/main/darwin/libsimple.dylib)             | arm64, x86_64                       | arm64 为 Apple Silicon M 系列芯片架构 |
-| **Linux**          | [CMakeLists.txt](https://github.com/SageMik/sqlite3_simple/blob/main/linux/CMakeLists.txt)                  |                                     |                                |
-| **Web**            | [src/web](src/web)                                                                                          | WebAssembly                         |                                |
+| 平台                 | 持续集成                                                                                                        | 架构                                  | 备注                                                                                                            |
+|--------------------|-------------------------------------------------------------------------------------------------------------|-------------------------------------|---------------------------------------------------------------------------------------------------------------|
+| **Android**        | [src/android](src/android)                                                                                  | armeabi-v7a, arm64-v8a, x86, x86_64 | Flutter Android 不支持 x86                                                                                       |
+| **iOS**            | [`libsimple.a`](https://github.com/SageMik/sqlite3_simple/blob/main/darwin/libsimple.a)                     | arm64                               |                                                                                                               |
+| **iOS 模拟器**        | [`libsimple-simulator.a`](https://github.com/SageMik/sqlite3_simple/blob/main/darwin/libsimple-simulator.a) | arm64, x86_64                       | arm64 为 Apple Silicon M 系列芯片架构                                                                                |
+| **HarmonyOS NEXT** | [src/ohos](src/ohos)                                                                                        | arm64-v8a, x86_64                   |                                                                                                               |
+| **Windows**        | [`simple.dll`](https://github.com/SageMik/sqlite3_simple/blob/main/windows/simple.dll)                      | x64                                 | Flutter Windows 仅支持 x64                                                                                       |
+| **MacOS**          | [`libsimple.dylib`](https://github.com/SageMik/sqlite3_simple/blob/main/darwin/libsimple.dylib)             | arm64, x86_64                       | arm64 为 Apple Silicon M 系列芯片架构                                                                                |
+| **Linux**          | [simple.yml](.github/workflows/simple.yml)                                                                  | x86_64, arm64                       | 目前主分支 Linux 实现还是通过 [CMakeLists.txt](https://github.com/SageMik/sqlite3_simple/blob/main/linux/CMakeLists.txt) |
+| **Web**            | [src/web](src/web)                                                                                          | WebAssembly                         |                                                                                                               |
