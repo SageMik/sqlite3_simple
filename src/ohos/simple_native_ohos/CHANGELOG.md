@@ -1,6 +1,6 @@
 ## 2.3.0
 
-- 其他平台调整，同步更新版本。
+- 更新发布配置，适配 [中心仓的调整](https://github.com/SageMik/sqlite3_simple/actions/runs/31255069687/job/93098009876) 。
 
 ## 2.2.0
 
