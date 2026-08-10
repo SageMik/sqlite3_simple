@@ -1,3 +1,7 @@
+## 2.3.0
+
+- **[新增]** 新增 [Swift Packager Manager 支持](https://docs.fluttercn.cn/packages-and-plugins/swift-package-manager/for-plugin-authors) ([#25](https://github.com/SageMik/sqlite3_simple/issues/25)) 。
+
 ## 2.2.0
 
 - **[新增]** 重构代码，新增 Web 平台支持。
@@ -6,8 +10,8 @@
 ## 2.1.0
 
 - **[ 原生库版本 ]** 更新至 [simple v0.7.1](https://github.com/wangfenjin/simple/releases/tag/v0.7.1) 。`Nv1.0.6` 基于当时原生库的最新提交进行构建，以修复 [结巴分词搜索 `C#` 出错](https://github.com/wangfenjin/simple/issues/176) 的问题，但 `Nv2.0.0` 又将版本降回至 [v0.5.2](https://github.com/wangfenjin/simple/releases/tag/v0.5.2) 导致问题复现，现重新升级以解决此问题。
-- **[修复]** 修复示例程序高亮文本相比原文本有宽高上有微小变化的问题，正确替换零宽字符（[#20](https://github.com/SageMik/sqlite3_simple/issues/20)）。
-- **[修复]** 修复错误依赖 `package:archive` 的问题，该依赖只用于开发时下载原生库（[#22](https://github.com/SageMik/sqlite3_simple/issues/22)）。
+- **[修复]** 修复示例程序高亮文本相比原文本有宽高上有微小变化的问题，正确替换零宽字符 ([#20](https://github.com/SageMik/sqlite3_simple/issues/20))。
+- **[修复]** 修复错误依赖 `package:archive` 的问题，该依赖只用于开发时下载原生库 ([#22](https://github.com/SageMik/sqlite3_simple/issues/22))。
 
 ## 2.0.0
 
@@ -44,8 +48,8 @@
 ## 1.0.2
 
 * 更新 iOS 编译工具链。
-* 补充 M芯片 iOS 模拟器 支持 (#3) 。
-* 修复最新版本 Android Studio Ladybug | 2024.2.1 Patch 2 (JDK 21) 无法运行 Android 示例的问题 (#4)。
+* 补充 M芯片 iOS 模拟器 支持 ([#3](https://github.com/SageMik/sqlite3_simple/issues/3)) 。
+* 修复最新版本 Android Studio Ladybug | 2024.2.1 Patch 2 (JDK 21) 无法运行 Android 示例的问题 ([#4](https://github.com/SageMik/sqlite3_simple/issues/4))。
 
 ## 1.0.1
 

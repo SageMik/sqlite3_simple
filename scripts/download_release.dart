@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:archive/archive_io.dart';
 
-const version = "2.2.0";
+const version = "2.3.0";
 
 void main(List<String> args) async {
   const r = "../";

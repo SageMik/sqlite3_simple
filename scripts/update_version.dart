@@ -1,7 +1,7 @@
 import 'dart:io';
 
 const projectRoot = '..';
-const toVersion = '2.2.0';
+const toVersion = '2.3.0';
 
 void main() {
   final changes = <VersionChange>[
