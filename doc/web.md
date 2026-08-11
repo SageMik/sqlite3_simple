@@ -31,7 +31,7 @@ SQLite 是基于文件的嵌入式数据库，但在 Web 环境中无法直接�
 flutter pub add sqlite3_simple
 ```
 
-随后到本仓库的 [Release](https://github.com/SageMik/sqlite3_simple/releases) 中下载 [`sqlite3.wasm`](https://github.com/SageMik/sqlite3_simple/releases/download/Nv2.2.0/sqlite3.wasm) 或 [`sqlite3mc.wasm`](https://github.com/SageMik/sqlite3_simple/releases/download/Nv2.2.0/sqlite3mc.wasm) (内置 [SQLite3 Multiple Ciphers](https://github.com/utelle/SQLite3MultipleCiphers) 扩展) ，置于项目的 `web` 或者资源等可访问目录下，以便后续加载使用。
+随后到本仓库的 [Release](https://github.com/SageMik/sqlite3_simple/releases) 中下载 [`sqlite3.wasm`](https://github.com/SageMik/sqlite3_simple/releases/download/Nv2.3.0/sqlite3.wasm) 或 [`sqlite3mc.wasm`](https://github.com/SageMik/sqlite3_simple/releases/download/Nv2.3.0/sqlite3mc.wasm) (内置 [SQLite3 Multiple Ciphers](https://github.com/utelle/SQLite3MultipleCiphers) 扩展) ，置于项目的 `web` 或者资源等可访问目录下，以便后续加载使用。
 
 > [!TIP]
 > `sqlite3` 使用 [WASI SDK](https://github.com/WebAssembly/wasi-sdk) 通过 [sqlite3_wasm_build](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3_wasm_build) 将 SQLite 编译为 WebAssembly 文件以在 Web 上使用。

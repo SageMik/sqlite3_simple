@@ -18,7 +18,7 @@
 
 | 支持平台                                                                                                        | 示例                               |
 |-------------------------------------------------------------------------------------------------------------|----------------------------------|
-| **Android ([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v2.2.0/example.apk))** | ![Android](doc/img/android.webp) |
+| **Android ([example.apk](https://github.com/SageMik/sqlite3_simple/releases/download/v2.3.0/example.apk))** | ![Android](doc/img/android.webp) |
 | **iOS**                                                                                                     | ![iOS](doc/img/ios.webp)         |
 | **Windows**                                                                                                 | ![Windows](doc/img/windows.webp) |
 | **MacOS**                                                                                                   | ![MacOS](doc/img/macos.webp)     |

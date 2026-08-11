@@ -21,7 +21,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
-  sqlite3_simple: 74e9c1de2bcbdce5a7faec63195533343b85c6a6
+  sqlite3_simple: d1c5170df7f7625464edb34bfc319790c89113dd
   url_launcher_macos: 175a54c831f4375a6cf895875f716ee5af3888ce
 
 PODFILE CHECKSUM: 20f5b78b4f7da53124c0a2855c65c0dd55e8978d

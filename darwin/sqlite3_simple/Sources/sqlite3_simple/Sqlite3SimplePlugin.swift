@@ -7,6 +7,5 @@ import Foundation
 #endif
 
 public class Sqlite3SimplePlugin: NSObject, FlutterPlugin {
-  public static func register(with registrar: FlutterPluginRegistrar) {
-  }
+  public static func register(with registrar: FlutterPluginRegistrar) {}
 }
