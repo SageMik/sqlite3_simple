@@ -1,0 +1,56 @@
+name: 发布 Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 提取 CHANGELOG
+        id: changelog
+        run: |
+          echo "release_notes<<EOF" >> "$GITHUB_OUTPUT"
+          python scripts/extract_changelog.py "${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+        shell: bash
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: 构建 Android APK
+        run: flutter build apk --release
+        working-directory: example
+
+      - name: 重命名 APK
+        id: apk
+        run: |
+          mv example/build/app/outputs/flutter-apk/app-release.apk example.apk
+          echo "path=example.apk" >> "$GITHUB_OUTPUT"
+        shell: bash
+
+      - name: 发布 Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body: ${{ steps.changelog.outputs.release_notes }}
+          files: ${{ steps.apk.outputs.path }}
+          draft: true
