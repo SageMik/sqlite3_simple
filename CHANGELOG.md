@@ -1,6 +1,7 @@
 ## 2.3.0
 
 - **[新增]** 新增 [Swift Packager Manager 支持](https://docs.fluttercn.cn/packages-and-plugins/swift-package-manager/for-plugin-authors) ([#25](https://github.com/SageMik/sqlite3_simple/issues/25)) 。
+- **[优化]** 优化 Web 示例代码，使用子集化字体，提高加载速度。
 
 ## 2.2.0
 
