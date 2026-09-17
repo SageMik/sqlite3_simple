@@ -23,46 +23,24 @@ jobs:
       - name: '安装 CMake'
         uses: lukka/get-cmake@v3.31.6
 
-      - name: '获取 simple/vcpkg 的 commit id'
-        id: vcpkg_commit
-        run: |
-          cd simple
-          COMMIT_ID=$(git ls-tree HEAD vcpkg | awk '{print $3}')
-          echo "commit_id=$COMMIT_ID" >> $GITHUB_OUTPUT
-          echo "vcpkg commit id: $COMMIT_ID"
-        shell: bash
-
       - name: '安装并配置 vcpkg'
-        uses: lukka/run-vcpkg@v10
-        with:
-          vcpkgDirectory: simple/vcpkg
-          vcpkgGitCommitId: ${{ steps.vcpkg_commit.outputs.commit_id }}
-
-      - name: '复制 CMakePresets.json'
-        run: |
-          Copy-Item "simple/CMakePresets.json" "CMakePresets.json"
-          $content = Get-Content "CMakePresets.json" -Raw
-          $content = $content -replace '\$\{sourceDir\}/vcpkg/scripts/buildsystems/vcpkg\.cmake', '${sourceDir}/simple/vcpkg/scripts/buildsystems/vcpkg.cmake'
-          Set-Content "CMakePresets.json" -Value $content -NoNewline
-        shell: pwsh
+        uses: ./.github/actions/setup-vcpkg
 
       - name: '通过 CMake 编译'
         uses: lukka/run-cmake@v10
-        continue-on-error: false
         with:
           configurePreset: 'windows-msvc-vs17'
           buildPreset: 'windows-msvc-vs17-release'
 
-      - name: '重命名编译产物'
-        run: |
-          Copy-Item "../../_temp/windows-x64/simple/src/release/simple.dll" simple.dll
+      - name: '保存编译产物'
+        run: Move-Item "../../_temp/windows-x64/simple/src/release/simple.dll" simple.windows.x64.dll
         shell: pwsh
 
       - name: '上传 Windows 产物'
         uses: actions/upload-artifact@v4
         with:
           name: windows
-          path: simple.dll
+          path: simple.windows.x64.dll
 
 
   Darwin:
@@ -80,53 +58,25 @@ jobs:
         run: cp simple/CMakePresets.json CMakePresets.json
         shell: bash
 
-      - name: '[MacOS] 编译动态库'
+      - name: '[MacOS] 编译 universal 动态库'
         uses: lukka/run-cmake@v10
         with:
           configurePreset: 'macos-ninja'
           buildPreset: 'macos-ninja-release'
 
-      - name: '[MacOS] 保存动态库并清理缓存'
+      - name: '[MacOS] 保存 universal 动态库'
         run: |
-          cp ../../_temp/macos/simple/src/libsimple.dylib libsimple-macos.dylib
+          cp ../../_temp/macos/simple/src/libsimple.dylib libsimple.macos.dylib
           rm -rf ../../_temp/macos
 
-      - name: '[MacOS] 编译静态库'
-        uses: lukka/run-cmake@v10
-        with:
-          configurePreset: 'macos-ninja'
-          configurePresetAdditionalArgs: "['-DBUILD_STATIC=ON']"
-          buildPreset: 'macos-ninja-release'
-
-      - name: '[MacOS] 保存静态库'
-        run: cp ../../_temp/macos/simple/src/libsimple.a libsimple-macos.a
-
-      - name: '[iOS] 编译真机和模拟器原生库'
-        run: ./build-ios.sh
-
-      - name: '[XCFramework] 打包 Apple 平台静态库'
-        run: |
-          mkdir -p xcf/ios xcf/ios-simulator xcf/macos
-          cp libsimple-ios.a            xcf/ios/libsimple.a
-          cp libsimple-ios-simulator.a  xcf/ios-simulator/libsimple.a
-          cp libsimple-macos.a          xcf/macos/libsimple.a
-          xcodebuild -create-xcframework \
-            -library xcf/ios/libsimple.a -headers src/darwin/include \
-            -library xcf/ios-simulator/libsimple.a -headers src/darwin/include \
-            -library xcf/macos/libsimple.a -headers src/darwin/include \
-            -output CSimple.xcframework
-          zip -r CSimple.xcframework.zip CSimple.xcframework
+      - name: '[iOS] 编译真机和模拟器动态库'
+        run: ./build-ios-dynamic.sh
 
       - name: '上传 Darwin 产物'
         uses: actions/upload-artifact@v4
         with:
           name: darwin
-          path: |
-            libsimple-macos.dylib
-            libsimple-macos.a
-            libsimple-ios.a
-            libsimple-ios-simulator.a
-            CSimple.xcframework.zip
+          path: libsimple*.dylib
 
 
   Linux:
@@ -134,7 +84,7 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - arch: x86_64
+          - arch: x64
             runner: ubuntu-latest
           - arch: arm64
             runner: ubuntu-24.04-arm
@@ -154,28 +104,8 @@ jobs:
           sudo apt-get install -y ninja-build build-essential gcc g++
         shell: bash
 
-      - name: '获取 simple/vcpkg 的 commit id'
-        id: vcpkg_commit
-        run: |
-          cd simple
-          COMMIT_ID=$(git ls-tree HEAD vcpkg | awk '{print $3}')
-          echo "commit_id=$COMMIT_ID" >> $GITHUB_OUTPUT
-          echo "vcpkg commit id: $COMMIT_ID"
-        shell: bash
-
       - name: '安装并配置 vcpkg'
-        uses: lukka/run-vcpkg@v10
-        with:
-          vcpkgDirectory: simple/vcpkg
-          vcpkgGitCommitId: ${{ steps.vcpkg_commit.outputs.commit_id }}
-
-      - name: '复制 CMakePresets.json'
-        run: |
-          Copy-Item "simple/CMakePresets.json" "CMakePresets.json"
-          $content = Get-Content "CMakePresets.json" -Raw
-          $content = $content -replace '\$\{sourceDir\}/vcpkg/scripts/buildsystems/vcpkg\.cmake', '${sourceDir}/simple/vcpkg/scripts/buildsystems/vcpkg.cmake'
-          Set-Content "CMakePresets.json" -Value $content -NoNewline
-        shell: pwsh
+        uses: ./.github/actions/setup-vcpkg
 
       - name: '通过 CMake 编译'
         uses: lukka/run-cmake@v10
@@ -326,52 +256,39 @@ jobs:
 
       - name: '整理并打包'
         run: |
-          mkdir -p dist/{windows,darwin,android,ohos,web}
-          mkdir -p dist/linux/{x86_64,arm64}
-          mkdir -p upload
-          
+          mkdir -p full
+
           # Windows
-          cp artifacts/windows/simple.dll   dist/windows/simple.dll
-          cp artifacts/windows/simple.dll   upload/simple-windows-x64.dll
+          cp artifacts/windows/simple.windows.x64.dll full/
 
           # Darwin
-          cp artifacts/darwin/libsimple-macos.dylib       dist/darwin/libsimple-macos.dylib
-          cp artifacts/darwin/CSimple.xcframework.zip     dist/darwin/CSimple.xcframework.zip
-          cp artifacts/darwin/libsimple-macos.dylib       upload/libsimple-macos-universal.dylib
-          cp artifacts/darwin/libsimple-macos.a           upload/libsimple-macos-universal.a
-          cp artifacts/darwin/libsimple-ios.a             upload/libsimple-ios-arm64.a
-          cp artifacts/darwin/libsimple-ios-simulator.a   upload/libsimple-ios-simulator-universal.a
-          cp artifacts/darwin/CSimple.xcframework.zip     upload/CSimple.xcframework.zip
+          cp artifacts/darwin/*.dylib full/
 
           # Linux
-          cp artifacts/linux-x86_64/libsimple.so dist/linux/x86_64/libsimple.so
-          cp artifacts/linux-arm64/libsimple.so  dist/linux/arm64/libsimple.so
-          cp artifacts/linux-x86_64/libsimple.so upload/libsimple-linux-x86_64.so
-          cp artifacts/linux-arm64/libsimple.so  upload/libsimple-linux-arm64.so
-          
-          # Android
-          cp -r artifacts/android/* dist/android/
-          for arch in armeabi-v7a arm64-v8a x86 x86_64; do
-            if [ -f artifacts/android/$arch/libsimple.so ]; then
-              cp artifacts/android/$arch/libsimple.so upload/libsimple-android-$arch.so
+          cp artifacts/linux-x64/libsimple.so  full/libsimple.linux.x64.so
+          cp artifacts/linux-arm64/libsimple.so full/libsimple.linux.arm64.so
+
+          # Android & HarmonyOS
+          for entry in android:armeabi-v7a:arm android:arm64-v8a:arm64 android:x86:ia32 android:x86_64:x64 ohos:arm64-v8a:arm64 ohos:x86_64:x64; do
+            os="${entry%%:*}"
+            rest="${entry#*:}"
+            abi="${rest%%:*}"
+            arch="${rest##*:}"
+            if [ -f "artifacts/$os/$abi/libsimple.so" ]; then
+              cp "artifacts/$os/$abi/libsimple.so" "full/libsimple.$os.$arch.so"
             fi
           done
-          
-          # HarmonyOS
-          cp -r artifacts/ohos/* dist/ohos/
-          for arch in arm64-v8a x86_64; do
-            if [ -f artifacts/ohos/$arch/libsimple.so ]; then
-              cp artifacts/ohos/$arch/libsimple.so upload/libsimple-ohos-$arch.so
-            fi
-          done
-          
+
           # WebAssembly
-          cp -r artifacts/web/* dist/web/
-          cp artifacts/web/sqlite3.wasm         upload/sqlite3.wasm
-          cp artifacts/web/sqlite3.debug.wasm   upload/sqlite3.debug.wasm
-          cp artifacts/web/sqlite3mc.wasm       upload/sqlite3mc.wasm
-          
-          cd dist && zip -r ../libsimple.zip .
+          cp artifacts/web/*.wasm full/
+
+          zip -j libsimple.zip full/*
+
+          cp -r full dart
+          rm dart/libsimple.android.ia32.so \
+             dart/libsimple.ohos.*.so \
+             dart/*.wasm
+          zip -j libsimple.dart.zip dart/*
         shell: bash
 
       - name: '提取 CHANGELOG 对应版本内容'
@@ -396,4 +313,5 @@ jobs:
           body: ${{ steps.changelog.outputs.release_notes }}
           files: |
             libsimple.zip
-            upload/*
+            libsimple.dart.zip
+            full/*

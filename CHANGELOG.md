@@ -1,3 +1,8 @@
+## 3.0.0
+
+- **[ 原生库版本 ]** 更新至 [最新提交](https://github.com/wangfenjin/simple/tree/45db071ba8043ffe8a2e5dfe41f9d68fb477576c) 以支持 iOS 动态库编译。
+- **[ 新增 ]** 适配 `sqlite3_simple` 引入 [Dart Hooks](https://pub.dev/packages/dart_hooks) 管理原生库的变更，调整 `libsimple.zip` 的组织方式，新增专用于 `sqlite3_simple` 的 `libsimple.dart.zip` 。
+
 ## 2.3.0
 
 - **[ 优化 ]** 调整 iOS 集成方式为 XCFramework，以配合 Flutter 进行 [Swift Package Manager 适配](https://docs.flutter.cn/packages-and-plugins/swift-package-manager/for-plugin-authors)。

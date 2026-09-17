@@ -1,0 +1,26 @@
+name: 'Setup vcpkg'
+description: '安装并配置 vcpkg，并准备根目录 CMakePresets.json（Windows / Linux 共用）'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: '获取 simple/vcpkg 的 commit id'
+      id: vcpkg_commit
+      shell: bash
+      run: |
+        cd simple
+        COMMIT_ID=$(git ls-tree HEAD vcpkg | awk '{print $3}')
+        echo "commit_id=$COMMIT_ID" >> $GITHUB_OUTPUT
+        echo "vcpkg commit id: $COMMIT_ID"
+
+    - name: '安装并配置 vcpkg'
+      uses: lukka/run-vcpkg@v10
+      with:
+        vcpkgDirectory: simple/vcpkg
+        vcpkgGitCommitId: ${{ steps.vcpkg_commit.outputs.commit_id }}
+
+    - name: '改写 vcpkg 路径并复制 CMakePresets.json 到根目录'
+      shell: bash
+      run: |
+        sed 's|\${sourceDir}/vcpkg/scripts/buildsystems/vcpkg\.cmake|${sourceDir}/simple/vcpkg/scripts/buildsystems/vcpkg.cmake|g' \
+          simple/CMakePresets.json > CMakePresets.json
