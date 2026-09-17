@@ -131,6 +131,8 @@ jobs:
 
       - name: '设置 Android 环境'
         uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
 
       - name: '通过 Gradle 编译'
         run: ./gradlew publishToMavenCentral --info
