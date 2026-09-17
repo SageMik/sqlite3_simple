@@ -284,6 +284,14 @@ jobs:
           # WebAssembly
           cp artifacts/web/*.wasm full/
 
+          # 版本信息
+          cat > full/VERSION.txt <<EOF
+          Version:     ${GITHUB_REF_NAME#N}
+          Commit:      ${GITHUB_SHA}
+          Built at:    $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          Run:         ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+          EOF
+
           zip -j libsimple.zip full/*
 
           cp -r full dart
@@ -291,6 +299,7 @@ jobs:
              dart/libsimple.ohos.*.so \
              dart/*.wasm
           zip -j libsimple.dart.zip dart/*
+          rm full/VERSION.txt
         shell: bash
 
       - name: '提取 CHANGELOG 对应版本内容'
