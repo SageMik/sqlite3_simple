@@ -1,3 +1,7 @@
+## 3.0.0
+
+- 更新至原生库至 [最新提交](https://github.com/wangfenjin/simple/tree/45db071ba8043ffe8a2e5dfe41f9d68fb477576c) 。
+
 ## 2.3.0
 
 - 更新发布配置，适配 [中心仓的调整](https://github.com/SageMik/sqlite3_simple/actions/runs/31255069687/job/93098009876) 。
