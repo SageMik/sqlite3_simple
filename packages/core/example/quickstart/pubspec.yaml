@@ -1,0 +1,17 @@
+name: basic
+description: ""
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.10.0 <4.0.0'
+
+dependencies:
+  sqlite3: ^3.3.0
+  sqlite3_simple_core:
+    path: ../../
+
+hooks:
+  user_defines:
+    sqlite3_simple_core:
+      source: local
+      path: ../libsimple.dart.zip

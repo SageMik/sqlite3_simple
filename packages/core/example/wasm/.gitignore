@@ -1,0 +1,7 @@
+# dart compile js 产物（由 dart tool/serve.dart 生成，无需入库）
+web/main.dart.js
+web/**/*.js.deps
+web/**/*.js.map
+
+# Dart 工具链
+.dart_tool/

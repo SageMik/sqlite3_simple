@@ -31,3 +31,5 @@ build/
 *.psd
 
 .swiftpm/
+
+.workbuddy/

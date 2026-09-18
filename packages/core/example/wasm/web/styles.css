@@ -1,0 +1,301 @@
+:root {
+  color-scheme: light dark;
+
+  /* 基础色板 */
+  --bg: #f6f8fc;
+  --bg-top: #eaeefb;
+  --fg: #0f172a;
+  --muted: #475569;
+  --border: #e2e8f0;
+  --card: #ffffff;
+  --card-border: #e7ecf3;
+  /* 结果项表面：浅色模式下与主卡同底同边框，深色模式再区分 */
+  --card-surface: var(--card);
+  --card-surface-border: var(--card-border);
+  --code-bg: #eef2ff;
+  --code-fg: #4338ca;
+
+  /* 品牌强调色（双色渐变） */
+  --accent: #6366f1;
+  --accent-2: #8b5cf6;
+  --accent-soft: rgba(99, 102, 241, 0.16);
+  --glow: rgba(99, 102, 241, 0.10);
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 2px 6px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.10), 0 24px 60px rgba(15, 23, 42, 0.08);
+
+  /* 高亮：暖色荧光黄底 + 深字。沿用通用"高亮笔"语义，避开红色带来的
+     "错误/危险"联想；深字保证对比度，明暗两端都清晰可读 */
+  --mark-bg: #fde68a;
+  --mark-fg: #1f2937;
+
+  /* 滚动条：跟随主题 accent 紫色，低透明度、安静不抢眼 */
+  --scrollbar-thumb: rgba(99, 102, 241, 0.32);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b1120;
+    --bg-top: #141b30;
+    --fg: #f1f5f9;
+    --muted: #94a3b8;
+    --border: #1e293b;
+    --card: #0f172a;
+    --card-border: #1e293b;
+    --card-surface: #16213a;
+    --card-surface-border: #243049;
+    --code-bg: #1e1b4b;
+    --code-fg: #c7d2fe;
+
+    --accent: #818cf8;
+    --accent-2: #a78bfa;
+    --accent-soft: rgba(129, 140, 248, 0.22);
+    --glow: rgba(129, 140, 248, 0.14);
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 12px 36px rgba(0, 0, 0, 0.6);
+
+    /* mark 底色两端同用 #fde68a，仅文字色加深适配暗底 */
+    --mark-fg: #1c1917;
+
+    --scrollbar-thumb: rgba(129, 140, 248, 0.38);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 56px 16px;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(900px 460px at 50% -8%, var(--glow), transparent 70%) linear-gradient(180deg, var(--bg-top) 0%, var(--bg) 55%) fixed;
+  color: var(--fg);
+  font: 16px/1.65 system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* 主卡片（hero card）：纵向 flex，圆角经 overflow:hidden 裁切内部 */
+main {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  max-height: 100%;
+  padding: 36px 32px;
+  background-color: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 1.75rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+h1 span {
+  margin-left: 8px;
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: normal;
+  color: var(--muted);
+  -webkit-text-fill-color: var(--muted);
+}
+
+.desc {
+  margin: 14px 0 24px;
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+code {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--code-bg);
+  color: var(--code-fg);
+  font-size: 0.85em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+#query {
+  width: 100%;
+  padding: 13px 16px 13px 42px;
+  font: inherit;
+  color: var(--fg);
+  background-color: var(--card);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 14px center;
+  background-size: 18px 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#query::placeholder {
+  color: var(--muted);
+  opacity: 0.85;
+}
+
+#query:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+/* 分词结果提示块 */
+#tokenize {
+  margin: 14px 0 11px;
+  padding: 8px 12px;
+  min-height: 1.4em;
+  font-size: 0.85rem;
+  color: var(--fg);
+  background: var(--code-bg);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+}
+
+/* 结果列表：占据主卡剩余高度，内部滚动；页面本身不滚动，
+   避免搜索时整页滚动条闪现导致页面位移。scrollbar-gutter 预留
+   滚动条槽位，列表自身也不因结果增减而横向跳动 */
+#result {
+  flex: 1 1 auto;
+  min-height: 0;
+  /* 上下留一点空隙：hover 上移的卡片与底部阴影不再被滚动容器裁掉 */
+  padding: 3px 0 4px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  /* 标准细滚动条 + 主题色 + 透明轨道，替代突兀的经典灰滚动条 */
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+/* 除结果列表外，主卡内其他区块（标题/描述/输入框/分词条/页脚）
+   固定不压缩，滚动空间全部交给 #result */
+main > *:not(#result) {
+  flex-shrink: 0;
+}
+
+/* 结果项与空结果提示共用同一套卡片样式：surface 底 + 实线边框 +
+   圆角 + 微阴影，视觉上同属"列表卡片" */
+#result article,
+#result .empty {
+  margin-bottom: 12px;
+  padding: 16px 18px;
+  background: var(--card-surface);
+  border: 1px solid var(--card-surface-border);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+#result article {
+  position: relative;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+#result article:hover {
+  /* 半透明 accent 描边：hover 是轻提示不是选中态，
+     color-mix 跟随明暗模式各自的 accent，不出现整条深紫实线 */
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 4px 12px var(--accent-soft);
+  transform: translateY(-2px);
+}
+
+#result article h2 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* 用 inline-block + margin-right 代替 flex gap：
+   避免 <mark> 成为 flex item 被 gap 推开，导致高亮与标题文字间出现间距 */
+#result article h2::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border-radius: 2px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  vertical-align: middle;
+}
+
+#result article p {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* 空结果提示：共享上方列表卡片样式，仅增加居中文案 */
+#result .empty {
+  text-align: center;
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+/* 高亮：暖黄底 + 深字。沿用原无内边距写法，不变宽、不向左遮挡
+   前一个字符、垂直对齐一致；box-decoration-break 保证换行连续 */
+mark {
+  background: var(--mark-bg);
+  color: var(--mark-fg);
+  border-radius: 3px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+#status {
+  padding: 28px 0 4px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+footer {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+footer a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+footer a:hover {
+  color: var(--accent-2);
+  text-decoration: underline;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
