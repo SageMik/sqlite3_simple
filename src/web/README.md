@@ -41,13 +41,13 @@ SQLite 早在 2007 年的 [3.5.0](https://www.sqlite.org/34to35.html) 版本就�
 
 在 `sqlite3.dart` 目录下执行 `git apply ../sqlite3_wasm_build.patch` 应用 Patch ，可以看到为集成 Simple 扩展在 `sqlite3_wasm_build` 中所做的调整，具体而言：
 
-| 操作 | 文件                                                           | 说明                                                      |
-|----|--------------------------------------------------------------|---------------------------------------------------------|
-| 新增 | [`simple.cmake`](extension/simple.cmake)                     | 引入 Simple 源码、cppjiba 结巴分词依赖、cmrc 内嵌资源依赖（主仓库，非子模块）       |
-| 新增 | [`cpp_exception_stubs.cc`](extension/cpp_exception_stubs.cc) | 提供 C++ 异常处理的桩函数（主仓库，非子模块）                               |
-| 修改 | `CMakeLists.txt`                                             | 启用 C/C++ 分步编译和 libc++ 链接，自动引用同级 extension 目录下的集成文件      |
-| 修改 | `os_web.c`                                                   | 注册 `sqlite3_auto_extension` 自动初始化 Simple                |
-| 修改 | `sqlite_cfg.h`                                               | 取消 `SQLITE_OMIT_LOAD_EXTENSION` 宏，解除 SQLite 扩展加载接口的禁用限制 |
+| 操作 | 文件                                                                                                       | 说明                                                                          |
+|------|------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| 新增 | [`extension/simple.cmake`](extension/simple.cmake)                                                         | 引入 Simple 源码、cppjieba 结巴分词依赖、cmrc 内嵌资源依赖                    |
+| 新增 | [`extension/cpp_exception_stubs.cc`](extension/cpp_exception_stubs.cc)                                     | 提供 C++ 异常处理的桩函数                                                     |
+| 修改 | [`sqlite3.dart/sqlite3_wasm_build/src/CMakeLists.txt`](sqlite3.dart/sqlite3_wasm_build/src/CMakeLists.txt) | 启用 C/C++ 分步编译和 libc++ 链接，引用 [`extension`](extension) 目录下的文件 |
+| 修改 | [`sqlite3.dart/sqlite3_wasm_build/src/os_web.c`](sqlite3.dart/sqlite3_wasm_build/src/os_web.c)             | 注册 `sqlite3_auto_extension` 自动启用并初始化 Simple                         |
+| 修改 | [`sqlite3.dart/sqlite3_wasm_build/src/sqlite_cfg.h`](sqlite3.dart/sqlite3_wasm_build/src/sqlite_cfg.h)     | 取消 `SQLITE_OMIT_LOAD_EXTENSION` 宏，解除扩展加载限制                        |
 
 <details>
 <summary><b> 💡 为何不启用 <code>wasi-sdk</code> 的 C++ 异常支持？</b></summary>
@@ -64,7 +64,7 @@ SQLite 早在 2007 年的 [3.5.0](https://www.sqlite.org/34to35.html) 版本就�
 
 不过，与 `sqlite3_wasm_build` 必须手写胶水代码桥接 VFS 等自定义接口不同的是，Simple 扩展使用标准 C/C++ 库的 IO 函数，`wasi-sdk` 能在编译时自动将其映射为 `wasi_snapshot_preview1` 模块的导入声明（`path_open`、`fd_read`、`fd_write` 等），因而无需手动编写胶水代码，只需要在宿主侧提供对应的实现即可。
 
-按照 [使用方法](#使用方法) 编译后，在 [`out`](out) 目录下通过 `binaryen` 提供的工具执行反编译命令，即查看模块依赖的宿主侧实现：
+按照 [使用方法](#使用方法) 编译后，在 [`out`](out) 目录下通过 `binaryen` 提供的工具执行反编译命令，即可查看相关声明：
 
 ```shell
 wasm-dis sqlite3.wasm -o sqlite3.wat
@@ -83,23 +83,24 @@ wasm-dis sqlite3.wasm -o sqlite3.wat
 
 ```
 
-`dart` 模块的导入声明源自 `sqlite3_wasm_build` 中 [`bridge.h`](sqlite3.dart/sqlite3_wasm_build/src/bridge.h) 的显式定义；`wasi_snapshot_preview1` 则是由 `wasi-sdk` 在编译时根据 Simple 所需自动生成的。这些导入要求在 WASM 模块实例化时 [`WebAssembly.instantiateStreaming(source, importObject)`](https://developer.mozilla.org/zh-CN/docs/WebAssembly/Reference/JavaScript_interface/instantiateStreaming_static) 将宿主侧能力通过 `importObject` 参数传入，传入格式类似于：
+其中：
+    
+1. `(import "dart" ...)` 源自 [`sqlite3.dart/sqlite3_wasm_build/src/bridge.h`](sqlite3.dart/sqlite3_wasm_build/src/bridge.h) 的显式定义，宿主侧实现来自 `sqlite3` 的 [`DartBridgeCallbacks`](https://github.com/simolus3/sqlite3.dart/blob/main/sqlite3/lib/src/wasm/injected_values.dart)。
 
-```json
-{
-  "dart": {
-    "xClose": [宿主侧实现],
-    "xRead": [宿主侧实现],
+2. `(import "wasi_snapshot_preview1" ...)` 则是由 `wasi-sdk` 根据 Simple 所需自动生成的，宿主侧实现由 `sqlite3_simple` 的 [`DefaultSimpleBridgeCallbacks`](https://github.com/SageMik/sqlite3_simple/blob/main/lib/src/web/bridge_callbacks_default.dart) 提供。
+
+得益于 Dart 与 JS 近乎无缝的互操作能力，这些宿主侧能力可以轻松地转为 JS 实现，并在 WASM 模块实例化时 [`WebAssembly.instantiateStreaming(source, importObject)`](https://developer.mozilla.org/zh-CN/docs/WebAssembly/Reference/JavaScript_interface/instantiateStreaming_static) 作为 `importObject` 参数传入，即 [`WasmModuleLoader`](https://github.com/simolus3/sqlite3.dart/blob/main/sqlite3/lib/src/wasm/loader.dart) ，从而为 Simple 在 Web 上的运行提供能力支撑。
+
+不难推断，任何能提供「结构类似如下控制台打印出的 `importObject` 」的宿主侧实现，都可以运行本指南提供的 `sqlite3.wasm` ，而不必局限于 Dart（比如在 JS 里自行实现 `const importObject = { "dart": ...}`）：
+
+```text
+Object
+  dart:
+    xOpen: ƒ (arg1, arg2, arg3, arg4, arg5)
+    xWrite: ƒ (arg1, arg2, arg3, arg4)
     ...
-  },
-  "wasi_snapshot_preview1": {
-    "fd_read": [宿主侧实现],
-    "fd_seek": [宿主侧实现],
+  wasi_snapshot_preview1:
+    fd_read: ƒ (arg1, arg2, arg3, arg4)
+    fd_seek: ƒ (arg1, arg2, arg3, arg4)
     ...
-  },
-}
 ```
-
-因此，任何能按此格式注入具体实现的宿主环境，都可以运行本项目的 SQLite WASM 文件，而不必局限于 Dart （实际上 Dart 的具体实现也是通过导出为 JavaScript 函数提供）。
-
-SQLite 所需 `dart` 模块的宿主侧实现由 `sqlite3` 的 [`DartBridgeCallbacks`](https://github.com/simolus3/sqlite3.dart/blob/main/sqlite3/lib/src/wasm/injected_values.dart) 提供，而  Simple 额外所需的 `wasi_snapshot_preview1` 模块的宿主侧实现，则由 `sqlite3_simple` 的 [`DefaultSimpleBridgeCallbacks`](https://github.com/SageMik/sqlite3_simple/blob/main/lib/src/web/bridge_callbacks_default.dart) 提供。如 [使用方法](#使用方法) 所述，可以通过 [`sqlite3_simple`](https://github.com/SageMik/sqlite3_simple/blob/main/doc/web.md) 在 Flutter Web 上使用 Simple 扩展，具体使用细节可移步其说明文档，此处不再展开。

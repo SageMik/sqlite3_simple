@@ -6,9 +6,9 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
 diff --git a/sqlite3_wasm_build/src/sqlite_cfg.h b/sqlite3_wasm_build/src/sqlite_cfg.h
---- a/sqlite3_wasm_build/src/sqlite_cfg.h	(revision 32eac80e47f4ca2822663730b6eeaa3c9b801833)
+--- a/sqlite3_wasm_build/src/sqlite_cfg.h	(revision da34d4d8fde7323310f868da26704aa31247aa4f)
 +++ b/sqlite3_wasm_build/src/sqlite_cfg.h	(date 1779898823411)
-@@ -47,7 +47,7 @@
+@@ -50,7 +50,7 @@
  #define SQLITE_OMIT_AUTHORIZATION
  #define SQLITE_UNTESTABLE
  #define SQLITE_OMIT_COMPILEOPTION_DIAGS
@@ -23,9 +23,9 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
 diff --git a/sqlite3_wasm_build/src/CMakeLists.txt b/sqlite3_wasm_build/src/CMakeLists.txt
---- a/sqlite3_wasm_build/src/CMakeLists.txt	(revision 32eac80e47f4ca2822663730b6eeaa3c9b801833)
+--- a/sqlite3_wasm_build/src/CMakeLists.txt	(revision da34d4d8fde7323310f868da26704aa31247aa4f)
 +++ b/sqlite3_wasm_build/src/CMakeLists.txt	(date 1779980684120)
-@@ -1,11 +1,15 @@
+@@ -1,13 +1,17 @@
  cmake_minimum_required(VERSION 3.24)
  
  set(PROJECT_NAME "sqlite3_web")
@@ -41,9 +41,11 @@ diff --git a/sqlite3_wasm_build/src/CMakeLists.txt b/sqlite3_wasm_build/src/CMak
 +get_filename_component(EXTENSION_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../extension" ABSOLUTE)
 +include(${EXTENSION_DIR}/simple.cmake)
  
+ file(GLOB headers ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+ 
  include(FetchContent)
  
-@@ -44,7 +48,11 @@
+@@ -46,7 +50,11 @@
      ${CMAKE_CURRENT_SOURCE_DIR}/helpers.c
      ${CMAKE_CURRENT_SOURCE_DIR}/external_objects.c
    )
@@ -56,18 +58,14 @@ diff --git a/sqlite3_wasm_build/src/CMakeLists.txt b/sqlite3_wasm_build/src/CMak
  
    if(${crypto})
      list(APPEND sources "${sqlite3mc_SOURCE_DIR}/sqlite3mc_amalgamation.c")
-@@ -64,29 +72,96 @@
+@@ -66,29 +74,94 @@
      list(APPEND sources "${sqlite3_SOURCE_DIR}/sqlite3.c")
    endif()
  
-+  set(pinyin_flags ${flags})
-+
    if(${debug})
      list(APPEND flags "-g" "-DDEBUG")
-+    list(APPEND pinyin_flags "-O0") # CMRC 将拼音文件处理为内嵌代码文件，没有必要以 Debug 模式编译，同时避免 Github Action 可能的内存溢出
    else()
      list(APPEND flags "-Oz" "-DNDEBUG" "-flto")
-+    set(pinyin_flags ${flags})
    endif()
  
 -  add_custom_command(
@@ -92,8 +90,10 @@ diff --git a/sqlite3_wasm_build/src/CMakeLists.txt b/sqlite3_wasm_build/src/CMak
 +  )
 +  set(common_compile_flags ${wasm_compile_base} ${flags})
 +
-+  set(pinyin_compile_flags ${wasm_compile_base} ${pinyin_flags})
-+  simple_wasm_add_pinyin_objects(${name} "${pinyin_compile_flags}" pinyin_objects)
++  # 拼音目标由三变体共享，仅在首次展开时构建（详见 simple.cmake）。
++  if(NOT TARGET simple_pinyin)
++    simple_wasm_add_pinyin("${wasm_compile_base}")
++  endif()
 +
 +  # C 中间产物
 +  set(c_objects)
@@ -141,7 +141,6 @@ diff --git a/sqlite3_wasm_build/src/CMakeLists.txt b/sqlite3_wasm_build/src/CMak
 +    )
 +    list(APPEND cpp_objects ${object})
 +  endforeach()
-+  list(APPEND cpp_objects ${pinyin_objects})
 +
 +  # 链接编译
 +  add_custom_command(
@@ -156,16 +155,19 @@ diff --git a/sqlite3_wasm_build/src/CMakeLists.txt b/sqlite3_wasm_build/src/CMak
 +      -o ${clang_output}
 +      ${c_objects}
 +      ${cpp_objects}
++      ${SIMPLE_PINYIN_OBJECTS}
 +      # -lunwind # C++ 异常支持：https://github.com/WebAssembly/wasi-sdk/blob/main/CppExceptions.md
 +      -lc++
 +      -lc++abi
        @${CMAKE_CURRENT_BINARY_DIR}/required_symbols.txt
--    DEPENDS ${sources} required_symbols
-+    DEPENDS ${c_objects} ${cpp_objects} required_symbols
+-    DEPENDS ${sources} ${headers} required_symbols
++    DEPENDS ${c_objects} ${cpp_objects} simple_pinyin ${SIMPLE_PINYIN_TEXT} required_symbols
      VERBATIM
    )
  
-@@ -115,9 +190,12 @@
+@@ -115,11 +188,14 @@
+ 
+ base_sqlite3_target(sqlite3_debug true false)
  base_sqlite3_target(sqlite3_opt false false)
  base_sqlite3_target(sqlite3mc false true)
  
@@ -187,7 +189,7 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
 diff --git a/sqlite3_wasm_build/src/os_web.c b/sqlite3_wasm_build/src/os_web.c
---- a/sqlite3_wasm_build/src/os_web.c	(revision 32eac80e47f4ca2822663730b6eeaa3c9b801833)
+--- a/sqlite3_wasm_build/src/os_web.c	(revision da34d4d8fde7323310f868da26704aa31247aa4f)
 +++ b/sqlite3_wasm_build/src/os_web.c	(date 1779898823411)
 @@ -6,7 +6,12 @@
  #include "bridge.h"
