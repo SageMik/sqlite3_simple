@@ -1,0 +1,23 @@
+name: sqlite3_simple_core_example
+description:
+publish_to: 'none'
+version: 1.0.0
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  sqlite3: ^3.3.0
+  sqlite3_simple_core:
+    path: ../
+  web: ^1.1.1
+  http: ^1.6.0
+
+dev_dependencies:
+  lints: ^6.0.0
+
+hooks:
+  user_defines:
+    sqlite3_simple_core:
+      source: local
+      path: libsimple.dart.zip

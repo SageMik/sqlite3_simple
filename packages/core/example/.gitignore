@@ -1,0 +1,8 @@
+# https://dart.dev/tools/private-files
+# Created by `dart pub`
+.dart_tool/
+
+# dart compile js 产物（由 dart run tool/serve.dart 生成，无需入库）
+web/main.dart.js
+web/**/*.js.deps
+web/**/*.js.map

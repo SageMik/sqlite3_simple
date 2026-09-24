@@ -1,1 +1,0 @@
-# sqlite3_simple_core - Web 示例
