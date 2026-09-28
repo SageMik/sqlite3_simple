@@ -4,7 +4,6 @@ import 'dart:js_interop_unsafe';
 import 'package:sqlite3/wasm.dart';
 import 'package:sqlite3_simple/web.dart';
 import 'package:sqlite3_web/sqlite3_web.dart';
-import 'package:web/web.dart';
 
 import '../fetch.dart';
 

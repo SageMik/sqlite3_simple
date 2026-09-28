@@ -6,7 +6,7 @@ String randomWords({
 }) {
   String result = '';
   final r = Random();
-  final length = r.nextInt(maxLength - minLength) + minLength;
+  final length = r.nextInt(maxLength - minLength + 1) + minLength;
   for (int i = 0; i < length; i++) {
     result += it_500[r.nextInt(it_500.length)];
   }

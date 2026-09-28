@@ -37,7 +37,7 @@ const pinyinDictKind2uiString = {
 class _DbBootstrapResult {
   final DbManager dbManager;
   final Map<PinyinDictKind, String> pinyinDictKind2path;
-  _DbBootstrapResult(this.dbManager, this.pinyinDictKind2path);
+  const _DbBootstrapResult(this.dbManager, this.pinyinDictKind2path);
 }
 final _dbBootstrapProvider = AsyncNotifierProvider(_DbBootstrapNotifier.new);
 class _DbBootstrapNotifier extends AsyncNotifier<_DbBootstrapResult> {
@@ -49,7 +49,6 @@ class _DbBootstrapNotifier extends AsyncNotifier<_DbBootstrapResult> {
     await dbManager.init();
 
     final pinyinDictKind2path = await dbManager.savePinyinDict();
-    await dbManager.dao.updatePinyinDict(pinyinDictKind2path[ref.read(pinyinDictKindProvider)]!);
 
     await dbManager.dao.insertRandomData(30);
 

@@ -1,63 +1,9 @@
-import 'package:meta/meta.dart';
 import 'package:sqlite3/common.dart';
 
 import '../../../utils/zero_width.dart';
-import '../../db_manager.dart';
 import '../../main_table_dao.dart';
 import '../../main_table_row.dart';
 import '../../main_table_schema.dart';
-
-mixin Sqlite3Fts5Creator<TDb extends CommonDatabase> on IDbManager<TDb> {
-  @override
-  @protected
-  Future<void> createMainAndFts5(TDb db) async {
-    /// 主表
-    db.execute('''
-      CREATE TABLE $mainTable (
-        $id INTEGER PRIMARY KEY AUTOINCREMENT, 
-        $title TEXT, 
-        $content TEXT, 
-        $insertDate INTEGER
-      );
-    ''');
-
-    /// FTS5虚表
-    db.execute('''
-      CREATE VIRTUAL TABLE $fts5Table USING fts5(
-        $title, $content, $insertDate UNINDEXED, 
-        tokenize = '$fts5Tokenizer', 
-        content = '$mainTable', 
-        content_rowid = '$id'
-      );
-    ''');
-
-    /// 触发器
-    const newInsert = '''
-      INSERT INTO $fts5Table(rowid, $title, $content, $insertDate) 
-        VALUES (new.$id, new.$title, new.$content, new.$insertDate);
-    ''';
-    const deleteInsert = '''
-      INSERT INTO $fts5Table($fts5Table, rowid, $title, $content, $insertDate) 
-        VALUES ('delete', old.$id, old.$title, old.$content, old.$insertDate);
-    ''';
-    db.execute('''
-      CREATE TRIGGER ${mainTable}_insert AFTER INSERT ON $mainTable BEGIN 
-        $newInsert
-      END;
-    ''');
-    db.execute('''
-      CREATE TRIGGER ${mainTable}_delete AFTER DELETE ON $mainTable BEGIN 
-        $deleteInsert
-      END;
-    ''');
-    db.execute('''
-      CREATE TRIGGER ${mainTable}_update AFTER UPDATE ON $mainTable BEGIN 
-        $deleteInsert
-        $newInsert
-      END;
-    ''');
-  }
-}
 
 class Sqlite3Dao extends MainTableDaoBase<CommonDatabase> {
   Sqlite3Dao(super.db);
@@ -66,7 +12,7 @@ class Sqlite3Dao extends MainTableDaoBase<CommonDatabase> {
   Future<void> insertRandomData(int length) async {
     final insertStmt = db.prepare("INSERT INTO $mainTable VALUES(?, ?, ?, ?);");
     for (int i = 0; i < length; i++) {
-      final newRow = createRandomRow(i);
+      final newRow = createRandomRow();
       insertStmt.execute([
         null,
         newRow.title,
@@ -111,7 +57,7 @@ class Sqlite3Dao extends MainTableDaoBase<CommonDatabase> {
         simple_highlight($fts5Table, 1, $wrapperSql) AS $content, 
         $insertDate 
       FROM $fts5Table 
-      WHERE $fts5Table MATCH ${tokenizer.name}_query(?);
+      WHERE $fts5Table MATCH ${tokenizer.queryFunctionName}(?);
     ''', [value]);
     return _toMainTableRows(resultSet);
   }
@@ -125,14 +71,38 @@ class Sqlite3Dao extends MainTableDaoBase<CommonDatabase> {
   @override
   Future<void> updateAll() async {
     final mainTableRowList = await selectAll();
+    final oldLen = mainTableRowList.length;
+    final newCount = shuffledRowCount();
+
     final updateStmt = db.prepare(
         "UPDATE $mainTable SET $title = ?, $content = ?, $insertDate = ? WHERE $id = ?;");
-    for (int i = 0; i < mainTableRowList.length; i++) {
-      final oldRow = mainTableRowList[i];
-      final newRow = createRandomRow(i);
-      updateStmt.execute(
-          [newRow.title, newRow.content, newRow.insertDate.toDb(), oldRow.id]);
+    for (int i = 0; i < newCount && i < oldLen; i++) {
+      final newRow = createRandomRow();
+      updateStmt.execute([
+        newRow.title,
+        newRow.content,
+        newRow.insertDate.toDb(),
+        mainTableRowList[i].id,
+      ]);
     }
     updateStmt.close();
+
+    final deleteStmt = db.prepare("DELETE FROM $mainTable WHERE $id = ?;");
+    for (int i = newCount; i < oldLen; i++) {
+      deleteStmt.execute([mainTableRowList[i].id]);
+    }
+    deleteStmt.close();
+
+    final insertStmt = db.prepare("INSERT INTO $mainTable VALUES(?, ?, ?, ?);");
+    for (int i = oldLen; i < newCount; i++) {
+      final newRow = createRandomRow();
+      insertStmt.execute([
+        null,
+        newRow.title,
+        newRow.content,
+        newRow.insertDate.toDb(),
+      ]);
+    }
+    insertStmt.close();
   }
 }

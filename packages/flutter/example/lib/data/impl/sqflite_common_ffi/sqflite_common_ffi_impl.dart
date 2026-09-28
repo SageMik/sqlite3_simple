@@ -33,7 +33,11 @@ final class SqfliteCommonFfiDbManager extends DbManager<SqfliteCommonFfiDao, Dat
       inMemoryDatabasePath,
       options: OpenDatabaseOptions(
         version: 1,
-        onCreate: (db, version) => createMainAndFts5(db),
+        onCreate: (db, version) async {
+          for (final statement in createMainAndFts5Statements) {
+            await db.execute(statement);
+          }
+        },
       ),
     );
     dao = SqfliteCommonFfiDao(db);
@@ -46,55 +50,6 @@ final class SqfliteCommonFfiDbManager extends DbManager<SqfliteCommonFfiDao, Dat
   }
 
   @override
-  Future<void> createMainAndFts5(Database db) async {
-    /// 主表
-    await db.execute('''
-      CREATE TABLE $mainTable (
-        $id INTEGER PRIMARY KEY AUTOINCREMENT, 
-        $title TEXT, 
-        $content TEXT, 
-        $insertDate INTEGER
-      );
-    ''');
-
-    /// FTS5虚表
-    await db.execute('''
-      CREATE VIRTUAL TABLE $fts5Table USING fts5(
-        $title, $content, $insertDate UNINDEXED, 
-        tokenize = '$fts5Tokenizer', 
-        content = '$mainTable', 
-        content_rowid = '$id'
-      );
-    ''');
-
-    /// 触发器
-    const newInsert = '''
-      INSERT INTO $fts5Table(rowid, $title, $content, $insertDate) 
-        VALUES (new.$id, new.$title, new.$content, new.$insertDate);
-    ''';
-    const deleteInsert = '''
-      INSERT INTO $fts5Table($fts5Table, rowid, $title, $content, $insertDate) 
-        VALUES ('delete', old.$id, old.$title, old.$content, old.$insertDate);
-    ''';
-    await db.execute('''
-      CREATE TRIGGER ${mainTable}_insert AFTER INSERT ON $mainTable BEGIN 
-        $newInsert
-      END;
-    ''');
-    await db.execute('''
-      CREATE TRIGGER ${mainTable}_delete AFTER DELETE ON $mainTable BEGIN 
-        $deleteInsert
-      END;
-    ''');
-    await db.execute('''
-      CREATE TRIGGER ${mainTable}_update AFTER UPDATE ON $mainTable BEGIN 
-        $deleteInsert
-        $newInsert
-      END;
-    ''');
-  }
-
-  @override
   Future<void> close() => dao.db.close();
 }
 
@@ -104,7 +59,7 @@ class SqfliteCommonFfiDao extends MainTableDaoBase<Database> {
   @override
   Future<void> insertRandomData(int length) async {
     for (int i = 0; i < length; i++) {
-      final newRow = createRandomRow(i);
+      final newRow = createRandomRow();
       await db.insert(mainTable, {
         id: null,
         title: newRow.title,
@@ -145,7 +100,7 @@ class SqfliteCommonFfiDao extends MainTableDaoBase<Database> {
         "simple_highlight($fts5Table, 1, $wrapperSql) AS $content",
         insertDate
       ],
-      where: "$fts5Table MATCH ${tokenizer.name}_query(?)",
+      where: "$fts5Table MATCH ${tokenizer.queryFunctionName}(?)",
       whereArgs: [value],
     );
     return _toMainTableRows(result);
@@ -160,10 +115,12 @@ class SqfliteCommonFfiDao extends MainTableDaoBase<Database> {
   @override
   Future<void> updateAll() async {
     final mainTableRowList = await selectAll();
-    for (int i = 0; i < mainTableRowList.length; i++) {
-      final oldRow = mainTableRowList[i];
-      final newRow = createRandomRow(i);
-      db.update(
+    final oldLen = mainTableRowList.length;
+    final newCount = shuffledRowCount();
+
+    for (int i = 0; i < newCount && i < oldLen; i++) {
+      final newRow = createRandomRow();
+      await db.update(
         mainTable,
         {
           title: newRow.title,
@@ -171,8 +128,26 @@ class SqfliteCommonFfiDao extends MainTableDaoBase<Database> {
           insertDate: newRow.insertDate.toDb(),
         },
         where: "$id = ?",
-        whereArgs: [oldRow.id],
+        whereArgs: [mainTableRowList[i].id],
       );
+    }
+
+    for (int i = newCount; i < oldLen; i++) {
+      await db.delete(
+        mainTable,
+        where: "$id = ?",
+        whereArgs: [mainTableRowList[i].id],
+      );
+    }
+
+    for (int i = oldLen; i < newCount; i++) {
+      final newRow = createRandomRow();
+      await db.insert(mainTable, {
+        id: null,
+        title: newRow.title,
+        content: newRow.content,
+        insertDate: newRow.insertDate.toDb(),
+      });
     }
   }
 }

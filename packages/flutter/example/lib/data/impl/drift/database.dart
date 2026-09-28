@@ -23,7 +23,7 @@ class AppDatabase extends _$AppDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities =>
       super.allSchemaEntities + buildFts5Triggers();
 
-  /// 触发器
+  /// 创建触发器
   List<Trigger> buildFts5Triggers() {
     final fts5Table = t1.actualTableName;
     final mainTable = main.actualTableName;

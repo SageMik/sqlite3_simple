@@ -60,60 +60,11 @@ final class Sqlite3WebDbManager extends DbManager<Sqlite3WebDao, Database> {
       "PRAGMA user_version",
     )).result.first['user_version'];
     if (version == 0) {
-      await createMainAndFts5(db);
+      for (final statement in createMainAndFts5Statements) {
+        await db.execute(statement);
+      }
       db.execute("PRAGMA user_version = 1");
     }
-  }
-
-  @override
-  @protected
-  Future<void> createMainAndFts5(Database db) async {
-    /// 主表
-    await db.execute('''
-      CREATE TABLE $mainTable (
-        $id INTEGER PRIMARY KEY AUTOINCREMENT, 
-        $title TEXT, 
-        $content TEXT, 
-        $insertDate INTEGER
-      );
-    ''');
-
-    /// FTS5虚表
-    await db.execute('''
-      CREATE VIRTUAL TABLE $fts5Table USING fts5(
-        $title, $content, $insertDate UNINDEXED, 
-        tokenize = '$fts5Tokenizer', 
-        content = '$mainTable', 
-        content_rowid = '$id'
-      );
-    ''');
-
-    const newInsert =
-        '''
-      INSERT INTO $fts5Table(rowid, $title, $content, $insertDate)
-        VALUES (new.$id, new.$title, new.$content, new.$insertDate);
-    ''';
-    const deleteInsert =
-        '''
-      INSERT INTO $fts5Table($fts5Table, rowid, $title, $content, $insertDate)
-        VALUES ('delete', old.$id, old.$title, old.$content, old.$insertDate);
-    ''';
-    await db.execute('''
-      CREATE TRIGGER ${mainTable}_insert AFTER INSERT ON $mainTable BEGIN 
-        $newInsert
-      END;
-    ''');
-    await db.execute('''
-      CREATE TRIGGER ${mainTable}_delete AFTER DELETE ON $mainTable BEGIN 
-        $deleteInsert
-      END;
-    ''');
-    await db.execute('''
-      CREATE TRIGGER ${mainTable}_update AFTER UPDATE ON $mainTable BEGIN 
-        $deleteInsert
-        $newInsert
-      END;
-    ''');
   }
 
   /// 传递拼音字典文件 URL 交由 [Sqlite3WebDb.handleCustomRequest] 处理
@@ -152,7 +103,7 @@ class Sqlite3WebDao extends MainTableDaoBase<Database> {
   Future<void> insertRandomData(int length) async {
     await db.requestLock((token) async {
       for (int i = 0; i < length; i++) {
-        final newRow = createRandomRow(i);
+        final newRow = createRandomRow();
         await db.execute(
           "INSERT INTO $mainTable VALUES(?, ?, ?, ?);",
           parameters: [
@@ -202,7 +153,7 @@ class Sqlite3WebDao extends MainTableDaoBase<Database> {
         simple_highlight($fts5Table, 1, $wrapperSql) AS $content, 
         $insertDate 
       FROM $fts5Table 
-      WHERE $fts5Table MATCH ${tokenizer.name}_query(?);
+      WHERE $fts5Table MATCH ${tokenizer.queryFunctionName}(?);
     ''',
       parameters: [value],
     );
@@ -218,17 +169,40 @@ class Sqlite3WebDao extends MainTableDaoBase<Database> {
   @override
   Future<void> updateAll() async {
     final mainTableRowList = await selectAll();
+    final oldLen = mainTableRowList.length;
+    final newCount = shuffledRowCount();
     await db.requestLock((token) async {
-      for (int i = 0; i < mainTableRowList.length; i++) {
-        final oldRow = mainTableRowList[i];
-        final newRow = createRandomRow(i);
+      for (int i = 0; i < newCount && i < oldLen; i++) {
+        final newRow = createRandomRow();
         await db.execute(
           "UPDATE $mainTable SET $title = ?, $content = ?, $insertDate = ? WHERE $id = ?;",
           parameters: [
             newRow.title,
             newRow.content,
             newRow.insertDate.toDb(),
-            oldRow.id,
+            mainTableRowList[i].id,
+          ],
+          token: token,
+        );
+      }
+
+      for (int i = newCount; i < oldLen; i++) {
+        await db.execute(
+          "DELETE FROM $mainTable WHERE $id = ?;",
+          parameters: [mainTableRowList[i].id],
+          token: token,
+        );
+      }
+
+      for (int i = oldLen; i < newCount; i++) {
+        final newRow = createRandomRow();
+        await db.execute(
+          "INSERT INTO $mainTable VALUES(?, ?, ?, ?);",
+          parameters: [
+            null,
+            newRow.title,
+            newRow.content,
+            newRow.insertDate.toDb(),
           ],
           token: token,
         );

@@ -28,11 +28,6 @@ final class Sqlite3WasmDbManager extends DbManager<Sqlite3WasmDao, CommonDatabas
     await _pool.initWithJiebaDict(await JiebaDictAssets.loadPaths());
   }
 
-  /// 该函数不会被调用，真正实现在 [Sqlite3Wasm.createMainAndFts5]
-  @override
-  @Deprecated("")
-  Future<void> createMainAndFts5(CommonDatabase db) => _pool.createMainAndFts5(db);
-
   @override
   Future<Map<PinyinDictKind, String>> savePinyinDict() async {
     await _pool.updatePinyinKind2Url(PinyinDictKind.values.resolveUrl());

@@ -2,7 +2,7 @@
 // dart format width=80
 
 // **************************************************************************
-// Generator: WorkerGenerator 9.0.0+2 (Squadron 7.4.3)
+// Generator: WorkerGenerator 9.3.2 (Squadron 7.4.3)
 // **************************************************************************
 
 import 'sqlite3_wasm.web.g.dart';

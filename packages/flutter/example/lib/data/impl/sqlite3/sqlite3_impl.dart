@@ -5,11 +5,12 @@ import 'package:sqlite3/sqlite3.dart';
 import 'package:sqlite3_simple/sqlite3_simple.dart';
 
 import '../../db_manager.dart';
+import '../../main_table_schema.dart';
 import '../pinyin_dict.dart';
 import 'sqlite3_dao.dart';
 
 final class Sqlite3DbManager extends DbManager<Sqlite3Dao, Database>
-    with PinyinDictSaver, Sqlite3Fts5Creator {
+    with PinyinDictSaver {
   @override
   late final Sqlite3Dao dao;
 
@@ -32,7 +33,9 @@ final class Sqlite3DbManager extends DbManager<Sqlite3Dao, Database>
 
     final version = db.select("PRAGMA user_version").first['user_version'];
     if (version == 0) {
-      await createMainAndFts5(db);
+      for (final statement in createMainAndFts5Statements) {
+        db.execute(statement);
+      }
       db.execute("PRAGMA user_version = 1");
     }
   }

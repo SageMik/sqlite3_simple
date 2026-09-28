@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 
 import 'font_loader_io.dart'
-    if (dart.library.html) 'font_loader_web.dart'
+    if (dart.library.js_interop) 'font_loader_web.dart'
     show createFontLoader;
 
 const String HarmonyOsSansSC = 'HarmonyOS Sans SC';

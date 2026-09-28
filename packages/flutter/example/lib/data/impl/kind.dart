@@ -6,15 +6,11 @@ import 'sqflite_common_ffi/sqflite_common_ffi_impl.dart';
 import 'sqlite3/sqlite3_impl.dart';
 
 enum DbManagerKind {
-  sqlite3,
-  sqflite_common_ffi,
-  drift,
-}
+  sqlite3(Sqlite3DbManager.new),
+  sqflite_common_ffi(SqfliteCommonFfiDbManager.new),
+  drift(DriftDbManager.new);
 
-DbManager createDbManager(DbManagerKind kind) {
-  return switch (kind) {
-    DbManagerKind.sqlite3 => Sqlite3DbManager(),
-    DbManagerKind.sqflite_common_ffi => SqfliteCommonFfiDbManager(),
-    DbManagerKind.drift => DriftDbManager(),
-  };
+  final DbManager Function() create;
+
+  const DbManagerKind(this.create);
 }

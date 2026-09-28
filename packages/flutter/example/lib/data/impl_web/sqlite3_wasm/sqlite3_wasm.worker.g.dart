@@ -4,7 +4,7 @@
 part of 'sqlite3_wasm.dart';
 
 // **************************************************************************
-// Generator: WorkerGenerator 9.0.0+2 (Squadron 7.4.3)
+// Generator: WorkerGenerator 9.3.2 (Squadron 7.4.3)
 // **************************************************************************
 
 // dart format width=80
@@ -147,10 +147,6 @@ mixin _$Sqlite3Wasm$Facade implements Sqlite3Wasm {
   Future<void> init() => throw UnimplementedError();
 
   @override
-  Future<void> createMainAndFts5(CommonDatabase db) =>
-      throw UnimplementedError();
-
-  @override
   // ignore: unused_element
   Sqlite3Dao get _dao => throw UnimplementedError();
 
@@ -219,6 +215,7 @@ WorkerService $Sqlite3WasmInitializer(WorkerRequest $req) =>
 base class Sqlite3WasmWorker extends Worker
     with _$Sqlite3Wasm$Invoker, _$Sqlite3Wasm$Facade
     implements Sqlite3Wasm {
+  // ignore: use_super_parameters
   Sqlite3WasmWorker({
     PlatformThreadHook? threadHook,
     ExceptionManager? exceptionManager,
@@ -228,6 +225,7 @@ base class Sqlite3WasmWorker extends Worker
          exceptionManager: exceptionManager,
        );
 
+  // ignore: use_super_parameters
   Sqlite3WasmWorker.js({
     PlatformThreadHook? threadHook,
     ExceptionManager? exceptionManager,
@@ -245,6 +243,7 @@ base class Sqlite3WasmWorker extends Worker
 base class Sqlite3WasmWorkerPool extends WorkerPool<Sqlite3WasmWorker>
     with _$Sqlite3Wasm$Facade
     implements Sqlite3Wasm {
+  // ignore: use_super_parameters
   Sqlite3WasmWorkerPool({
     PlatformThreadHook? threadHook,
     ExceptionManager? exceptionManager,
@@ -258,6 +257,7 @@ base class Sqlite3WasmWorkerPool extends WorkerPool<Sqlite3WasmWorker>
          exceptionManager: exceptionManager,
        );
 
+  // ignore: use_super_parameters
   Sqlite3WasmWorkerPool.js({
     PlatformThreadHook? threadHook,
     ExceptionManager? exceptionManager,

@@ -2,7 +2,6 @@
 
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
 import 'package:sqlite3/wasm.dart';
 import 'package:sqlite3_simple/jieba_dict_type.dart';
 import 'package:sqlite3_simple/web.dart';
@@ -12,6 +11,7 @@ import '../../db_manager.dart';
 import '../../impl/sqlite3/sqlite3_dao.dart';
 import '../../main_table_dao.dart';
 import '../../main_table_row.dart';
+import '../../main_table_schema.dart';
 import '../../pinyin_dict_kind.dart';
 import '../fetch.dart';
 import 'main_table_row_marshaler.dart';
@@ -26,7 +26,7 @@ part 'sqlite3_wasm.worker.g.dart';
 /// ```
 /// 建议最终发布时使用 `-O4` 编译优化等级。
 @SquadronService(baseUrl: "~", targetPlatform: TargetPlatform.js)
-class Sqlite3Wasm extends IDbManager<CommonDatabase> with Sqlite3Fts5Creator implements MainTableDao {
+class Sqlite3Wasm extends IDbManager<CommonDatabase> implements MainTableDao {
   late final Sqlite3Dao _dao;
   late final DefaultSimpleWasmModuleLoader _loader;
 
@@ -68,19 +68,14 @@ class Sqlite3Wasm extends IDbManager<CommonDatabase> with Sqlite3Fts5Creator imp
 
     final version = db.select("PRAGMA user_version").first['user_version'];
     if (version == 0) {
-      await createMainAndFts5(db);
+      for (final statement in createMainAndFts5Statements) {
+        db.execute(statement);
+      }
       db.execute("PRAGMA user_version = 1");
     }
 
     stopWatch.stop();
     print("数据库初始化耗时：${(stopWatch.elapsedMilliseconds)}ms");
-  }
-
-  /// 避免 `squadron` 生成报错
-  @override
-  @protected
-  Future<void> createMainAndFts5(CommonDatabase db) {
-    return super.createMainAndFts5(db);
   }
 
   late Map<PinyinDictKind, String> _kind2url;
@@ -104,8 +99,8 @@ class Sqlite3Wasm extends IDbManager<CommonDatabase> with Sqlite3Fts5Creator imp
         kind2path[kind] = '';
       } else {
         final path = "$pinyinDictDir/${kind.assetName!}";
+        kind2path[kind] = path;
         if (!existingFiles.containsKey(path)) {
-          kind2path[kind] = path;
           path2asset[path] = await fetchFromBase(url);
         }
       }

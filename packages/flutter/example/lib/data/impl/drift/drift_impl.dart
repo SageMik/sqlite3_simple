@@ -40,13 +40,6 @@ class DriftDbManager extends DbManager<DriftDao, AppDatabase>
     if (kDebugMode) print(init.rawData.data);
   }
 
-  /// 不需要手动调用，见 [AppDatabase.buildFts5Triggers]
-  @override
-  @Deprecated("不需要手动调用")
-  Future<void> createMainAndFts5(AppDatabase db) async {
-    throw UnimplementedError();
-  }
-
   @override
   Future<void> close() => dao.db.close();
 }
@@ -62,7 +55,7 @@ class DriftDao extends MainTableDaoBase<AppDatabase> {
   Future<void> insertRandomData(int length) {
     return db.batch((b) {
       b.insertAll(mainTable,
-          Iterable.generate(length, (i) => createRandomRow(i).toCompanion()));
+          Iterable.generate(length, (_) => createRandomRow().toCompanion()));
     });
   }
 
@@ -119,11 +112,11 @@ class DriftDao extends MainTableDaoBase<AppDatabase> {
     final items = await mainTable.select().get();
     return items
         .map((it) => MainTableRow(
-              id: it.id,
-              title: it.title,
-              content: it.content,
-              insertDate: it.insertDate,
-            ))
+      id: it.id,
+      title: it.title,
+      content: it.content,
+      insertDate: it.insertDate,
+    ))
         .toList();
   }
 
@@ -138,13 +131,26 @@ class DriftDao extends MainTableDaoBase<AppDatabase> {
   @override
   Future<void> updateAll() async {
     final mainTableRowList = await selectAll();
-    db.batch((b) {
-      for (int i = 0; i < mainTableRowList.length; i++) {
+    final oldLen = mainTableRowList.length;
+    final newCount = shuffledRowCount();
+    await db.batch((b) {
+      for (int i = 0; i < newCount && i < oldLen; i++) {
         b.update(
           mainTable,
-          createRandomRow(i).toCompanion(),
+          createRandomRow().toCompanion(),
           where: (t) => t.id.equals(mainTableRowList[i].id),
         );
+      }
+
+      for (int i = newCount; i < oldLen; i++) {
+        b.deleteWhere(
+          mainTable,
+              (t) => t.id.equals(mainTableRowList[i].id),
+        );
+      }
+
+      for (int i = oldLen; i < newCount; i++) {
+        b.insert(mainTable, createRandomRow().toCompanion());
       }
     });
   }
