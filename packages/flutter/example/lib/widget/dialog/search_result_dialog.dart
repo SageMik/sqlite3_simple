@@ -4,14 +4,13 @@ import 'package:flutter/material.dart';
 import '../../data/main_table_row.dart';
 import '../../utils/padding.dart';
 import 'common_dialog.dart';
-import '../highlight_text.dart';
+import '../highlight_text_span_builder.dart';
 
 /// 搜索结果详情对话框
 class SearchResultDialog extends StatelessWidget {
   final MainTableRowUiModel row;
-  final HighlightTextSpanBuilder highlightTextBuilder;
 
-  const SearchResultDialog(this.row, this.highlightTextBuilder, {super.key});
+  const SearchResultDialog(this.row, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -37,12 +36,12 @@ class SearchResultDialog extends StatelessWidget {
             row.title,
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
             textAlign: TextAlign.center,
-            specialTextSpanBuilder: highlightTextBuilder,
+            specialTextSpanBuilder: HighlightTextSpanBuilder.Default,
           ),
           const SizedBox(height: P.extraSmall),
           ExtendedText(
             row.content,
-            specialTextSpanBuilder: highlightTextBuilder,
+            specialTextSpanBuilder: HighlightTextSpanBuilder.Default,
             style: const TextStyle(fontSize: 18, height: 1.3),
           ),
         ],

@@ -1,33 +1,38 @@
 import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../data/main_table_row.dart';
 import '../utils/padding.dart';
-import 'highlight_text.dart';
+import 'highlight_text_span_builder.dart';
+
+typedef OnItemTap = void Function(BuildContext context, MainTableRowUiModel row);
 
 /// 搜索结果列表
 class SearchResultList extends StatelessWidget {
-  final List<MainTableRowUiModel> results;
-  final HighlightTextSpanBuilder highlightTextBuilder;
-  final void Function(BuildContext context, MainTableRowUiModel row) onItemTap;
+  final List<MainTableRowUiModel> items;
+  final OnItemTap onItemTap;
 
-  const SearchResultList({
-    super.key,
-    required this.results,
-    required this.highlightTextBuilder,
-    required this.onItemTap,
-  });
+  const SearchResultList({super.key, required this.items, required this.onItemTap});
+
+  static final _dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
 
   @override
   Widget build(BuildContext context) {
+    final highlightTextBuilder = HighlightTextSpanBuilder.Default;
     return ListView.builder(
-      itemCount: results.length,
+      itemCount: items.length,
       itemBuilder: (context, index) {
-        final r = results[index];
+        final r = items[index];
+        final scheme = Theme.of(context).colorScheme;
         return Material(
-          // 水波纹特效超出列表：https://github.com/flutter/flutter/issues/73315
+          color: scheme.surface,
           child: InkWell(
             onTap: () => onItemTap(context, r),
+            hoverColor: Theme.of(context).hoverColor,
+            highlightColor: Colors.transparent,
+            splashColor: Theme.of(context).splashColor,
+            splashFactory: InkRipple.splashFactory,
             child: Padding(
               padding: const EdgeInsets.only(
                 left: P.middle,
@@ -36,6 +41,7 @@ class SearchResultList extends StatelessWidget {
                 bottom: P.extraSmall,
               ),
               child: Row(
+                spacing: P.small,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
@@ -48,7 +54,6 @@ class SearchResultList extends StatelessWidget {
                       fontFeatures: [FontFeature.tabularFigures()],
                     ),
                   ),
-                  const SizedBox(width: P.small),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,10 +68,7 @@ class SearchResultList extends StatelessWidget {
                                 specialTextSpanBuilder: highlightTextBuilder,
                                 style: const TextStyle(fontSize: 20),
                               ),
-                              ExtendedText(
-                                r.content,
-                                specialTextSpanBuilder: highlightTextBuilder,
-                              ),
+                              ExtendedText(r.content, specialTextSpanBuilder: highlightTextBuilder),
                             ],
                           ),
                         ),
@@ -74,12 +76,9 @@ class SearchResultList extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Text(
-                              "${r.insertDate}",
+                              _dateFormat.format(r.insertDate),
                               textAlign: TextAlign.end,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
+                              style: const TextStyle(fontSize: 12, color: Colors.grey),
                             ),
                           ],
                         ),

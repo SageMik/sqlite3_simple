@@ -1,4 +1,4 @@
-name: _
+name: sqlite3_simple_workspace
 publish_to: none
 
 environment:

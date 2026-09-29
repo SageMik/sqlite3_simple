@@ -1,26 +1,12 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide AppBar;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-import 'data/db_manager_kind.dart';
-import 'data/main_table_dao.dart';
-import 'data/pinyin_dict_kind.dart';
-import 'main_provider.dart';
+import 'main_app_bar.dart';
+import 'main_panel_search.dart';
 import 'utils/font/font_loader.dart';
-import 'utils/padding.dart';
-import 'widget/dialog/usage_dialog.dart';
-import 'widget/expand_collapse_strip.dart';
-import 'widget/highlight_text.dart';
-import 'widget/search_input.dart';
-import 'widget/search_option_radio_row.dart';
-import 'widget/dialog/search_result_dialog.dart';
-import 'widget/search_result_list.dart';
-import 'widget/expandable_table.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,222 +15,99 @@ void main() async {
     ProviderScope(
       retry: (retryCount, error) =>
           ProviderContainer.defaultRetry(retryCount, error, maxRetries: 0),
-      child: const MyApp(),
+      child: const SimpleExampleApp(),
     ),
   );
   unawaited(AppFontLoader.instance.loadFull());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class SimpleExampleApp extends ConsumerWidget {
+  const SimpleExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    /// 通过国际化设置中文环境以让 Flutter 使用正确的中文字体，主要是 Windows 平台
-    const localizationsDelegates = [
-      GlobalMaterialLocalizations.delegate,
-      GlobalWidgetsLocalizations.delegate,
-      GlobalCupertinoLocalizations.delegate,
-    ];
-    const supportedLocales = [Locale('zh', 'CN')];
-
-    /// 自定义中文字体，避免 Flutter 默认加载字体的方式导致短时间的乱码
-    final theme = ThemeData(fontFamily: HarmonyOsSansSC);
-    final colorScheme = theme.colorScheme;
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: theme,
-      localizationsDelegates: localizationsDelegates,
-      supportedLocales: supportedLocales,
+      theme: _theme,
+      localizationsDelegates: _localizationsDelegates,
+      supportedLocales: _supportedLocales,
       home: Scaffold(
-        appBar: AppBar(
-          centerTitle: MediaQuery.of(context).size.width > 420,
-          title: const Text(
-            'Simple 分词器 示例',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-          ),
-          backgroundColor: colorScheme.primary,
-          foregroundColor: colorScheme.onPrimary,
-          actionsPadding: const EdgeInsetsDirectional.only(end: P.small),
-          actions: buildActions(),
-        ),
+        appBar: SimpleExampleAppBar(),
         body: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              buildSearchBar(),
-              buildSearchOptions(context),
-              Expanded(child: buildSearchResult()),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// 右上角功能按钮
-  List<Widget> buildActions() {
-    return [
-      Consumer(
-        builder: (context, ref, _) => IconButton(
-          tooltip: '刷新数据',
-          onPressed: () => refreshDbData(ref),
-          icon: const Icon(Icons.refresh),
-        ),
-      ),
-      Builder(
-        builder: (context) => IconButton(
-          tooltip: '使用说明',
-          onPressed: () => showDialog(
-            context: context,
-            builder: (context) => const UsageDialog(),
-          ),
-          icon: const Icon(Icons.info_outline_rounded),
-        ),
-      ),
-      IconButton(
-        tooltip: 'Github 仓库',
-        onPressed: () => launchUrl(
-          Uri.parse('https://github.com/SageMik/sqlite3_simple'),
-          webOnlyWindowName: '_blank',
-        ),
-        icon: const FaIcon(FontAwesomeIcons.github, size: 20),
-      ),
-    ];
-  }
-
-  /// 搜索栏
-  Widget buildSearchBar() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.only(
-        left: P.middle,
-        right: P.middle,
-        top: P.middle,
-      ),
-      child: Consumer(
-        builder: (context, ref, _) {
-          return SearchInput(
-            onChanged: ref.read(searchQueryProvider.notifier).update,
-          );
-        },
-      ),
-    );
-  }
-
-  /// 搜索栏下方选项
-  Widget buildSearchOptions(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(P.middle, P.middle, P.middle, 0),
-      child: Consumer(
-        builder: (context, ref, _) {
-          final moreOpen = ref.watch(searchOptionsMoreOpenProvider);
-          return ExpandableTable(
-            expanded: moreOpen,
-            pinnedRowCount: 1,
-            trailing: ExpandCollapseStrip(
-              expanded: moreOpen,
-              onTap: () => ref
-                  .read(searchOptionsMoreOpenProvider.notifier)
-                  .update(!ref.read(searchOptionsMoreOpenProvider)),
-            ),
-            child: Table(
-              columnWidths: searchOptionTableColumnWidths,
-              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-              children: [
-                SearchOptionRadioRow<DbManagerKind>(
-                  label: "数据库实现：",
-                  value: ref.watch(dbManagerKindProvider),
-                  options: dbManagerKind2uiString,
-                  onChanged: (v) async {
-                    if (ref.read(dbManagerKindProvider) == v) {
-                      // 重复点击刷新为新的随机数据
-                      await refreshDbData(ref);
-                    } else {
-                      if (kDebugMode) {
-                        print("切换数据库至：${dbManagerKind2uiString[v]}");
-                      }
-                      ref.read(dbManagerKindProvider.notifier).update(v);
-                    }
-                  },
-                ),
-                SearchOptionRadioRow<Tokenizer>(
-                  label: "分词器：",
-                  value: ref.watch(tokenizerProvider),
-                  options: tokenizer2uiString,
-                  onChanged: (v) =>
-                      ref.read(tokenizerProvider.notifier).update(v),
-                ),
-                SearchOptionRadioRow<PinyinDictKind>(
-                  label: "拼音文件：",
-                  value: ref.watch(pinyinDictKindProvider),
-                  options: pinyinDictKind2uiString,
-                  isLast: true,
-                  onChanged: (v) =>
-                      ref.read(pinyinDictKindProvider.notifier).update(v),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  /// 高亮文本构建器
-  static final highlightTextBuilder = HighlightTextSpanBuilder(
-    (src) => src.copyWith(color: Colors.red),
-  );
-
-  static const searchOptionTableColumnWidths = <int, TableColumnWidth>{
-    0: IntrinsicColumnWidth(),
-    1: FlexColumnWidth(),
-  };
-
-  /// 搜索结果
-  Widget buildSearchResult() {
-    return Consumer(
-      builder: (context, ref, _) {
-        final result = ref.watch(searchResultProvider);
-        return result.when(
-          skipLoadingOnRefresh: true,
-          skipLoadingOnReload: true,
-          data: (results) => AnimatedSwitcher(
-            duration: kThemeAnimationDuration,
-            child: results == null
-                ? const Center(child: CircularProgressIndicator())
-                : SearchResultList(
-                    results: results,
-                    highlightTextBuilder: highlightTextBuilder,
-                    onItemTap: (context, row) {
-                      showDialog(
-                        context: context,
-                        builder: (context) =>
-                            SearchResultDialog(row, highlightTextBuilder),
-                      );
-                    },
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              return Row(
+                children: [
+                  Expanded(
+                    //
+                    child: const SearchPanel(),
                   ),
+                ],
+              );
+            },
           ),
-          loading: () => const SizedBox.shrink(),
-          error: (error, stack) => Container(
-            height: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: P.middle),
-            width: double.infinity,
-            child: SingleChildScrollView(
-              child: SelectionArea(child: Text('错误: $error\n\n堆栈：$stack')),
-            ),
-          ),
-        );
-      },
+        ),
+      ),
     );
   }
 
-  /// 刷新数据库数据
-  Future<void> refreshDbData(WidgetRef ref) async {
-    final dbManager = await ref.read(dbManagerProvider.future);
-    await dbManager.dao.updateAll();
-    ref.invalidate(searchResultProvider);
-    await ref.read(searchResultProvider.future);
-  }
+  /// 通过国际化设置中文环境以让 Flutter 使用正确的中文字体，主要是 Windows 平台
+  static const _localizationsDelegates = [
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ];
+  static const _supportedLocales = [Locale('zh', 'CN')];
+
+  static final ThemeData _theme = (() {
+    const accent = Color(0xFF635BFF);
+    const canvas = Color(0xFFF4F5F7);
+    const surface = Color(0xFFFFFFFF);
+    const surfaceElevated = Color(0xFFEDEEF2);
+    const press = Color(0xFFDDDEE4);
+    const ink = Color(0xFF17171A);
+    const mute = Color(0xFF6E6E73);
+    final hairline = Colors.black.withValues(alpha: .08);
+    final colorScheme = ColorScheme.fromSeed(seedColor: accent, brightness: Brightness.light)
+        .copyWith(
+          primary: accent,
+          surface: surface,
+          onSurface: ink,
+          onSurfaceVariant: mute,
+          surfaceContainerLow: canvas,
+          surfaceContainerHighest: surfaceElevated,
+          outlineVariant: hairline,
+        );
+    return ThemeData(
+      /// 自定义中文字体，避免 Flutter 默认加载字体的方式导致短时间的乱码
+      fontFamily: HarmonyOsSansSC,
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: surface,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: surface,
+        foregroundColor: ink,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        centerTitle: false,
+      ),
+      dividerTheme: DividerThemeData(color: hairline, thickness: 1, space: 1),
+      splashFactory: InkRipple.splashFactory,
+      hoverColor: canvas,
+      highlightColor: Colors.transparent,
+      splashColor: press,
+      focusColor: accent.withValues(alpha: .10),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        strokeWidth: 2.5,
+        strokeCap: StrokeCap.round,
+        color: accent,
+      ),
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(color: ink, borderRadius: BorderRadius.circular(6)),
+        textStyle: const TextStyle(fontSize: 12, color: Colors.white),
+      ),
+      dialogTheme: const DialogThemeData(backgroundColor: surface),
+    );
+  })();
 }
