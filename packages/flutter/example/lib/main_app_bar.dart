@@ -10,12 +10,11 @@ import 'utils/padding.dart';
 class SimpleExampleAppBar extends AppBar {
   SimpleExampleAppBar({super.key})
     : super(
-        toolbarHeight: 64,
+        toolbarHeight: 72,
         title: _Title(title: 'Simple 分词器', subtitle: '示例'),
         actions: [
           Consumer(
             builder: (context, ref, _) => IconButton(
-              constraints: _iconConstraints,
               tooltip: '刷新数据',
               onPressed: () => refreshDbData(ref),
               icon: const Icon(Icons.refresh),
@@ -23,7 +22,6 @@ class SimpleExampleAppBar extends AppBar {
           ),
           Builder(
             builder: (context) => IconButton(
-              constraints: _iconConstraints,
               tooltip: '使用说明',
               onPressed: () =>
                   showDialog(context: context, builder: (context) => const UsageDialog()),
@@ -31,7 +29,6 @@ class SimpleExampleAppBar extends AppBar {
             ),
           ),
           IconButton(
-            constraints: _iconConstraints,
             tooltip: 'Github 仓库',
             onPressed: () => launchUrl(
               Uri.parse('https://github.com/SageMik/sqlite3_simple'),
@@ -40,11 +37,9 @@ class SimpleExampleAppBar extends AppBar {
             icon: const FaIcon(FontAwesomeIcons.github, size: 20),
           ),
         ],
-        actionsPadding: const EdgeInsetsDirectional.only(end: P.small),
+        actionsPadding: const EdgeInsetsDirectional.only(end: P.middle),
       );
 }
-
-const BoxConstraints _iconConstraints = BoxConstraints(minWidth: 48, minHeight: 48);
 
 class _Title extends StatelessWidget {
   final String title;
@@ -58,13 +53,13 @@ class _Title extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 28,
-          height: 28,
+          width: 36,
+          height: 36,
           alignment: Alignment.center,
           decoration: BoxDecoration(color: scheme.primary, borderRadius: BorderRadius.circular(7)),
           child: Text(
             title.characters.first,
-            style: TextStyle(color: scheme.onPrimary, fontSize: 14, height: 1),
+            style: TextStyle(color: scheme.onPrimary, fontSize: 20, height: 1, fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(width: P.small),
@@ -83,13 +78,13 @@ class _Title extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: scheme.onSurface,
-                      fontSize: 18,
+                      fontSize: 20,
                       fontWeight: FontWeight.w900,
                       height: 1,
                     ),
                   ),
                   Container(
-                    height: 14,
+                    height: 16,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: scheme.primary.withValues(alpha: .10),

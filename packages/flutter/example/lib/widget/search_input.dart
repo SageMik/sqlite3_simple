@@ -13,11 +13,18 @@ class SearchInput extends StatefulWidget {
 
 class _SearchInputState extends State<SearchInput> {
   late final SearchController _controller;
+  late final FocusNode _focusNode;
   var _showClearBtn = false;
+  var _focused = false;
 
   @override
   void initState() {
     super.initState();
+    _focusNode = FocusNode()
+      ..addListener(() {
+        final focused = _focusNode.hasFocus;
+        if (focused != _focused) setState(() => _focused = focused);
+      });
     _controller = SearchController()
       ..addListener(() {
         final value = _controller.text;
@@ -28,6 +35,7 @@ class _SearchInputState extends State<SearchInput> {
 
   @override
   void dispose() {
+    _focusNode.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -39,17 +47,26 @@ class _SearchInputState extends State<SearchInput> {
       onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
       child: SearchBar(
         controller: _controller,
+        focusNode: _focusNode,
         constraints: const BoxConstraints(minHeight: 48),
         hintText: widget.hintText,
-        leading: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: P.extraSmall),
-          child: Icon(Icons.search),
+        padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: P.extraSmall)),
+        leading: TextFieldTapRegion(
+          child: _Icon(icon: Icons.search, focused: _focused),
         ),
         trailing: [
           if (_showClearBtn)
-            IconButton(
-              onPressed: () => _controller.text = '',
-              icon: const Icon(Icons.clear),
+            // 防止桌面端点击后搜索框失去焦点
+            TextFieldTapRegion(
+              child: Material(
+                type: MaterialType.transparency,
+                child: InkWell(
+                  canRequestFocus: false,
+                  onTap: _controller.clear,
+                  borderRadius: BorderRadius.circular(P.small),
+                  child: _Icon(icon: Icons.clear, focused: _focused),
+                ),
+              ),
             ),
         ],
         elevation: const WidgetStatePropertyAll(0),
@@ -57,9 +74,7 @@ class _SearchInputState extends State<SearchInput> {
         overlayColor: const WidgetStatePropertyAll(Colors.transparent),
         side: WidgetStateProperty.resolveWith(
           (states) => BorderSide(
-            color: states.contains(WidgetState.focused)
-                ? scheme.primary
-                : Colors.transparent,
+            color: states.contains(WidgetState.focused) ? scheme.primary : Colors.transparent,
             width: states.contains(WidgetState.focused) ? 1.5 : 0,
           ),
         ),
@@ -67,6 +82,25 @@ class _SearchInputState extends State<SearchInput> {
           RoundedRectangleBorder(borderRadius: BorderRadius.circular(P.small)),
         ),
       ),
+    );
+  }
+}
+
+class _Icon extends StatelessWidget {
+  final IconData icon;
+  final bool focused;
+
+  const _Icon({required this.icon, required this.focused});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return TweenAnimationBuilder<Color?>(
+      duration: kThemeChangeDuration,
+      curve: Curves.fastOutSlowIn,
+      tween: ColorTween(end: focused ? scheme.primary : scheme.onSurface),
+      builder: (context, color, _) =>
+          SizedBox.square(dimension: 42, child: Icon(icon, color: color)),
     );
   }
 }

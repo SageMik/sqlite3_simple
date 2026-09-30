@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sqlite3_simple_example/utils/padding.dart';
 
 import 'main_app_bar.dart';
 import 'main_panel_search.dart';
@@ -60,7 +61,7 @@ class SimpleExampleApp extends ConsumerWidget {
   ];
   static const _supportedLocales = [Locale('zh', 'CN')];
 
-  static final ThemeData _theme = (() {
+  static ThemeData get _theme {
     const accent = Color(0xFF635BFF);
     const canvas = Color(0xFFF4F5F7);
     const surface = Color(0xFFFFFFFF);
@@ -98,6 +99,11 @@ class SimpleExampleApp extends ConsumerWidget {
       highlightColor: Colors.transparent,
       splashColor: press,
       focusColor: accent.withValues(alpha: .10),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(P.small)),
+        ),
+      ),
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         strokeWidth: 2.5,
         strokeCap: StrokeCap.round,
@@ -109,5 +115,5 @@ class SimpleExampleApp extends ConsumerWidget {
       ),
       dialogTheme: const DialogThemeData(backgroundColor: surface),
     );
-  })();
+  }
 }
