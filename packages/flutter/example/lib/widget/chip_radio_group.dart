@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../utils/padding.dart';
+import '../utils/ui_label.dart';
 
 class ChipRadioGroup<T> extends StatelessWidget {
   final T value;
-  final Map<T, String> options;
+  final Map<T, UiLabel> options;
   final ValueChanged<T> onSelect;
   final double fontSize;
 
@@ -25,22 +25,23 @@ class ChipRadioGroup<T> extends StatelessWidget {
       children: [
         Expanded(
           child: Wrap(
-            spacing: P.small,
-            runSpacing: P.small,
+            spacing: 8,
+            runSpacing: 8,
             children: options.entries.map((e) {
+              final label = e.value.full;
               final isSelected = value == e.key;
               return Material(
                 color: isSelected
                     ? scheme.primary
                     : scheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(P.small),
+                borderRadius: BorderRadius.circular(8),
                 clipBehavior: Clip.antiAlias,
                 child: InkWell(
                   onTap: () => onSelect(e.key),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: P.middle,
-                      vertical: P.small * .8,
+                      horizontal: 12,
+                      vertical: 4,
                     ),
                     child: Stack(
                       alignment: Alignment.center,
@@ -48,7 +49,7 @@ class ChipRadioGroup<T> extends StatelessWidget {
                         Opacity( // 加粗字体占位避免宽度变化
                           opacity: 0,
                           child: Text(
-                            e.value,
+                            label,
                             style: TextStyle(
                               fontSize: fontSize,
                               fontWeight: selectedWeight,
@@ -56,7 +57,7 @@ class ChipRadioGroup<T> extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          e.value,
+                          label,
                           style: TextStyle(
                             fontSize: fontSize,
                             fontWeight: isSelected ? selectedWeight : null,

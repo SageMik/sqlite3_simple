@@ -50,7 +50,7 @@ class Sqlite3WasmDao implements MainTableDao {
   Future<void> insertRandomData(int length) => _pool.insertRandomData(length);
 
   @override
-  Future<List<MainTableRow>> search(String value, Tokenizer tokenizer) =>
+  Future<SearchResult> search(String value, Tokenizer tokenizer) =>
       _pool.search(value, tokenizer);
 
   @override

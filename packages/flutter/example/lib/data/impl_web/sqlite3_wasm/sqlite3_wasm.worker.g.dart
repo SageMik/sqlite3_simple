@@ -40,14 +40,14 @@ extension on Sqlite3Wasm {
       } finally {}
     },
     _$searchId: ($req) async {
-      final List<MainTableRow> $res;
+      final SearchResult $res;
       try {
         final $dsr = _$Deser(contextAware: false);
         $res = await search($dsr.$2($req.args[0]), $dsr.$4($req.args[1]));
       } finally {}
       try {
         final $sr = _$Ser(contextAware: false);
-        return $sr.$3($res);
+        return $sr.$7($res);
       } finally {}
     },
     _$selectAllId: ($req) async {
@@ -96,7 +96,7 @@ mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
   }
 
   @override
-  Future<List<MainTableRow>> search(String value, Tokenizer tokenizer) async {
+  Future<SearchResult> search(String value, Tokenizer tokenizer) async {
     final dynamic $res;
     try {
       final $sr = _$Ser(contextAware: false);
@@ -104,7 +104,7 @@ mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
     } finally {}
     try {
       final $dsr = _$Deser(contextAware: true);
-      return $dsr.$8($res);
+      return $dsr.$9($res);
     } finally {}
   }
 
@@ -288,7 +288,7 @@ base class Sqlite3WasmWorkerPool extends WorkerPool<Sqlite3WasmWorker>
       execute((w) => w.savePinyinDict());
 
   @override
-  Future<List<MainTableRow>> search(String value, Tokenizer tokenizer) =>
+  Future<SearchResult> search(String value, Tokenizer tokenizer) =>
       execute((w) => w.search(value, tokenizer));
 
   @override
@@ -320,6 +320,11 @@ final class _$Deser extends MarshalingContext {
   late final $6 = map<PinyinDictKind, String>(kcast: $5, vcast: $2);
   late final $7 = (($) => MainTableRowSquadronMarshaling.unmarshal($, this));
   late final $8 = list<MainTableRow>($7);
+  late final $9 = (($) => FtsSearchResultSquadronMarshaling.unmarshal(
+        $,
+        $8,
+        this,
+      ));
 }
 
 final class _$Ser extends MarshalingContext {
@@ -332,4 +337,7 @@ final class _$Ser extends MarshalingContext {
   late final $4 = (($) => ($ as JiebaDictType).index);
   late final $5 = map(kcast: $4);
   late final $6 = (($) => ($ as Tokenizer).index);
+  late final $7 = (($) => FtsSearchResultSquadronMarshaling(
+        $ as SearchResult,
+      ).marshal($3));
 }

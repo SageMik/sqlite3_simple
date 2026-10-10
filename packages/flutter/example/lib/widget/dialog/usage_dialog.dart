@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../utils/padding.dart';
 import 'common_dialog.dart';
 
 /// 使用说明对话框
@@ -20,17 +19,17 @@ class UsageDialog extends StatelessWidget {
     return CommonDialog(
       closeLabel: '关闭',
       child: Padding(
-        padding: const EdgeInsets.all(P.extraSmall),
+        padding: const EdgeInsets.all(4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: P.extraSmall,
+          spacing: 4,
           children: [
             const Text(
               '使用说明',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: P.small),
+            const SizedBox(height: 8),
             ConstrainedBox(
               constraints: BoxConstraints(maxHeight: maxBodyHeight),
               child: const SingleChildScrollView(

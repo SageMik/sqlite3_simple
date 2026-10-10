@@ -124,7 +124,7 @@ class Sqlite3Wasm extends IDbManager<CommonDatabase> implements MainTableDao {
 
   @override
   @SquadronMethod()
-  Future<List<MainTableRow>> search(String value, Tokenizer tokenizer) =>
+  Future<SearchResult> search(String value, Tokenizer tokenizer) =>
       _dao.search(value, tokenizer);
 
   @override

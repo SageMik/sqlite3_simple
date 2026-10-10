@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sqlite3_simple_example/utils/padding.dart';
 
 import 'main_app_bar.dart';
 import 'main_panel_search.dart';
@@ -42,7 +41,7 @@ class SimpleExampleApp extends ConsumerWidget {
                 children: [
                   Expanded(
                     //
-                    child: const SearchPanel(),
+                    child: SearchPanel(),
                   ),
                 ],
               );
@@ -64,12 +63,10 @@ class SimpleExampleApp extends ConsumerWidget {
   static ThemeData get _theme {
     const accent = Color(0xFF635BFF);
     const canvas = Color(0xFFF4F5F7);
-    const surface = Color(0xFFFFFFFF);
+    const surface = Colors.white;
     const surfaceElevated = Color(0xFFEDEEF2);
-    const press = Color(0xFFDDDEE4);
     const ink = Color(0xFF17171A);
     const mute = Color(0xFF6E6E73);
-    final hairline = Colors.black.withValues(alpha: .08);
     final colorScheme = ColorScheme.fromSeed(seedColor: accent, brightness: Brightness.light)
         .copyWith(
           primary: accent,
@@ -78,30 +75,20 @@ class SimpleExampleApp extends ConsumerWidget {
           onSurfaceVariant: mute,
           surfaceContainerLow: canvas,
           surfaceContainerHighest: surfaceElevated,
-          outlineVariant: hairline,
         );
     return ThemeData(
       /// 自定义中文字体，避免 Flutter 默认加载字体的方式导致短时间的乱码
       fontFamily: HarmonyOsSansSC,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: surface,
       appBarTheme: const AppBarTheme(
         backgroundColor: surface,
         foregroundColor: ink,
-        elevation: 0,
-        scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
-        centerTitle: false,
       ),
-      dividerTheme: DividerThemeData(color: hairline, thickness: 1, space: 1),
-      splashFactory: InkRipple.splashFactory,
-      hoverColor: canvas,
-      highlightColor: Colors.transparent,
-      splashColor: press,
       focusColor: accent.withValues(alpha: .10),
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(P.small)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
       progressIndicatorTheme: const ProgressIndicatorThemeData(
@@ -110,7 +97,7 @@ class SimpleExampleApp extends ConsumerWidget {
         color: accent,
       ),
       tooltipTheme: TooltipThemeData(
-        decoration: BoxDecoration(color: ink, borderRadius: BorderRadius.circular(6)),
+        decoration: BoxDecoration(color: ink, borderRadius: BorderRadius.circular(4)),
         textStyle: const TextStyle(fontSize: 12, color: Colors.white),
       ),
       dialogTheme: const DialogThemeData(backgroundColor: surface),

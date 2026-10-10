@@ -48,7 +48,10 @@ class Sqlite3Dao extends MainTableDaoBase<CommonDatabase> {
       db.select("SELECT COUNT(*) as c FROM $mainTable").first['c'];
 
   @override
-  Future<List<MainTableRow>> search(String value, Tokenizer tokenizer) async {
+  Future<SearchResult> search(String value, Tokenizer tokenizer) async {
+    final stopwatch = Stopwatch()..start();
+    final tokens =
+        '${db.select('SELECT ${tokenizer.queryFunctionName}(?) AS q', [value]).first['q']}';
     const wrapperSql = "'${ZeroWidth.start}', '${ZeroWidth.end}'";
     final resultSet = db.select('''
       SELECT 
@@ -59,7 +62,12 @@ class Sqlite3Dao extends MainTableDaoBase<CommonDatabase> {
       FROM $fts5Table 
       WHERE $fts5Table MATCH ${tokenizer.queryFunctionName}(?);
     ''', [value]);
-    return _toMainTableRows(resultSet);
+    stopwatch.stop();
+    return SearchResult(
+      rows: _toMainTableRows(resultSet),
+      tokens: tokens,
+      elapsed: stopwatch.elapsed,
+    );
   }
 
   @override

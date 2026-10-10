@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:sqlite3_simple_example/utils/padding.dart';
 
 class SearchInput extends StatefulWidget {
   final ValueChanged<String> onChanged;
   final String hintText;
 
-  const SearchInput({super.key, required this.onChanged, required this.hintText});
+  final ValueChanged<bool>? onFocusChanged;
+
+  const SearchInput({
+    super.key,
+    required this.onChanged,
+    required this.hintText,
+    this.onFocusChanged,
+  });
 
   @override
   State<SearchInput> createState() => _SearchInputState();
@@ -23,7 +29,10 @@ class _SearchInputState extends State<SearchInput> {
     _focusNode = FocusNode()
       ..addListener(() {
         final focused = _focusNode.hasFocus;
-        if (focused != _focused) setState(() => _focused = focused);
+        if (focused != _focused) {
+          setState(() => _focused = focused);
+          widget.onFocusChanged?.call(focused);
+        }
       });
     _controller = SearchController()
       ..addListener(() {
@@ -42,45 +51,32 @@ class _SearchInputState extends State<SearchInput> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return TapRegion(
-      onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-      child: SearchBar(
-        controller: _controller,
-        focusNode: _focusNode,
-        constraints: const BoxConstraints(minHeight: 48),
-        hintText: widget.hintText,
-        padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: P.extraSmall)),
-        leading: TextFieldTapRegion(
-          child: _Icon(icon: Icons.search, focused: _focused),
-        ),
-        trailing: [
-          if (_showClearBtn)
-            // 防止桌面端点击后搜索框失去焦点
-            TextFieldTapRegion(
-              child: Material(
-                type: MaterialType.transparency,
-                child: InkWell(
-                  canRequestFocus: false,
-                  onTap: _controller.clear,
-                  borderRadius: BorderRadius.circular(P.small),
-                  child: _Icon(icon: Icons.clear, focused: _focused),
-                ),
+    return SearchBar(
+      controller: _controller,
+      focusNode: _focusNode,
+      constraints: const BoxConstraints(minHeight: 44),
+      hintText: widget.hintText,
+      padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 4)),
+      leading: TextFieldTapRegion(child: _Icon(icon: Icons.search, focused: _focused)),
+      trailing: [
+        if (_showClearBtn)
+          TextFieldTapRegion(
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                canRequestFocus: false,
+                onTap: _controller.clear,
+                borderRadius: BorderRadius.circular(8),
+                child: _Icon(icon: Icons.clear, focused: _focused),
               ),
             ),
-        ],
-        elevation: const WidgetStatePropertyAll(0),
-        backgroundColor: WidgetStatePropertyAll(scheme.surfaceContainerLow),
-        overlayColor: const WidgetStatePropertyAll(Colors.transparent),
-        side: WidgetStateProperty.resolveWith(
-          (states) => BorderSide(
-            color: states.contains(WidgetState.focused) ? scheme.primary : Colors.transparent,
-            width: states.contains(WidgetState.focused) ? 1.5 : 0,
           ),
-        ),
-        shape: WidgetStatePropertyAll(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(P.small)),
-        ),
+      ],
+      elevation: const WidgetStatePropertyAll(0),
+      backgroundColor: const WidgetStatePropertyAll(Colors.transparent),
+      overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+      shape: const WidgetStatePropertyAll(
+        RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       ),
     );
   }
@@ -100,7 +96,7 @@ class _Icon extends StatelessWidget {
       curve: Curves.fastOutSlowIn,
       tween: ColorTween(end: focused ? scheme.primary : scheme.onSurface),
       builder: (context, color, _) =>
-          SizedBox.square(dimension: 42, child: Icon(icon, color: color)),
+          SizedBox.square(dimension: 36.0, child: Icon(icon, color: color, size: 22)),
     );
   }
 }

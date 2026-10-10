@@ -79,26 +79,32 @@ class DriftDao extends MainTableDaoBase<AppDatabase> {
   ];
 
   @override
-  Future<List<MainTableRow>> search(String value, Tokenizer tokenizer) async {
+  Future<SearchResult> search(String value, Tokenizer tokenizer) async {
+    final stopwatch = Stopwatch()..start();
+    final tokenExpr = switch (tokenizer) {
+      Tokenizer.simple => SimpleQuery(value),
+      Tokenizer.jieba => JiebaQuery(value),
+    };
+    final tokenRow = await db.selectExpressions([tokenExpr]).getSingle();
+    final tokens = '${tokenRow.read(tokenExpr)}';
+
     final query = fts5Table.selectOnly()
       ..addColumns(searchExprList)
-      ..where(
-        fts5Table.match(
-          switch (tokenizer) {
-            Tokenizer.simple => SimpleQuery(value),
-            Tokenizer.jieba => JiebaQuery(value)
-          },
-        ),
-      );
+      ..where(fts5Table.match(tokenExpr));
     final result = await query.get();
-    return result
-        .map((it) => MainTableRow(
-              id: it.read(idExpr)!,
-              title: it.read(titleExpr)!,
-              content: it.read(contentExpr)!,
-              insertDate: it.read(insertDateExpr)!,
-            ))
-        .toList();
+    stopwatch.stop();
+    return SearchResult(
+      rows: result
+          .map((it) => MainTableRow(
+                id: it.read(idExpr)!,
+                title: it.read(titleExpr)!,
+                content: it.read(contentExpr)!,
+                insertDate: it.read(insertDateExpr)!,
+              ))
+          .toList(),
+      tokens: tokens,
+      elapsed: stopwatch.elapsed,
+    );
   }
 
   @override

@@ -8,6 +8,7 @@ import 'data/main_table_dao.dart';
 import 'data/main_table_row.dart';
 import 'data/modifiable_notifier.dart';
 import 'data/pinyin_dict_kind.dart';
+import 'utils/ui_label.dart';
 
 /// 搜索文本
 final searchQueryProvider = mutable<String>("");
@@ -20,29 +21,24 @@ final indexRebuildDurationProvider = mutable<Duration?>(null);
 
 /// 分词器
 final tokenizerProvider = mutable<Tokenizer>(Tokenizer.jieba);
-const tokenizer2uiString = {Tokenizer.jieba: "结巴", Tokenizer.simple: "Simple"};
-const tokenizer2tooltip = {
-  Tokenizer.jieba: "jieba_query：结巴分词",
-  Tokenizer.simple: "simple_query：Simple 分词",
+const tokenizer2uiLabel = {
+  Tokenizer.jieba: UiLabel("结巴"),
+  Tokenizer.simple: UiLabel("Simple"),
 };
 
 /// [DbManager] 具体实现。
 ///  - 非 Web 平台： `data\impl\kind.dart`；
 ///  - Web 平台：`data\impl_web\kind.dart`。
-final dbManagerKindProvider = mutable(dbManagerKind2uiString.keys.first);
-final dbManagerKind2uiString = {
-  for (final t in DbManagerKind.values) t: t.name,
+final dbManagerKindProvider = mutable(dbManagerKind2uiLabel.keys.first);
+final dbManagerKind2uiLabel = {
+  for (final t in DbManagerKind.values) t: UiLabel(t.name),
 };
 
 /// 拼音文件
 final pinyinDictKindProvider = mutable(PinyinDictKind.bundled);
-const pinyinDictKind2uiString = {
-  PinyinDictKind.bundled: "内置 (zdic.txt)",
-  PinyinDictKind.simpleDefault: "原 Simple 扩展内置",
-};
-const pinyinDictKind2tooltip = {
-  PinyinDictKind.bundled: "sqlite3_simple 自行维护的内置拼音文件",
-  PinyinDictKind.simpleDefault: "原 Simple 扩展内置的拼音文件，包含较多不常见古音",
+const pinyinDictKind2uiLabel = {
+  PinyinDictKind.bundled: UiLabel("内置 (zdic.txt)", "内置"),
+  PinyinDictKind.simpleDefault: UiLabel("原 Simple 扩展内置", "原扩展"),
 };
 
 class _DbBootstrapResult {
@@ -69,10 +65,13 @@ class _DbBootstrapNotifier extends AsyncNotifier<_DbBootstrapResult> {
 
 /// [DbManager] 数据库管理类
 final dbManagerProvider = AsyncNotifierProvider(DbManagerNotifier.new);
+
 class DbManagerNotifier extends AsyncNotifier<DbManager> {
   @override
   Future<DbManager> build() async {
-    final _DbBootstrapResult(:dbManager, :pinyinDictKind2path) = await ref.watch(_dbBootstrapProvider.future);
+    final _DbBootstrapResult(:dbManager, :pinyinDictKind2path) = await ref.watch(
+      _dbBootstrapProvider.future,
+    );
     final dao = dbManager.dao;
 
     /// 切换拼音文件
@@ -100,15 +99,27 @@ class SearchResult {
   /// 走 FTS5 `MATCH` 时使用的分词器；列出全部时为 `null`
   final Tokenizer? tokenizer;
 
-  /// 查询耗时
+  /// 查询耗时（空查询时 UI 显示为 —）
   final Duration elapsed;
+
+  /// 分词函数原始输出；空查询时为空串，UI 显示为 —
+  final String tokens;
+
+  /// 主表总行数
+  final int totalCount;
 
   const SearchResult({
     required this.rows,
     required this.query,
     required this.tokenizer,
     required this.elapsed,
+    required this.tokens,
+    required this.totalCount,
   });
+
+  bool get hasQuery => query.isNotEmpty;
+
+  int get matchCount => rows.length;
 }
 
 /// 搜索结果
@@ -122,13 +133,22 @@ final searchResultProvider = FutureProvider<SearchResult?>((ref) async {
 
   final dao = dbManager.dao;
   final actualQuery = query.trim();
-  final stopwatch = Stopwatch()..start();
-  final rows = actualQuery.isEmpty
-      ? await dao.selectAll()
-      : await dao.search(actualQuery, tokenizer);
-  stopwatch.stop();
+  final List<MainTableRow> rows;
+  final String tokens;
+  final Duration elapsed;
+  if (actualQuery.isEmpty) {
+    rows = await dao.selectAll();
+    tokens = '';
+    elapsed = Duration.zero;
+  } else {
+    final hits = await dao.search(actualQuery, tokenizer);
+    rows = hits.rows;
+    tokens = hits.tokens;
+    elapsed = hits.elapsed;
+  }
 
-  final idDigitLength = "${await dao.selectCount()}".length;
+  final totalCount = await dao.selectCount();
+  final idDigitLength = "$totalCount".length;
   return SearchResult(
     rows: rows
         .map(
@@ -143,23 +163,16 @@ final searchResultProvider = FutureProvider<SearchResult?>((ref) async {
         .toList(),
     query: actualQuery,
     tokenizer: actualQuery.isEmpty ? null : tokenizer,
-    elapsed: stopwatch.elapsed,
+    elapsed: elapsed,
+    tokens: tokens,
+    totalCount: totalCount,
   );
 });
 
-/// 重新生成全部随机数据（同时测试触发器）
+/// 重新生成随机数据（同时测试触发器）
 Future<void> refreshDbData(WidgetRef ref) async {
   final dbManager = await ref.read(dbManagerProvider.future);
   await dbManager.dao.updateAll();
-  ref.invalidate(mainTableCountProvider);
-  ref.invalidate(searchResultProvider);
-  await ref.read(searchResultProvider.future);
-}
-
-/// 追加 [length] 行随机数据
-Future<void> appendRandomData(WidgetRef ref, int length) async {
-  final dbManager = await ref.read(dbManagerProvider.future);
-  await dbManager.dao.insertRandomData(length);
   ref.invalidate(mainTableCountProvider);
   ref.invalidate(searchResultProvider);
   await ref.read(searchResultProvider.future);

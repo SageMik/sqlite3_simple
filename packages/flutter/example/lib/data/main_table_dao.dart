@@ -13,6 +13,18 @@ enum Tokenizer {
   const Tokenizer(this.queryFunctionName);
 }
 
+class SearchResult {
+  final List<MainTableRow> rows;
+  final String tokens;
+  final Duration elapsed;
+
+  const SearchResult({
+    required this.rows,
+    required this.tokens,
+    required this.elapsed,
+  });
+}
+
 abstract interface class MainTableDao {
   /// 插入 [length] 行随机中文词组数据
   Future<void> insertRandomData(int length);
@@ -24,7 +36,7 @@ abstract interface class MainTableDao {
   Future<int> selectCount();
 
   /// 根据 [value] 和 指定分词器 [tokenizer] 搜索， [tokenizer] 取值：[Tokenizer.jieba], [Tokenizer.simple]
-  Future<List<MainTableRow>> search(String value, Tokenizer tokenizer);
+  Future<SearchResult> search(String value, Tokenizer tokenizer);
 
   /// 更换拼音文件为 [newPath] 路径所指向的文件，并重建 FTS5 的索引。[newPath] 为空时使用内置拼音文件
   Future<void> updatePinyinDict(String newPath);

@@ -90,7 +90,13 @@ class SqfliteCommonFfiDao extends MainTableDaoBase<Database> {
       (await db.query(mainTable, columns: ["COUNT(*) as c"])).first["c"] as int;
 
   @override
-  Future<List<MainTableRow>> search(String value, Tokenizer tokenizer) async {
+  Future<SearchResult> search(String value, Tokenizer tokenizer) async {
+    final stopwatch = Stopwatch()..start();
+    final tokenRows = await db.rawQuery(
+      'SELECT ${tokenizer.queryFunctionName}(?) AS q',
+      [value],
+    );
+    final tokens = '${tokenRows.first['q']}';
     const wrapperSql = "'${ZeroWidth.start}', '${ZeroWidth.end}'";
     final result = await db.query(
       fts5Table,
@@ -103,7 +109,12 @@ class SqfliteCommonFfiDao extends MainTableDaoBase<Database> {
       where: "$fts5Table MATCH ${tokenizer.queryFunctionName}(?)",
       whereArgs: [value],
     );
-    return _toMainTableRows(result);
+    stopwatch.stop();
+    return SearchResult(
+      rows: _toMainTableRows(result),
+      tokens: tokens,
+      elapsed: stopwatch.elapsed,
+    );
   }
 
   @override

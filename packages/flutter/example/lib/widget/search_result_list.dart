@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../data/main_table_row.dart';
-import '../utils/padding.dart';
 import 'highlight_text_span_builder.dart';
 
 typedef OnItemTap = void Function(BuildContext context, MainTableRowUiModel row);
@@ -35,13 +34,13 @@ class SearchResultList extends StatelessWidget {
             splashFactory: InkRipple.splashFactory,
             child: Padding(
               padding: const EdgeInsets.only(
-                left: P.middle,
-                right: P.middle,
-                top: P.extraSmall,
-                bottom: P.extraSmall,
+                left: 16,
+                right: 16,
+                top: 4,
+                bottom: 4,
               ),
               child: Row(
-                spacing: P.small,
+                spacing: 8,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(

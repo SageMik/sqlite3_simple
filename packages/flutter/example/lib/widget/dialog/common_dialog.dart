@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../utils/padding.dart';
 
 /// 通用对话框
 class CommonDialog extends StatelessWidget {
@@ -20,7 +19,7 @@ class CommonDialog extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final rounded = MediaQuery.sizeOf(context).width > width;
     final borderRadius = rounded
-        ? BorderRadius.circular(P.small)
+        ? BorderRadius.circular(8)
         : BorderRadius.zero;
     return AlertDialog(
       insetPadding: const EdgeInsets.all(0),
@@ -28,19 +27,19 @@ class CommonDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: borderRadius),
       content: Container(
         width: width,
-        padding: const EdgeInsets.all(P.middle),
+        padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             child,
-            const SizedBox(height: P.middle),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(),
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(P.small),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 backgroundColor: colorScheme.primary,
                 foregroundColor: colorScheme.onPrimary,

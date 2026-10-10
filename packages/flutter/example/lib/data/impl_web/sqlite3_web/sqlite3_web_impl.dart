@@ -143,7 +143,13 @@ class Sqlite3WebDao extends MainTableDaoBase<Database> {
   }
 
   @override
-  Future<List<MainTableRow>> search(String value, Tokenizer tokenizer) async {
+  Future<SearchResult> search(String value, Tokenizer tokenizer) async {
+    final stopwatch = Stopwatch()..start();
+    final tokenResult = await db.select(
+      'SELECT ${tokenizer.queryFunctionName}(?) AS q',
+      parameters: [value],
+    );
+    final tokens = '${tokenResult.result.first['q']}';
     const wrapperSql = "'${ZeroWidth.start}', '${ZeroWidth.end}'";
     final resultSet = await db.select(
       '''
@@ -157,7 +163,12 @@ class Sqlite3WebDao extends MainTableDaoBase<Database> {
     ''',
       parameters: [value],
     );
-    return _toMainTableRows(resultSet.result);
+    stopwatch.stop();
+    return SearchResult(
+      rows: _toMainTableRows(resultSet.result),
+      tokens: tokens,
+      elapsed: stopwatch.elapsed,
+    );
   }
 
   @override

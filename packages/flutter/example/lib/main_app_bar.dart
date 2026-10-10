@@ -5,7 +5,6 @@ import 'package:sqlite3_simple_example/widget/dialog/usage_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'main_provider.dart';
-import 'utils/padding.dart';
 
 class SimpleExampleAppBar extends AppBar {
   SimpleExampleAppBar({super.key})
@@ -37,7 +36,7 @@ class SimpleExampleAppBar extends AppBar {
             icon: const FaIcon(FontAwesomeIcons.github, size: 20),
           ),
         ],
-        actionsPadding: const EdgeInsetsDirectional.only(end: P.middle),
+        actionsPadding: const EdgeInsetsDirectional.only(end: 16),
       );
 }
 
@@ -62,7 +61,7 @@ class _Title extends StatelessWidget {
             style: TextStyle(color: scheme.onPrimary, fontSize: 20, height: 1, fontWeight: FontWeight.bold),
           ),
         ),
-        const SizedBox(width: P.small),
+        const SizedBox(width: 8),
         Expanded(
           child: Align(
             alignment: Alignment.centerLeft,
