@@ -720,7 +720,12 @@ class $T1TableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<T1, T1Data>(table),
+                  BaseReferences<_$AppDatabase, T1, T1Data>(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -889,7 +894,16 @@ class $$MainTableTableManager
                 insertDate: insertDate,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$MainTable, MainData>(table),
+                  BaseReferences<_$AppDatabase, $MainTable, MainData>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),

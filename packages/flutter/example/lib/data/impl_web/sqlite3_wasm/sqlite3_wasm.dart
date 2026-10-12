@@ -14,7 +14,7 @@ import '../../main_table_row.dart';
 import '../../main_table_schema.dart';
 import '../../pinyin_dict_kind.dart';
 import '../fetch.dart';
-import 'main_table_row_marshaler.dart';
+import 'marshaler.dart';
 import 'sqlite3_wasm.activator.g.dart';
 
 part 'sqlite3_wasm.worker.g.dart';

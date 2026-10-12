@@ -28,22 +28,24 @@ extension MainTableRowSquadronMarshaling on MainTableRow {
 }
 
 /// [SearchResult] 的 Web Worker 传输序列化：`[tokens, rows, elapsedMicros]`
-extension FtsSearchResultSquadronMarshaling on SearchResult {
-  List<dynamic> marshal(List Function(List<MainTableRow>) marshalRows) =>
-      <dynamic>[tokens, marshalRows(rows), elapsed.inMicroseconds];
+extension SearchResultSquadronMarshaling on SearchResult {
+  List<dynamic> marshal() => <dynamic>[
+        tokens,
+        [for (final row in rows) row.marshal()],
+        elapsed.inMicroseconds,
+      ];
 
-  static SearchResult unmarshal(
-    List data,
-    List<MainTableRow> Function(dynamic) unmarshalRows, [
-    MarshalingContext? context,
-  ]) {
+  static SearchResult unmarshal(List data, [MarshalingContext? context]) {
     final tokens =
         context?.converter.value<String>()(data[0]) ?? data[0] as String;
     final elapsedMicros =
         context?.converter.value<int>()(data[2]) ?? data[2] as int;
     return SearchResult(
       tokens: tokens,
-      rows: unmarshalRows(data[1]),
+      rows: [
+        for (final row in data[1] as List)
+          MainTableRowSquadronMarshaling.unmarshal(row as List, context),
+      ],
       elapsed: Duration(microseconds: elapsedMicros),
     );
   }

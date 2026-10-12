@@ -47,14 +47,14 @@ extension on Sqlite3Wasm {
       } finally {}
       try {
         final $sr = _$Ser(contextAware: false);
-        return $sr.$7($res);
+        return $sr.$2($res);
       } finally {}
     },
     _$selectAllId: ($req) async {
       final List<MainTableRow> $res = await selectAll();
       try {
         final $sr = _$Ser(contextAware: false);
-        return $sr.$3($res);
+        return $sr.$4($res);
       } finally {}
     },
     _$selectCountId: ($req) => selectCount(),
@@ -79,7 +79,7 @@ mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
   @override
   Future<void> initWithJiebaDict(Map<JiebaDictType, String> jiebaDictPath2Url) {
     final $sr = _$Ser(contextAware: false);
-    return send(_$initWithJiebaDictId, args: [$sr.$5(jiebaDictPath2Url)]);
+    return send(_$initWithJiebaDictId, args: [$sr.$6(jiebaDictPath2Url)]);
   }
 
   @override
@@ -100,11 +100,11 @@ mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
     final dynamic $res;
     try {
       final $sr = _$Ser(contextAware: false);
-      $res = await send(_$searchId, args: [value, $sr.$6(tokenizer)]);
+      $res = await send(_$searchId, args: [value, $sr.$7(tokenizer)]);
     } finally {}
     try {
       final $dsr = _$Deser(contextAware: true);
-      return $dsr.$9($res);
+      return $dsr.$7($res);
     } finally {}
   }
 
@@ -113,7 +113,7 @@ mixin _$Sqlite3Wasm$Invoker on Invoker implements Sqlite3Wasm {
     final dynamic $res = await send(_$selectAllId);
     try {
       final $dsr = _$Deser(contextAware: true);
-      return $dsr.$8($res);
+      return $dsr.$9($res);
     } finally {}
   }
 
@@ -318,13 +318,9 @@ final class _$Deser extends MarshalingContext {
   late final $4 = (($) => Tokenizer.values[$0($)]);
   late final $5 = (($) => PinyinDictKind.values[$0($)]);
   late final $6 = map<PinyinDictKind, String>(kcast: $5, vcast: $2);
-  late final $7 = (($) => MainTableRowSquadronMarshaling.unmarshal($, this));
-  late final $8 = list<MainTableRow>($7);
-  late final $9 = (($) => FtsSearchResultSquadronMarshaling.unmarshal(
-        $,
-        $8,
-        this,
-      ));
+  late final $7 = (($) => SearchResultSquadronMarshaling.unmarshal($, this));
+  late final $8 = (($) => MainTableRowSquadronMarshaling.unmarshal($, this));
+  late final $9 = list<MainTableRow>($8);
 }
 
 final class _$Ser extends MarshalingContext {
@@ -332,12 +328,11 @@ final class _$Ser extends MarshalingContext {
   late final $0 = (($) => ($ as PinyinDictKind).index);
   late final $1 = map(kcast: $0);
   late final $2 = (($) =>
+      SearchResultSquadronMarshaling($ as SearchResult).marshal());
+  late final $3 = (($) =>
       MainTableRowSquadronMarshaling($ as MainTableRow).marshal());
-  late final $3 = list($2);
-  late final $4 = (($) => ($ as JiebaDictType).index);
-  late final $5 = map(kcast: $4);
-  late final $6 = (($) => ($ as Tokenizer).index);
-  late final $7 = (($) => FtsSearchResultSquadronMarshaling(
-        $ as SearchResult,
-      ).marshal($3));
+  late final $4 = list($3);
+  late final $5 = (($) => ($ as JiebaDictType).index);
+  late final $6 = map(kcast: $5);
+  late final $7 = (($) => ($ as Tokenizer).index);
 }
