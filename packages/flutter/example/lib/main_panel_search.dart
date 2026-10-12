@@ -82,51 +82,50 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
         Expanded(
           child: Consumer(
             builder: (context, ref, _) {
-              return ref
-                  .watch(searchResultProvider)
-                  .when(
-                    skipLoadingOnRefresh: true,
-                    skipLoadingOnReload: true,
-                    data: (results) {
-                      return Listener(
-                        onPointerDown: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                        child: Column(
-                          spacing: 16,
-                          children: [
-                            SearchStatsBar(
-                              hasQuery: results?.hasQuery ?? false,
-                              matchCount: results?.matchCount ?? 0,
-                              elapsed: results?.elapsed ?? Duration.zero,
-                              totalCount: results?.totalCount,
-                              tokens: results?.tokens ?? '',
-                            ),
-                            Expanded(
-                              child: results == null
-                                  ? const Center(child: CircularProgressIndicator())
-                                  : SearchResultList(
-                                      items: results.rows,
-                                      onItemTap: (context, row) {
-                                        showDialog(
-                                          context: context,
-                                          builder: (context) => SearchResultDialog(row),
-                                        );
-                                      },
-                                    ),
-                            ),
-                          ],
+              final searchResult = ref.watch(searchResultProvider);
+              return searchResult.when(
+                skipLoadingOnRefresh: true,
+                skipLoadingOnReload: true,
+                data: (results) {
+                  return Listener(
+                    onPointerDown: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                    child: Column(
+                      spacing: 16,
+                      children: [
+                        SearchStatsBar(
+                          hasQuery: results?.hasQuery ?? false,
+                          matchCount: results?.matchCount ?? 0,
+                          elapsed: results?.elapsed ?? Duration.zero,
+                          totalCount: results?.totalCount,
+                          tokens: results?.tokens ?? '',
                         ),
-                      );
-                    },
-                    loading: () => const SizedBox.shrink(),
-                    error: (error, stack) => Container(
-                      height: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      width: double.infinity,
-                      child: SingleChildScrollView(
-                        child: SelectionArea(child: Text('错误: $error\n\n堆栈：$stack')),
-                      ),
+                        Expanded(
+                          child: results == null
+                              ? const Center(child: CircularProgressIndicator())
+                              : SearchResultList(
+                                  items: results.rows,
+                                  onItemTap: (context, row) {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => SearchResultDialog(row),
+                                    );
+                                  },
+                                ),
+                        ),
+                      ],
                     ),
                   );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (error, stack) => Container(
+                  height: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  width: double.infinity,
+                  child: SingleChildScrollView(
+                    child: SelectionArea(child: Text('错误: $error\n\n堆栈：$stack')),
+                  ),
+                ),
+              );
             },
           ),
         ),
@@ -146,25 +145,27 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final radius = BorderRadius.circular(8);
-    return ValueListenableBuilder<bool>(
-      valueListenable: inputFocused,
-      builder: (context, focused, child) => AnimatedContainer(
-        duration: kThemeChangeDuration,
-        curve: Curves.fastOutSlowIn,
-        decoration: BoxDecoration(
-          borderRadius: radius,
-          border: Border.all(color: focused ? scheme.primary : Colors.transparent, width: 1.5),
+    return TextFieldTapRegion(
+      child: ValueListenableBuilder<bool>(
+        valueListenable: inputFocused,
+        builder: (context, focused, child) => AnimatedContainer(
+          duration: kThemeChangeDuration,
+          curve: Curves.fastOutSlowIn,
+          decoration: BoxDecoration(
+            borderRadius: radius,
+            border: Border.all(color: focused ? scheme.primary : Colors.transparent, width: 1.5),
+          ),
+          child: child,
         ),
-        child: child,
-      ),
-      child: ClipRRect(
-        borderRadius: radius,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ColoredBox(color: scheme.surfaceContainerLow, child: input),
-            options,
-          ],
+        child: ClipRRect(
+          borderRadius: radius,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ColoredBox(color: scheme.surfaceContainerLow, child: input),
+              options,
+            ],
+          ),
         ),
       ),
     );

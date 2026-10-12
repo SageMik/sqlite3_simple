@@ -30,74 +30,70 @@ class _SearchOptionsState extends State<SearchOptions> with SingleTickerProvider
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final edge = BorderSide(color: scheme.surfaceContainerLow);
-    return Listener(
-      onPointerDown: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: scheme.surface,
-          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
-          border: Border(left: edge, right: edge, bottom: edge),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {
-                FocusManager.instance.primaryFocus?.unfocus();
-                if (_expandController.isCompleted) {
-                  _expandController.reverse();
-                } else {
-                  _expandController.forward();
-                }
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Row(
-                  spacing: 8,
-                  children: [
-                    Text('选项', style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
-                    Expanded(
-                      child: Wrap(
-                        alignment: WrapAlignment.end,
-                        spacing: 4,
-                        runSpacing: 8,
-                        children: [for (final row in widget.rows) _BadgePill(label: row.pillLabel)],
-                      ),
-                    ),
-                    RotationTransition(
-                      turns: Tween(begin: 0.0, end: 0.5).animate(_expandAnimation),
-                      child: Icon(
-                        Icons.keyboard_arrow_down,
-                        size: 18,
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizeTransition(
-              sizeFactor: _expandAnimation,
-              alignment: Alignment.topCenter,
-              child: Column(
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
+        border: Border(left: edge, right: edge, bottom: edge),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              if (_expandController.isCompleted) {
+                _expandController.reverse();
+              } else {
+                _expandController.forward();
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                spacing: 8,
                 children: [
-                  Divider(height: 1, color: edge.color),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
+                  Text('选项', style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
+                  Expanded(
+                    child: Wrap(
+                      alignment: WrapAlignment.end,
+                      spacing: 4,
+                      runSpacing: 8,
+                      children: [for (final row in widget.rows) _BadgePill(label: row.pillLabel)],
                     ),
-                    child: Table(
-                      columnWidths: const {0: IntrinsicColumnWidth(), 1: FlexColumnWidth()},
-                      children: widget.rows,
+                  ),
+                  RotationTransition(
+                    turns: Tween(begin: 0.0, end: 0.5).animate(_expandAnimation),
+                    child: Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 18,
+                      color: scheme.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+          SizeTransition(
+            sizeFactor: _expandAnimation,
+            alignment: Alignment.topCenter,
+            child: Column(
+              children: [
+                Divider(height: 1, color: edge.color),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  child: Table(
+                    columnWidths: const {0: IntrinsicColumnWidth(), 1: FlexColumnWidth()},
+                    children: widget.rows,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
