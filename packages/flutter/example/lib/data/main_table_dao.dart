@@ -2,6 +2,7 @@ import 'dart:math';
 
 import '../utils/random_words.dart';
 import 'main_table_row.dart';
+import 'search_result.dart';
 
 enum Tokenizer {
   jieba("jieba_query"),
@@ -11,18 +12,6 @@ enum Tokenizer {
   final String queryFunctionName;
 
   const Tokenizer(this.queryFunctionName);
-}
-
-class SearchResult {
-  final List<MainTableRow> rows;
-  final String tokens;
-  final Duration elapsed;
-
-  const SearchResult({
-    required this.rows,
-    required this.tokens,
-    required this.elapsed,
-  });
 }
 
 abstract interface class MainTableDao {

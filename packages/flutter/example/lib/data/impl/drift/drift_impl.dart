@@ -9,6 +9,7 @@ import 'package:sqlite3_simple/sqlite3_simple.dart';
 import '../../../utils/zero_width.dart';
 import '../../main_table_dao.dart';
 import '../../main_table_row.dart';
+import '../../search_result.dart';
 import '../../db_manager.dart';
 import '../pinyin_dict.dart';
 import 'expression/custom.dart';

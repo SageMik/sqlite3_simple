@@ -21128,10 +21128,9 @@
       t2.bindLinearMemory$1(t1);
     },
     createImportObject$0() {
-      var a = this.super$WasmModuleLoader$createImportObject();
-      a.wasi_snapshot_preview1 = new A.DefaultSimpleWasmModuleLoader_createImportObject_closure(this).call$0();
-      A._asJSObject(init.G.console).log(a);
-      return a;
+      var t1 = this.super$WasmModuleLoader$createImportObject();
+      t1.wasi_snapshot_preview1 = new A.DefaultSimpleWasmModuleLoader_createImportObject_closure(this).call$0();
+      return t1;
     },
     instantiateModule$1(response) {
       var $async$goto = 0,

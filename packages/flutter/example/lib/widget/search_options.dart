@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../utils/ui_label.dart';
-import 'chip_radio_group.dart';
 
 class SearchOptions extends StatefulWidget {
   final List<SearchOptionRow> rows;
@@ -81,10 +80,7 @@ class _SearchOptionsState extends State<SearchOptions> with SingleTickerProvider
               children: [
                 Divider(height: 1, color: edge.color),
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Table(
                     columnWidths: const {0: IntrinsicColumnWidth(), 1: FlexColumnWidth()},
                     children: widget.rows,
@@ -108,18 +104,14 @@ class _BadgePill extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color: const Color(0xFFEFEEFF),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         label,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
-          color: scheme.primary,
-        ),
+        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: scheme.primary),
       ),
     );
   }
@@ -151,14 +143,77 @@ class SearchOptionRow<T extends Object> extends TableRow {
              verticalAlignment: TableCellVerticalAlignment.middle,
              child: Padding(
                padding: const EdgeInsets.symmetric(vertical: 4),
-               child: ChipRadioGroup<T>(
-                 value: value,
-                 options: options,
-                 onSelect: onChanged,
-                 fontSize: 11,
-               ),
+               child: _OptionChips<T>(value: value, options: options, onSelect: onChanged),
              ),
            ),
          ],
        );
+}
+
+class _OptionChips<T> extends StatelessWidget {
+  final T value;
+  final Map<T, UiLabel> options;
+  final ValueChanged<T> onSelect;
+  final double fontSize;
+
+  const _OptionChips({
+    super.key,
+    required this.value,
+    required this.options,
+    required this.onSelect,
+    this.fontSize = 11,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    const selectedWeight = FontWeight.bold;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: options.entries.map((e) {
+              final label = e.value.full;
+              final isSelected = value == e.key;
+              return Material(
+                color: isSelected ? scheme.primary : scheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () => onSelect(e.key),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Opacity(
+                          // 加粗字体占位避免宽度变化
+                          opacity: 0,
+                          child: Text(
+                            label,
+                            style: TextStyle(fontSize: fontSize, fontWeight: selectedWeight),
+                          ),
+                        ),
+                        Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: fontSize,
+                            fontWeight: isSelected ? selectedWeight : null,
+                            color: isSelected ? scheme.onPrimary : scheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
 }

@@ -1,7 +1,7 @@
 import 'package:squadron/squadron.dart';
 
-import '../../main_table_dao.dart';
 import '../../main_table_row.dart';
+import '../../search_result.dart';
 
 /// [MainTableRow] 的 Web Worker 传输序列化
 extension MainTableRowSquadronMarshaling on MainTableRow {

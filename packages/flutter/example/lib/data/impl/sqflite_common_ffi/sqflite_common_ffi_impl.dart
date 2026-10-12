@@ -9,6 +9,7 @@ import '../../../utils/zero_width.dart';
 import '../../db_manager.dart';
 import '../../main_table_dao.dart';
 import '../../main_table_row.dart';
+import '../../search_result.dart';
 import '../../main_table_schema.dart';
 import '../pinyin_dict.dart';
 

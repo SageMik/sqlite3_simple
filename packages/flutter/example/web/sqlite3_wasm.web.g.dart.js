@@ -7212,11 +7212,6 @@
       this.index = t1;
       this._core$_name = t2;
     },
-    SearchResult: function SearchResult(t0, t1, t2) {
-      this.rows = t0;
-      this.tokens = t1;
-      this.elapsed = t2;
-    },
     MainTableDaoBase: function MainTableDaoBase() {
     },
     MainTableRow: function MainTableRow(t0, t1, t2, t3) {
@@ -7230,6 +7225,11 @@
       this.assetName = t0;
       this.index = t1;
       this._core$_name = t2;
+    },
+    SearchResult: function SearchResult(t0, t1, t2) {
+      this.rows = t0;
+      this.tokens = t1;
+      this.elapsed = t2;
     },
     bootstrap(initializer, command) {
       var transfer, _this, message,
@@ -16548,7 +16548,6 @@
       return "Tokenizer." + this._core$_name;
     }
   };
-  A.SearchResult.prototype = {};
   A.MainTableDaoBase.prototype = {};
   A.MainTableRow.prototype = {};
   A.PinyinDictKind.prototype = {
@@ -16556,6 +16555,7 @@
       return "PinyinDictKind." + this._core$_name;
     }
   };
+  A.SearchResult.prototype = {};
   A.bootstrap_closure0.prototype = {
     call$1(r) {
       var t1;
@@ -19030,7 +19030,7 @@
       _inherit = hunkHelpers.inherit,
       _inheritMany = hunkHelpers.inheritMany;
     _inherit(A.Object, null);
-    _inheritMany(A.Object, [A.JS_CONST, J.Interceptor, A.SafeToStringHook, J.ArrayIterator, A.Iterable, A.CastIterator, A.MapBase, A.Closure, A.Error, A.SentinelValue, A.ListIterator, A.MappedIterator, A.WhereIterator, A.SkipIterator, A.EmptyIterator, A.FixedLengthListMixin, A.Symbol, A._Record, A.MapView, A.ConstantMap, A._KeysOrValuesOrElementsIterator, A.JSInvocationMirror, A.TypeErrorDecoder, A.NullThrownFromJavaScriptException, A.ExceptionAndStackTrace, A._StackTrace, A._Required, A.LinkedHashMapCell, A.LinkedHashMapKeyIterator, A.LinkedHashMapValueIterator, A.LinkedHashMapEntryIterator, A.JSSyntaxRegExp, A._MatchImplementation, A._AllMatchesIterator, A.StringMatch, A._StringAllMatchesIterator, A._Cell, A._UnmodifiableNativeByteBufferView, A.Rti, A._FunctionParameters, A._Type, A._TimerImpl, A._AsyncAwaitCompleter, A._SyncStarIterator, A.AsyncError, A._Completer, A._FutureListener, A._Future, A._AsyncCallbackEntry, A._StreamIterator, A._Zone, A._HashMapKeyIterator, A.SetBase, A._LinkedHashSetCell, A._LinkedHashSetIterator, A.ListBase, A._MapBaseValueIterator, A._UnmodifiableMapMixin, A.Codec, A.Converter, A._JsonStringifier, A._JsonPrettyPrintMixin, A._Utf8Encoder, A._Utf8Decoder, A._BigIntImpl, A._FinalizationRegistryWrapper, A.DateTime, A.Duration, A._Enum, A.OutOfMemoryError, A.StackOverflowError, A._Exception, A.FormatException, A.IntegerDivisionByZeroException, A.MapEntry, A.Null, A._StringStackTrace, A.Stopwatch, A.StringBuffer, A._Uri, A.UriData, A._SimpleUri, A.Expando, A.NullRejectionException, A._JSRandom, A._JSSecureRandom, A.CancelationToken, A.Clock, A.NonGrowableListMixin, A.UnmodifiableMapMixin, A.LogEvent, A.LogFilter, A.LogOutput, A.LogPrinter, A.Logger, A.OutputEvent, A.SqliteException, A.DatabaseImplementation, A.Sqlite3Implementation, A.CommonPreparedStatement, A.VirtualFileSystem, A.BaseVfsFile, A.Cursor, A._Row_Object_UnmodifiableMapMixin, A._ResultIterator, A.IndexedParameters, A.VfsException, A.Sqlite3Filename, A.WasmSqliteBindings, A.WasmDatabase, A.WasmStatementCompiler, A.WasmStatement, A.WasmContext, A.WasmValue, A.DartBridgeCallbacks, A.WasmModuleLoader, A.WasmBindings, A.SimpleBridgeCallbacks, A._EmptyInstance, A._MemoryFromJsToWasd, A.IDbManager, A.MainTableDaoBase, A.MarshalingContext, A.SearchResult, A.MainTableRow, A._WebWorkerChannel, A.WorkerRunner, A.Converter0, A.LazyInPlaceList, A.LazyInPlaceMap, A.SerializationContext, A.SquadronException, A.CancelationTokenReference, A.WASI0, A.WASI, A.WASI1, A._MemoryView, A._VirtualOpenFile, A.ImportExportValue]);
+    _inheritMany(A.Object, [A.JS_CONST, J.Interceptor, A.SafeToStringHook, J.ArrayIterator, A.Iterable, A.CastIterator, A.MapBase, A.Closure, A.Error, A.SentinelValue, A.ListIterator, A.MappedIterator, A.WhereIterator, A.SkipIterator, A.EmptyIterator, A.FixedLengthListMixin, A.Symbol, A._Record, A.MapView, A.ConstantMap, A._KeysOrValuesOrElementsIterator, A.JSInvocationMirror, A.TypeErrorDecoder, A.NullThrownFromJavaScriptException, A.ExceptionAndStackTrace, A._StackTrace, A._Required, A.LinkedHashMapCell, A.LinkedHashMapKeyIterator, A.LinkedHashMapValueIterator, A.LinkedHashMapEntryIterator, A.JSSyntaxRegExp, A._MatchImplementation, A._AllMatchesIterator, A.StringMatch, A._StringAllMatchesIterator, A._Cell, A._UnmodifiableNativeByteBufferView, A.Rti, A._FunctionParameters, A._Type, A._TimerImpl, A._AsyncAwaitCompleter, A._SyncStarIterator, A.AsyncError, A._Completer, A._FutureListener, A._Future, A._AsyncCallbackEntry, A._StreamIterator, A._Zone, A._HashMapKeyIterator, A.SetBase, A._LinkedHashSetCell, A._LinkedHashSetIterator, A.ListBase, A._MapBaseValueIterator, A._UnmodifiableMapMixin, A.Codec, A.Converter, A._JsonStringifier, A._JsonPrettyPrintMixin, A._Utf8Encoder, A._Utf8Decoder, A._BigIntImpl, A._FinalizationRegistryWrapper, A.DateTime, A.Duration, A._Enum, A.OutOfMemoryError, A.StackOverflowError, A._Exception, A.FormatException, A.IntegerDivisionByZeroException, A.MapEntry, A.Null, A._StringStackTrace, A.Stopwatch, A.StringBuffer, A._Uri, A.UriData, A._SimpleUri, A.Expando, A.NullRejectionException, A._JSRandom, A._JSSecureRandom, A.CancelationToken, A.Clock, A.NonGrowableListMixin, A.UnmodifiableMapMixin, A.LogEvent, A.LogFilter, A.LogOutput, A.LogPrinter, A.Logger, A.OutputEvent, A.SqliteException, A.DatabaseImplementation, A.Sqlite3Implementation, A.CommonPreparedStatement, A.VirtualFileSystem, A.BaseVfsFile, A.Cursor, A._Row_Object_UnmodifiableMapMixin, A._ResultIterator, A.IndexedParameters, A.VfsException, A.Sqlite3Filename, A.WasmSqliteBindings, A.WasmDatabase, A.WasmStatementCompiler, A.WasmStatement, A.WasmContext, A.WasmValue, A.DartBridgeCallbacks, A.WasmModuleLoader, A.WasmBindings, A.SimpleBridgeCallbacks, A._EmptyInstance, A._MemoryFromJsToWasd, A.IDbManager, A.MainTableDaoBase, A.MarshalingContext, A.MainTableRow, A.SearchResult, A._WebWorkerChannel, A.WorkerRunner, A.Converter0, A.LazyInPlaceList, A.LazyInPlaceMap, A.SerializationContext, A.SquadronException, A.CancelationTokenReference, A.WASI0, A.WASI, A.WASI1, A._MemoryView, A._VirtualOpenFile, A.ImportExportValue]);
     _inheritMany(J.Interceptor, [J.JSBool, J.JSNull, J.JavaScriptObject, J.JavaScriptBigInt, J.JavaScriptSymbol, J.JSNumber, J.JSString]);
     _inheritMany(J.JavaScriptObject, [J.LegacyJavaScriptObject, J.JSArray, A.NativeByteBuffer, A.NativeTypedData]);
     _inheritMany(J.LegacyJavaScriptObject, [J.PlainJavaScriptObject, J.UnknownJavaScriptObject, J.JavaScriptFunction]);

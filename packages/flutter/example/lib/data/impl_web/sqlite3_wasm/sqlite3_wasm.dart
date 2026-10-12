@@ -11,6 +11,7 @@ import '../../db_manager.dart';
 import '../../impl/sqlite3/sqlite3_dao.dart';
 import '../../main_table_dao.dart';
 import '../../main_table_row.dart';
+import '../../search_result.dart';
 import '../../main_table_schema.dart';
 import '../../pinyin_dict_kind.dart';
 import '../fetch.dart';

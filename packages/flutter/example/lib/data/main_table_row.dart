@@ -23,7 +23,7 @@ class MainTableRowUiModel extends MainTableRow {
   /// 格式化的 ID
   final String idFormatted;
 
-  MainTableRowUiModel({
+  const MainTableRowUiModel({
     required super.id,
     required this.idFormatted,
     required super.title,

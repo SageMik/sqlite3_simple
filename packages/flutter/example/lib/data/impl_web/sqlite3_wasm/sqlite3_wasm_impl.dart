@@ -6,6 +6,7 @@ import 'package:squadron/squadron.dart';
 import '../../db_manager.dart';
 import '../../main_table_dao.dart';
 import '../../main_table_row.dart';
+import '../../search_result.dart';
 import '../../pinyin_dict_kind.dart';
 import 'sqlite3_wasm.dart';
 
