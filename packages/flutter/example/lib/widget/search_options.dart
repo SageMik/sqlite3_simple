@@ -32,8 +32,8 @@ class _SearchOptionsState extends State<SearchOptions> with SingleTickerProvider
     return DecoratedBox(
       decoration: BoxDecoration(
         color: scheme.surface,
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
-        border: Border(left: edge, right: edge, bottom: edge),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: scheme.surfaceContainerLow),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -1,5 +1,4 @@
 import 'package:extended_text/extended_text.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -23,63 +22,61 @@ class SearchPanel extends ConsumerStatefulWidget {
 }
 
 class _SearchPanelState extends ConsumerState<SearchPanel> {
-  final _inputFocused = ValueNotifier(false);
-
-  @override
-  void dispose() {
-    _inputFocused.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Column(
       spacing: 6,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: _Header(
-            inputFocused: _inputFocused,
-            input: SearchInput(
-              hintText: '搜索中文、拼音或英文',
-              onChanged: (value) => ref.read(searchQueryProvider.notifier).update(value),
-              onFocusChanged: (focused) => _inputFocused.value = focused,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: ColoredBox(
+              color: scheme.surfaceContainerLow,
+              child: SearchInput(
+                hintText: '搜索中文、拼音或英文',
+                onChanged: (value) => ref.read(searchQueryProvider.notifier).update(value),
+              ),
             ),
-            options: Consumer(
-              builder: (context, ref, _) {
-                final dbManagerKind = ref.watch(dbManagerKindProvider);
-                final tokenizer = ref.watch(tokenizerProvider);
-                final pinyinDictKind = ref.watch(pinyinDictKindProvider);
-                return SearchOptions(
-                  rows: [
-                    SearchOptionRow<DbManagerKind>(
-                      label: '数据库实现：',
-                      value: dbManagerKind,
-                      options: dbManagerKind2uiLabel,
-                      onChanged: (v) {
-                        if (v == dbManagerKind) {
-                          refreshDbData(ref); // 选中后再次点击重灌数据
-                        } else {
-                          ref.read(dbManagerKindProvider.notifier).update(v);
-                        }
-                      },
-                    ),
-                    SearchOptionRow<Tokenizer>(
-                      label: '分词器：',
-                      value: tokenizer,
-                      options: tokenizer2uiLabel,
-                      onChanged: (v) => ref.read(tokenizerProvider.notifier).update(v),
-                    ),
-                    SearchOptionRow<PinyinDictKind>(
-                      label: '拼音文件：',
-                      value: pinyinDictKind,
-                      options: pinyinDictKind2uiLabel,
-                      onChanged: (v) => ref.read(pinyinDictKindProvider.notifier).update(v),
-                    ),
-                  ],
-                );
-              },
-            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Consumer(
+            builder: (context, ref, _) {
+              final dbManagerKind = ref.watch(dbManagerKindProvider);
+              final tokenizer = ref.watch(tokenizerProvider);
+              final pinyinDictKind = ref.watch(pinyinDictKindProvider);
+              return SearchOptions(
+                rows: [
+                  SearchOptionRow<DbManagerKind>(
+                    label: '数据库实现：',
+                    value: dbManagerKind,
+                    options: dbManagerKind2uiLabel,
+                    onChanged: (v) {
+                      if (v == dbManagerKind) {
+                        refreshDbData(ref); // 选中后再次点击重灌数据
+                      } else {
+                        ref.read(dbManagerKindProvider.notifier).update(v);
+                      }
+                    },
+                  ),
+                  SearchOptionRow<Tokenizer>(
+                    label: '分词器：',
+                    value: tokenizer,
+                    options: tokenizer2uiLabel,
+                    onChanged: (v) => ref.read(tokenizerProvider.notifier).update(v),
+                  ),
+                  SearchOptionRow<PinyinDictKind>(
+                    label: '拼音文件：',
+                    value: pinyinDictKind,
+                    options: pinyinDictKind2uiLabel,
+                    onChanged: (v) => ref.read(pinyinDictKindProvider.notifier).update(v),
+                  ),
+                ],
+              );
+            },
           ),
         ),
         Expanded(
@@ -147,44 +144,6 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  final ValueListenable<bool> inputFocused;
-  final Widget input;
-  final Widget options;
-
-  const _Header({required this.inputFocused, required this.input, required this.options});
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final radius = BorderRadius.circular(8);
-    return TextFieldTapRegion(
-      child: ValueListenableBuilder<bool>(
-        valueListenable: inputFocused,
-        builder: (context, focused, child) => AnimatedContainer(
-          duration: kThemeChangeDuration,
-          curve: Curves.fastOutSlowIn,
-          decoration: BoxDecoration(
-            borderRadius: radius,
-            border: Border.all(color: focused ? scheme.primary : Colors.transparent, width: 1.5),
-          ),
-          child: child,
-        ),
-        child: ClipRRect(
-          borderRadius: radius,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              ColoredBox(color: scheme.surfaceContainerLow, child: input),
-              options,
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

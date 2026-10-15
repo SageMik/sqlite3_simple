@@ -4,14 +4,7 @@ class SearchInput extends StatefulWidget {
   final ValueChanged<String> onChanged;
   final String hintText;
 
-  final ValueChanged<bool>? onFocusChanged;
-
-  const SearchInput({
-    super.key,
-    required this.onChanged,
-    required this.hintText,
-    this.onFocusChanged,
-  });
+  const SearchInput({super.key, required this.onChanged, required this.hintText});
 
   @override
   State<SearchInput> createState() => _SearchInputState();
@@ -31,7 +24,6 @@ class _SearchInputState extends State<SearchInput> {
         final focused = _focusNode.hasFocus;
         if (focused != _focused) {
           setState(() => _focused = focused);
-          widget.onFocusChanged?.call(focused);
         }
       });
     _controller = SearchController()
