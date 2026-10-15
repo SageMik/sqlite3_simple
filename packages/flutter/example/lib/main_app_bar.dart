@@ -1,13 +1,14 @@
+import 'package:flutter/material.dart' as material;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:sqlite3_simple_example/widget/dialog/usage_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'main_provider.dart';
+import 'widget/common_dialog.dart';
 
-class SimpleExampleAppBar extends AppBar {
-  SimpleExampleAppBar({super.key})
+class AppBar extends material.AppBar {
+  AppBar()
     : super(
         toolbarHeight: 72,
         title: _Title(title: 'Simple 分词器', subtitle: '示例'),
@@ -23,7 +24,7 @@ class SimpleExampleAppBar extends AppBar {
             builder: (context) => IconButton(
               tooltip: '使用说明',
               onPressed: () =>
-                  showDialog(context: context, builder: (context) => const UsageDialog()),
+                  showDialog(context: context, builder: (context) => const _UsageDialog()),
               icon: const Icon(Icons.info_outline_rounded),
             ),
           ),
@@ -58,7 +59,12 @@ class _Title extends StatelessWidget {
           decoration: BoxDecoration(color: scheme.primary, borderRadius: BorderRadius.circular(7)),
           child: Text(
             title.characters.first,
-            style: TextStyle(color: scheme.onPrimary, fontSize: 20, height: 1, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: scheme.onPrimary,
+              fontSize: 20,
+              height: 1,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         const SizedBox(width: 8),
@@ -100,6 +106,46 @@ class _Title extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _UsageDialog extends StatelessWidget {
+  const _UsageDialog();
+
+  static const _usage = '''
+点击右上角刷新按钮，或重复点击已选中的数据库实现，可以刷新数据库数据。
+
+结巴分词 和 Simple 分词 的差异之一是对 `C#` 的分词逻辑不同，可搜索后切换分词器查看。
+
+原 Simple 扩展内置的拼音字典包含了很多不常见的古音（如 `示(U+793A, qí)`、`客(U+5BA2, qià)` 等），可搜索 `qili`（示例）后切换拼音文件以查看差异。''';
+
+  @override
+  Widget build(BuildContext context) {
+    final maxBodyHeight = MediaQuery.sizeOf(context).height * 0.55;
+    return CommonDialog(
+      closeLabel: '关闭',
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 4,
+          children: [
+            const Text(
+              '使用说明',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: maxBodyHeight),
+              child: const SingleChildScrollView(
+                child: Text(_usage, style: TextStyle(fontSize: 16, height: 1.3)),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

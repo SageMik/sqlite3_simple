@@ -2,17 +2,17 @@ import 'package:extended_text/extended_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
-import 'package:sqlite3_simple_example/data/db_manager_kind.dart';
-import 'package:sqlite3_simple_example/widget/highlight_text_span_builder.dart';
 
+import 'data/impl/kind.dart';
 import 'data/main_table_dao.dart';
 import 'data/main_table_row.dart';
 import 'data/pinyin_dict_kind.dart';
 import 'main_provider.dart';
-import 'widget/dialog/search_result_dialog.dart';
+import 'widget/common_dialog.dart';
+import 'widget/highlight_text_span_builder.dart';
 import 'widget/search_input.dart';
 import 'widget/search_options.dart';
+import 'widget/search_result_list.dart';
 import 'widget/search_stats_cell.dart';
 
 class SearchPanel extends ConsumerStatefulWidget {
@@ -96,71 +96,35 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
                     child: Column(
                       spacing: 16,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Column(
-                            spacing: 6,
-                            children: [
-                              Row(
-                                spacing: 6,
-                                children: [
-                                  Expanded(
-                                    child: SearchStatCell(
-                                      label: '匹配',
-                                      value: hasQuery
-                                          ? TextSpan(text: results.matchCount.toString())
-                                          : null,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: SearchStatCell(
-                                      label: '耗时',
-                                      value: hasQuery
-                                          ? TextSpan(
-                                              children: [
-                                                TextSpan(text: results.elapsedText),
-                                                TextSpan(
-                                                  text: ' ms',
-                                                  style: TextStyle(
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Theme.of(
-                                                      context,
-                                                    ).colorScheme.onSurfaceVariant,
-                                                  ),
-                                                ),
-                                              ],
-                                            )
-                                          : null,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: SearchStatCell(
-                                      label: '总量',
-                                      value: results != null
-                                          ? TextSpan(text: results.totalCount.toString())
-                                          : null,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SearchStatCell(
-                                label: '分词',
-                                value: hasQuery ? TextSpan(text: results.tokens) : null,
-                                style: SearchStatCell.tokenStyle,
-                              ),
-                            ],
+                        _StatBar(
+                          cells: [
+                            SearchStatCell.common(
+                              label: '匹配',
+                              value: hasQuery ? results.matchCount.toString() : null,
+                            ),
+                            SearchStatCell.elapsed(
+                              label: '耗时',
+                              elapsed: hasQuery ? results.elapsed : null,
+                            ),
+                            SearchStatCell.common(
+                              label: '总量',
+                              value: results?.totalCount.toString(),
+                            ),
+                          ],
+                          wideCell: SearchStatCell.token(
+                            label: '分词',
+                            value: hasQuery ? results.tokens : null,
                           ),
                         ),
                         Expanded(
                           child: results == null
                               ? const Center(child: CircularProgressIndicator())
-                              : _ResultList(
+                              : SearchResultList(
                                   items: results.rows,
                                   onItemTap: (context, row) {
                                     showDialog(
                                       context: context,
-                                      builder: (context) => SearchResultDialog(row),
+                                      builder: (context) => _ResultDialog(row),
                                     );
                                   },
                                 ),
@@ -225,83 +189,66 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _ResultList extends StatelessWidget {
-  final List<MainTableRowUiModel> items;
-  final void Function(BuildContext context, MainTableRowUiModel row) onItemTap;
+class _StatBar extends StatelessWidget {
+  final List<Widget> cells;
+  final Widget wideCell;
 
-  const _ResultList({required this.items, required this.onItemTap});
-
-  static final _dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
+  const _StatBar({required this.cells, required this.wideCell});
 
   @override
   Widget build(BuildContext context) {
-    final highlightTextBuilder = HighlightTextSpanBuilder.Default;
-    return ListView.builder(
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final r = items[index];
-        final scheme = Theme.of(context).colorScheme;
-        return Material(
-          color: scheme.surface,
-          child: InkWell(
-            onTap: () => onItemTap(context, r),
-            hoverColor: Theme.of(context).hoverColor,
-            highlightColor: Colors.transparent,
-            splashColor: Theme.of(context).splashColor,
-            splashFactory: InkRipple.splashFactory,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-              child: Row(
-                spacing: 8,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    r.idFormatted,
-                    style: const TextStyle(
-                      fontSize: 36,
-                      fontWeight: FontWeight.w600,
-                      height: 1,
-                      letterSpacing: -1,
-                      fontFeatures: [FontFeature.tabularFigures()],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ExtendedText(
-                                r.title,
-                                specialTextSpanBuilder: highlightTextBuilder,
-                                style: const TextStyle(fontSize: 20),
-                              ),
-                              ExtendedText(r.content, specialTextSpanBuilder: highlightTextBuilder),
-                            ],
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(
-                              _dateFormat.format(r.insertDate),
-                              textAlign: TextAlign.end,
-                              style: const TextStyle(fontSize: 12, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        spacing: 6,
+        children: [
+          Row(spacing: 6, children: [for (final cell in cells) Expanded(child: cell)]),
+          wideCell,
+        ],
+      ),
+    );
+  }
+}
+
+class _ResultDialog extends StatelessWidget {
+  final MainTableRowUiModel row;
+
+  const _ResultDialog(this.row);
+
+  @override
+  Widget build(BuildContext context) {
+    return CommonDialog(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            row.idFormatted,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 48,
+              fontWeight: FontWeight.bold,
+              height: 1,
+              letterSpacing: -1,
+              fontFeatures: [FontFeature.tabularFigures()],
             ),
           ),
-        );
-      },
+          const SizedBox(height: 8),
+          ExtendedText(
+            row.title,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+            textAlign: TextAlign.center,
+            specialTextSpanBuilder: HighlightTextSpanBuilder.Default,
+          ),
+          const SizedBox(height: 4),
+          ExtendedText(
+            row.content,
+            specialTextSpanBuilder: HighlightTextSpanBuilder.Default,
+            style: const TextStyle(fontSize: 18, height: 1.3),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -42,10 +42,4 @@ class SearchResultUiModel {
 
   /// 匹配数量
   int get matchCount => rows.length;
-
-  /// 耗时的展示文本：≥100ms 取整，否则保留一位小数
-  String get elapsedText {
-    final ms = elapsed.inMicroseconds / 1000.0;
-    return ms >= 100 ? ms.toStringAsFixed(0) : ms.toStringAsFixed(1);
-  }
 }

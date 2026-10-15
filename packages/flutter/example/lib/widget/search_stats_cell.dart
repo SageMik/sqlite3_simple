@@ -1,18 +1,9 @@
 import 'package:flutter/material.dart';
 
-
 const _labelSize = 12.0;
 const _valueSize = 14.0;
-const _tokenSize = 11.0;
 const _valueHeight = 1.15;
 
-/// 数值行固定行盒，避免 — / 数字 / 分词切换时高度跳动
-const _valueLineBox = _valueSize * _valueHeight;
-
-const _valueStrut = StrutStyle(fontSize: _valueSize, height: _valueHeight, forceStrutHeight: true);
-const _labelStrut = StrutStyle(fontSize: _labelSize, height: _valueHeight, forceStrutHeight: true);
-
-/// 数值/占位样式：等宽数字 + 紧字距
 const _valueStyle = TextStyle(
   fontSize: _valueSize,
   fontWeight: FontWeight.w700,
@@ -22,19 +13,44 @@ const _valueStyle = TextStyle(
 );
 
 class SearchStatCell extends StatelessWidget {
-  /// 分词样式：空色区分词与分隔符
-  static const tokenStyle = TextStyle(fontSize: _tokenSize, fontWeight: FontWeight.w500);
-
   final String label;
-  final InlineSpan? value;
+  final String? value;
   final TextStyle? style;
+  final String? suffix;
 
-  const SearchStatCell({super.key, required this.label, this.value, this.style});
+  const SearchStatCell._({super.key, required this.label, this.value, this.style, this.suffix});
+
+  const SearchStatCell.common({Key? key, required String label, String? value})
+    : this._(key: key, label: label, value: value);
+
+  SearchStatCell.elapsed({Key? key, required String label, Duration? elapsed})
+    : this._(
+        key: key,
+        label: label,
+        value: elapsed == null
+            ? null
+            : (elapsed.inMicroseconds / 1000.0).toStringAsFixed(
+                elapsed.inMicroseconds >= 100000 ? 0 : 1,
+              ),
+        suffix: ' ms',
+      );
+
+  const SearchStatCell.token({Key? key, required String label, String? value})
+    : this._(
+        key: key,
+        label: label,
+        value: value,
+        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+      );
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final valueStyle = (style ?? _valueStyle).copyWith(color: scheme.onSurface, height: _valueHeight);
+    final valueStyle = (style ?? _valueStyle).copyWith(
+      color: scheme.onSurface,
+      height: _valueHeight,
+    );
+    final text = value?.isNotEmpty == true ? value : null;
 
     return Container(
       width: double.infinity,
@@ -47,13 +63,22 @@ class SearchStatCell extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: _labelSize, height: _valueHeight, color: scheme.onSurfaceVariant),
-            strutStyle: _labelStrut,
+            style: TextStyle(
+              fontSize: _labelSize,
+              height: _valueHeight,
+              color: scheme.onSurfaceVariant,
+            ),
+            strutStyle: const StrutStyle(
+              fontSize: _labelSize,
+              height: _valueHeight,
+              forceStrutHeight: true,
+            ),
           ),
           const SizedBox(width: 6),
           Expanded(
             child: SizedBox(
-              height: _valueLineBox,
+              // 固定行高，避免跳动
+              height: _valueSize * _valueHeight,
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: _HFadeScroll(
@@ -61,8 +86,32 @@ class SearchStatCell extends StatelessWidget {
                   child: DefaultTextStyle(
                     style: valueStyle,
                     child: Text.rich(
-                      value ?? TextSpan(text: '—', style: valueStyle.copyWith(color: scheme.onSurfaceVariant)),
-                      strutStyle: _valueStrut,
+                      TextSpan(
+                        children: [
+                          if (text == null)
+                            TextSpan(
+                              text: '—',
+                              style: valueStyle.copyWith(color: scheme.onSurfaceVariant),
+                            )
+                          else ...[
+                            TextSpan(text: text),
+                            if (suffix != null)
+                              TextSpan(
+                                text: ' $suffix',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
+                                  color: scheme.onSurfaceVariant,
+                                ),
+                              ),
+                          ],
+                        ],
+                      ),
+                      strutStyle: const StrutStyle(
+                        fontSize: _valueSize,
+                        height: _valueHeight,
+                        forceStrutHeight: true,
+                      ),
                     ),
                   ),
                 ),
