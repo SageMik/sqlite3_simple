@@ -35,7 +35,7 @@ class DbManager {
       );
     ''');
 
-    // FTS5 虚表（external content，正文存主表，索引只存分词）
+    /// FTS5 虚表
     _db.execute('''
       CREATE VIRTUAL TABLE $fts5Table USING fts5(
         $title, $content, 
@@ -78,7 +78,9 @@ class DbManager {
       (
         'FTS5',
         'SQLite 内置的第五代全文检索引擎，是一个为数据库应用提供全文搜索功能的虚拟表模块。'
-            '基于倒排索引实现高效的文本匹配，并支持通过 tokenize 选项接入自定义分词器。',
+            '基于倒排索引实现高效的文本匹配，并支持通过 tokenize 选项接入自定义分词器。'
+            '检索日志时时间字段一般取自 datetime()，形如 2026-10-29 09:05:00，'
+            '空格、冒号和短横线都会把它切成多个 token 参与建索引。',
       ),
       (
         'Dart Hooks',

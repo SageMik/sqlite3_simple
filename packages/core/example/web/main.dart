@@ -9,6 +9,10 @@ import 'package:sqlite3_simple_core_example/db_manager.dart';
 import 'package:sqlite3_simple_core_example/search_result.dart';
 import 'package:web/web.dart';
 
+/// 在 example 目录下执行如下命令以启动 Web 示例
+/// ```
+/// dart tool/serve.dart
+/// ```
 Future<void> main() async {
   final input = document.querySelector('#query')! as HTMLInputElement;
   final tokenizeInfo = document.querySelector('#tokenize')! as HTMLElement;
@@ -20,12 +24,12 @@ Future<void> main() async {
     dbManager = await DbManager.create(() async {
       /// 打开数据库
       final loader = DefaultSimpleWasmModuleLoader();
-      final sqlite = await WasmSqlite3.loadFromUrl(
+      final sqlite3 = await WasmSqlite3.loadFromUrl(
         Uri.parse('sqlite3.wasm'),
         loader: loader,
       );
-      sqlite.registerVirtualFileSystem(InMemoryFileSystem(), makeDefault: true);
-      final db = sqlite.open('db');
+      sqlite3.registerVirtualFileSystem(InMemoryFileSystem(), makeDefault: true);
+      final db = sqlite3.open('db');
 
       /// 将结巴分词文件加载到数据库可以访问的 WASM 内存中
       const jiebaDictDir = 'cpp_jieba_dict';
@@ -37,6 +41,9 @@ Future<void> main() async {
       };
       loader.updateFiles((it) => it..addAll(jiebaDictBytes));
       db.execute("SELECT jieba_dict(?)", [jiebaDictDir]);
+      db.execute(
+        "SELECT jieba_query('Jieba分词初始化（提前加载避免后续等待）')",
+      );
 
       return db;
     });
@@ -72,8 +79,9 @@ Future<void> main() async {
   status.remove();
   input
     ..disabled = false
-    ..value = 'sqlite'
-    ..dispatchEvent(Event('input'));
+    ..value = ''
+    ..dispatchEvent(Event('input'))
+    ..focus();
 }
 
 extension on HTMLElement {

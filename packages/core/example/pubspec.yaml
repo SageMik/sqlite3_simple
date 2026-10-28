@@ -10,6 +10,7 @@ dependencies:
   sqlite3: ^3.3.0
   sqlite3_simple_core:
     path: ../
+  termui: ^0.9.4
   web: ^1.1.1
   http: ^1.6.0
 

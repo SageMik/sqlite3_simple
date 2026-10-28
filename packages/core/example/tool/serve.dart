@@ -90,7 +90,6 @@ Future<void> _serve(HttpRequest request, Map<String, String> bases) async {
   await response.close();
 }
 
-/// 词法规范化路径段：忽略 `.`、回退 `..`；越界或含路径分隔符（如 %2F）时返回 null。
 List<String>? _normalize(List<String> segments) {
   final result = <String>[];
   for (final segment in segments) {

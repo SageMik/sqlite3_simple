@@ -11,17 +11,19 @@
     <h1>sqlite3_simple_core<span>Web 示例</span></h1>
 
     <p class="desc">
-      在浏览器中通过 <code>DefaultSimpleWasmModuleLoader</code> 加载内置 Simple 分词器的
-      <code>sqlite3.wasm</code>，演示中文 / 拼音全文搜索。
+      通过 <code>DefaultSimpleWasmModuleLoader</code> 加载内置 Simple 分词器的 <code>sqlite3.wasm</code>，通过 <code>SELECT simple_highlight(...) FROM fts5 WHERE fts5 MATCH jieba_query(?)</code> 实现中文及拼音全文检索。
     </p>
 
     <label class="sr-only" for="query">搜索关键词</label>
     <input id="query" type="search" placeholder="输入关键词或拼音进行搜索"
            autocomplete="off" aria-describedby="tokenize" disabled>
 
-    <p id="tokenize" aria-live="polite"></p>
-    <div id="result" aria-live="polite"></div>
-    <p id="status" role="status">正在加载 sqlite3.wasm …</p>
+    <p id="tokenize" aria-live="polite">分词结果：</p>
+    <div id="result" aria-live="polite">
+      <div id="status" role="status">
+        <p class="empty">正在加载 sqlite3.wasm …</p>
+      </div>
+    </div>
 
     <footer>
       <a href="https://github.com/SageMik/sqlite3_simple">SageMik/sqlite3_simple</a>
