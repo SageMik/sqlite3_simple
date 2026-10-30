@@ -111,29 +111,14 @@ mixin SimpleSourceInfoMixin implements SimpleSourceInfo {
   @override
   Architecture get targetArchitecture => info.targetArchitecture;
 
-  /// fat 产物在发布包中的文件名，例如 `libsimple.macos.dylib`；仅 fat 平台非空
-  String? get fatAssetFileName => targetOS.fat
-      ? targetOS.hookOS.dylibFileName('$assetName.${targetOS.name}')
-      : null;
-
-  /// thin 产物在发布包中的文件名，例如 `libsimple.android.arm64.so`、`simple.windows.x64.dll`
+  /// 产物在发布包中的文件名，例如 `libsimple.android.arm64.so`、`simple.windows.x64.dll`
   String get assetFileName => targetOS.hookOS.dylibFileName(
     '$assetName.${targetOS.name}.${targetArchitecture.name}',
   );
 
-  /// 在 [directoryUri] 下定位原生库：fat 平台优先取 fat 产物，缺失时回退 thin
-  File resolveAssetFile(Uri directoryUri) {
-    final fatName = fatAssetFileName;
-    if (fatName != null) {
-      final fatFile = File.fromUri(directoryUri.resolve(fatName));
-      if (fatFile.existsSync()) return fatFile;
-    }
-    return File.fromUri(directoryUri.resolve(assetFileName));
-  }
-
-  /// 发布包中可能的原生库文件名（fat 平台为 fat + thin 两个，其余仅 thin），用于错误提示
-  String get expectedAssetFileNames =>
-      [if (fatAssetFileName case final fat?) fat, assetFileName].join(' or ');
+  /// 在 [directoryUri] 下定位原生库
+  File resolveAssetFile(Uri directoryUri) =>
+      File.fromUri(directoryUri.resolve(assetFileName));
 
   /// 原生库落地到构建目录时使用的文件名
   String get outFileName => targetOS.hookOS.dylibFileName(assetName);

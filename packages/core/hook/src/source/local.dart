@@ -49,14 +49,14 @@ final class LocalSource with SimpleSourceInfoMixin implements SimpleSource {
       src = resolveAssetFile(cacheDir.uri);
       if (!src.existsSync()) {
         throw StateError(
-          'Required $expectedAssetFileNames not found in archive $path',
+          'Required $assetFileName not found in archive $path',
         );
       }
     } else if (Directory.fromUri(path).existsSync()) {
       src = resolveAssetFile(Uri.directory(path.toFilePath()));
       if (!src.existsSync()) {
         throw StateError(
-          'Required $expectedAssetFileNames not found in local directory $path',
+          'Required $assetFileName not found in local directory $path',
         );
       }
       dependency = src.uri;
