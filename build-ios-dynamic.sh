@@ -23,4 +23,5 @@ build_variant() {
 }
 
 build_variant OS64 libsimple.ios.arm64.dylib
-build_variant SIMULATOR64COMBINED libsimple.ios_sim.dylib
+build_variant SIMULATORARM64 libsimple.ios_sim.arm64.dylib
+build_variant SIMULATOR64 libsimple.ios_sim.x64.dylib

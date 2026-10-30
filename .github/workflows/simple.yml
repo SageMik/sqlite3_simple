@@ -58,16 +58,25 @@ jobs:
         run: cp simple/CMakePresets.json CMakePresets.json
         shell: bash
 
-      - name: '[MacOS] 编译 universal 动态库'
+      - name: '[MacOS] 编译 arm64 动态库'
         uses: lukka/run-cmake@v10
         with:
-          configurePreset: 'macos-ninja'
-          buildPreset: 'macos-ninja-release'
+          configurePreset: 'macos-ninja-arm64'
+          buildPreset: 'macos-ninja-arm64-release'
 
-      - name: '[MacOS] 保存 universal 动态库'
+      - name: '[MacOS] 保存 arm64 动态库'
+        run: cp ../../_temp/macos-arm64/simple/src/libsimple.dylib libsimple.macos.arm64.dylib
+
+      - name: '[MacOS] 编译 x64 动态库'
+        uses: lukka/run-cmake@v10
+        with:
+          configurePreset: 'macos-ninja-x64'
+          buildPreset: 'macos-ninja-x64-release'
+
+      - name: '[MacOS] 保存 x64 动态库'
         run: |
-          cp ../../_temp/macos/simple/src/libsimple.dylib libsimple.macos.dylib
-          rm -rf ../../_temp/macos
+          cp ../../_temp/macos-x64/simple/src/libsimple.dylib libsimple.macos.x64.dylib
+          rm -rf ../../_temp/macos-arm64 ../../_temp/macos-x64
 
       - name: '[iOS] 编译真机和模拟器动态库'
         run: ./build-ios-dynamic.sh
