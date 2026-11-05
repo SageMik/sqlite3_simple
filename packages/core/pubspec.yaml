@@ -19,11 +19,10 @@ topics:
 
 dependencies:
   archive: ^4.0.0
-  code_assets: ^1.0.0
+  code_assets: ^2.1.0
   crypto: ^3.0.6
-  hooks: ^1.0.0
+  hooks: ^2.2.0
   meta: ^1.19.0
-  native_toolchain_c: ^0.17.5
   path: ^1.9.0
   sqlite3: ^3.3.0
   wasd: ^0.2.0
