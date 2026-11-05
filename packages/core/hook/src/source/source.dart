@@ -7,7 +7,6 @@ import 'package:crypto/crypto.dart' as crypto;
 import 'package:hooks/hooks.dart';
 
 import '../defines.dart';
-import '../extension/build_input_ext.dart';
 import '../targets.dart';
 
 part 'download.dart';
@@ -26,33 +25,23 @@ sealed class SimpleSource {
 
   factory SimpleSource.fromBuild(BuildInput input, BuildOutputBuilder output) {
     final config = input.config.code;
-    final CodeConfig(:targetOS, :targetArchitecture) = config;
+    final CodeConfig(:targetArchitecture) = config;
     final defines = SimpleUserDefines(input);
+    final simpleOS = SimpleTargetOS.forConfig(config);
 
     /// 跳过用户指定平台架构
     final skip = defines.list('skip_targets');
     if (skip != null) {
-      final keys = <String>{
-        targetOS.name,
-        '${targetOS.name}-${targetArchitecture.name}',
-      };
-      if (skip.any(keys.contains)) {
+      final osName = simpleOS.name;
+      if (skip.any({osName, '$osName-${targetArchitecture.name}'}.contains)) {
         return const NoneSource();
       }
     }
 
-    /// 不支持的平台，提示用户跳过或自行处理
-    final SimpleTargetOS os =
-        SimpleTargetOS.forConfig(config) ??
-        (throw UnsupportedError(
-          'Unsupported platform. Use ${input.f('source')} to switch to `local` or `none`, '
-          'or skip this platform via ${input.f('skip_targets')}',
-        ));
-
     final info = SimpleSourceInfo(
       input: input,
       output: output,
-      targetOS: os,
+      targetOS: simpleOS,
       targetArchitecture: targetArchitecture,
     );
 
@@ -67,16 +56,12 @@ sealed class SimpleSource {
         info,
         path:
             defines.path('path') ??
-            (throw defines.exception(
-              'path',
-              (it) => '$it is required when `source: local`',
-            )),
+            (throw defines.exception('path', (it) => '$it is required when `source: local`')),
       ),
       'none' => const NoneSource(),
       _ => throw defines.exception(
         'source',
-        (it) =>
-            'Invalid value `$src` for $it, expected `download`, `local` or `none`',
+        (it) => 'Invalid value `$src` for $it, expected `download`, `local` or `none`',
       ),
     };
   }
@@ -112,13 +97,11 @@ mixin SimpleSourceInfoMixin implements SimpleSourceInfo {
   Architecture get targetArchitecture => info.targetArchitecture;
 
   /// 产物在发布包中的文件名，例如 `libsimple.android.arm64.so`、`simple.windows.x64.dll`
-  String get assetFileName => targetOS.hookOS.dylibFileName(
-    '$assetName.${targetOS.name}.${targetArchitecture.name}',
-  );
+  String get assetFileName =>
+      targetOS.hookOS.dylibFileName('$assetName.${targetOS.name}.${targetArchitecture.name}');
 
   /// 在 [directoryUri] 下定位原生库
-  File resolveAssetFile(Uri directoryUri) =>
-      File.fromUri(directoryUri.resolve(assetFileName));
+  File resolveAssetFile(Uri directoryUri) => File.fromUri(directoryUri.resolve(assetFileName));
 
   /// 原生库落地到构建目录时使用的文件名
   String get outFileName => targetOS.hookOS.dylibFileName(assetName);
