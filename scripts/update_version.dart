@@ -1,42 +1,63 @@
 import 'dart:io';
 
-const projectRoot = '..';
-const toVersion = '2.3.0';
+final projectRoot = File.fromUri(Platform.script).parent.parent.path;
 
-void main() {
+void main(List<String> args) {
+  if (args.length != 2) {
+    stderr.writeln('用法：dart update_version.dart <core 版本> <flutter 版本>');
+    exitCode = 64;
+    return;
+  }
+
+  final coreVersion = args[0];
+  final flutterVersion = args[1];
+
   final changes = <VersionChange>[
     VersionChange(
-      path: '$projectRoot/pubspec.yaml',
-      pattern: RegExp(r'^version:\s+\d+\.\d+\.\d+', multiLine: true),
-      replacement: 'version: $toVersion',
+      path: '$projectRoot/packages/core/pubspec.yaml',
+      pattern: RegExp(r'^version:.*$', multiLine: true),
+      replacement: 'version: $coreVersion',
     ),
     VersionChange(
-      path: '$projectRoot/android/build.gradle',
-      pattern: RegExp(r'^version\s*=\s*"\d+\.\d+\.\d+"', multiLine: true),
-      replacement: 'version = "$toVersion"',
+      path: '$projectRoot/packages/flutter/pubspec.yaml',
+      pattern: RegExp(r'^version:.*$', multiLine: true),
+      replacement: 'version: $flutterVersion',
     ),
     VersionChange(
-      path: '$projectRoot/darwin/sqlite3_simple.podspec',
-      pattern: RegExp(r"^\s*s\.version\s*=\s*'\d+\.\d+\.\d+'", multiLine: true),
-      replacement: "  s.version          = '$toVersion'",
+      path: '$projectRoot/packages/flutter/pubspec.yaml',
+      pattern: RegExp(r'sqlite3_simple_core:\s*\^?\d+\.\d+\.\d+'),
+      replacement: 'sqlite3_simple_core: ^$coreVersion',
     ),
     VersionChange(
-      path: '$projectRoot/README.md',
-      pattern: RegExp(r'releases/download/v\d+\.\d+\.\d+/example\.apk'),
-      replacement: 'releases/download/v$toVersion/example.apk',
+      path: '$projectRoot/packages/flutter/README.md',
+      pattern: RegExp(r'releases/download/[^/]+/example\.apk'),
+      replacement: 'releases/download/v$flutterVersion/example.apk',
     ),
   ];
 
+  var failed = false;
   for (final change in changes) {
     final file = File(change.path);
-    if (!file.existsSync()) continue;
+    if (!file.existsSync()) {
+      stderr.writeln('未更新：${change.path} 不存在');
+      failed = true;
+      continue;
+    }
 
     final content = file.readAsStringSync();
-    final match = change.pattern.firstMatch(content);
-    if (match == null) continue;
+    if (!change.pattern.hasMatch(content)) {
+      stderr.writeln('未更新：${change.path} 中没匹配到版本号，请手工确认');
+      failed = true;
+      continue;
+    }
 
-    file.writeAsStringSync(content.replaceFirst(change.pattern, change.replacement));
+    file.writeAsStringSync(
+      content.replaceFirst(change.pattern, change.replacement),
+    );
+    stdout.writeln('已更新：${change.path}');
   }
+
+  if (failed) exitCode = 1;
 }
 
 class VersionChange {

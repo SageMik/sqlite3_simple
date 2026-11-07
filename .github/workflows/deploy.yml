@@ -34,14 +34,14 @@ jobs:
 
       - name: 编译
         run: |
-          cd example
+          cd packages/flutter/example
           flutter pub get
           flutter build web --release --base-href "/${{ github.event.repository.name }}/"
 
       - name: 上传产物
         uses: actions/upload-pages-artifact@v3
         with:
-          path: example/build/web
+          path: packages/flutter/example/build/web
 
       - name: 部署至 Github Pages
         id: deployment

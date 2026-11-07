@@ -11,7 +11,14 @@ def run_git_command(args):
     return result.stdout.strip() if result.stdout else ""
 
 
-with open(ROOT / "CHANGELOG.md", "r", encoding="utf-8") as f:
+if len(sys.argv) not in (2, 3):
+    print("用法：extract_changelog.py <CHANGELOG 路径> [tag]", file=sys.stderr)
+    sys.exit(64)
+
+path = sys.argv[1]
+input_version = sys.argv[2] if len(sys.argv) > 2 else None
+
+with open(ROOT / path, "r", encoding="utf-8") as f:
     content = f.read()
 
 
@@ -29,8 +36,8 @@ def extract_latest_changelog():
     return None
 
 
-def extract_version_changelog(version):
-    version_clean = version.lstrip('v')
+def extract_version_changelog(version, prefix):
+    version_clean = version.removeprefix(prefix)
     pattern = rf"(?:^## {re.escape(version_clean)}\s*\n)(.*?)(?=^## |\Z)"
     match = re.search(pattern, content, re.DOTALL | re.MULTILINE)
 
@@ -39,11 +46,12 @@ def extract_version_changelog(version):
     return None
 
 
-input_version = sys.argv[1] if len(sys.argv) > 1 else None
+if input_version:
+    prefix_match = re.match(r"^.*?v(?=\d)", input_version)
+    prefix = prefix_match.group(0) if prefix_match else ""
 
-if input_version and (input_version.startswith('v') or re.match(r'^\d+\.\d+', input_version)):
-    changelog = extract_version_changelog(input_version)
-    version_for_compare = input_version if input_version.startswith('v') else f'v{input_version}'
+    changelog = extract_version_changelog(input_version, prefix)
+    version_for_compare = input_version
 else:
     changelog = extract_latest_changelog()
     version_for_compare = run_git_command(["git", "rev-parse", "--abbrev-ref", "HEAD"]) or "main"
@@ -52,19 +60,22 @@ if changelog:
     print(changelog)
 
     try:
-        if input_version and (input_version.startswith('v') or re.match(r'^\d+\.\d+', input_version)):
-            last_tag = run_git_command(["git", "describe", "--abbrev=0", "--tags", f"{version_for_compare}^"])
+        if input_version:
+            last_tag = run_git_command([
+                "git", "describe", "--abbrev=0", "--tags",
+                f"--match={prefix}*", f"{version_for_compare}^",
+            ])
             if not last_tag:
-                last_tag = run_git_command(["git", "describe", "--abbrev=0", "--tags"])
+                last_tag = run_git_command([
+                    "git", "describe", "--abbrev=0", "--tags", f"--match={prefix}*",
+                ])
         else:
             last_tag = run_git_command(["git", "describe", "--abbrev=0", "--tags"])
     except:
         last_tag = run_git_command(["git", "describe", "--abbrev=0", "--tags"])
 
-    if not last_tag:
-        last_tag = "v1.0.0"
-
-    print(f"\n修改记录：[{last_tag} -> {version_for_compare}](https://github.com/SageMik/sqlite3_simple/compare/{last_tag}...{version_for_compare})")
+    if last_tag and last_tag != version_for_compare:
+        print(f"\n修改记录：[{last_tag} -> {version_for_compare}](https://github.com/SageMik/sqlite3_simple/compare/{last_tag}...{version_for_compare})")
 else:
     if input_version:
         print(f"未找到版本 {input_version} 的 CHANGELOG")

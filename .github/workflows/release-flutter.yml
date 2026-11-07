@@ -1,10 +1,9 @@
-name: 发布 Release
+name: 发布 sqlite3_simple
 
 on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -21,7 +20,7 @@ jobs:
         id: changelog
         run: |
           echo "release_notes<<EOF" >> "$GITHUB_OUTPUT"
-          python scripts/extract_changelog.py "${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          python scripts/extract_changelog.py packages/flutter/CHANGELOG.md "${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
         shell: bash
 
@@ -37,12 +36,12 @@ jobs:
 
       - name: 构建 Android APK
         run: flutter build apk --release
-        working-directory: example
+        working-directory: packages/flutter/example
 
       - name: 重命名 APK
         id: apk
         run: |
-          mv example/build/app/outputs/flutter-apk/app-release.apk example.apk
+          mv packages/flutter/example/build/app/outputs/flutter-apk/app-release.apk example.apk
           echo "path=example.apk" >> "$GITHUB_OUTPUT"
         shell: bash
 

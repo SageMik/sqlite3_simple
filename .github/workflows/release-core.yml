@@ -1,0 +1,33 @@
+name: 发布 sqlite3_simple_core
+
+on:
+  push:
+    tags:
+      - 'core-v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 提取 CHANGELOG
+        id: changelog
+        run: |
+          echo "release_notes<<EOF" >> "$GITHUB_OUTPUT"
+          python scripts/extract_changelog.py packages/core/CHANGELOG.md "${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+        shell: bash
+
+      - name: 发布 Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body: ${{ steps.changelog.outputs.release_notes }}
+          draft: true
