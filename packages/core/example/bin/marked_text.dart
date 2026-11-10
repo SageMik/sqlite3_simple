@@ -173,7 +173,9 @@ List<List<_Run>> _wrap(String text, int width) {
         endLine();
       default:
         final charWidth = graphemeWidth(char);
-        if (used + charWidth > width && line.isNotEmpty) endLine();
+        if (used + charWidth > width && (line.isNotEmpty || run.isNotEmpty)) {
+          endLine();
+        }
         run.write(char);
         used += charWidth;
     }
