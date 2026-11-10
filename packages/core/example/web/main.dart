@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:js_interop';
+import 'dart:typed_data';
 
 import 'package:http/http.dart';
 import 'package:sqlite3/wasm.dart';
@@ -19,6 +20,18 @@ Future<void> main() async {
   final result = document.querySelector('#result')! as HTMLElement;
   final status = document.querySelector('#status')! as HTMLElement;
 
+  const jiebaDictDir = 'cpp_jieba_dict';
+  var useJieba = true;
+  final jiebaDictBytes = <String, Uint8List>{};
+  try {
+    for (final type in JiebaDictType.values) {
+      final path = '$jiebaDictDir/${type.filename}';
+      jiebaDictBytes[path] = await readBytes(Uri.parse(path));
+    }
+  } on Exception {
+    useJieba = false;
+  }
+
   final DbManager dbManager;
   try {
     dbManager = await DbManager.create(() async {
@@ -32,21 +45,14 @@ Future<void> main() async {
       final db = sqlite3.open('db');
 
       /// 将结巴分词文件加载到数据库可以访问的 WASM 内存中
-      const jiebaDictDir = 'cpp_jieba_dict';
-      final jiebaDictBytes = {
-        for (final type in JiebaDictType.values)
-          "$jiebaDictDir/${type.filename}": await readBytes(
-            Uri.parse("$jiebaDictDir/${type.filename}"),
-          ),
-      };
-      loader.updateFiles((it) => it..addAll(jiebaDictBytes));
-      db.execute("SELECT jieba_dict(?)", [jiebaDictDir]);
-      db.execute(
-        "SELECT jieba_query('Jieba分词初始化（提前加载避免后续等待）')",
-      );
+      if (useJieba) {
+        loader.updateFiles((it) => it..addAll(jiebaDictBytes));
+        db.execute("SELECT jieba_dict(?)", [jiebaDictDir]);
+        db.execute("SELECT jieba_query('Jieba分词初始化（提前加载避免后续等待）')");
+      }
 
       return db;
-    });
+    }, useJieba: useJieba);
   } catch (e) {
     status.showMessage('加载失败：$e');
     return;
@@ -56,7 +62,7 @@ Future<void> main() async {
     final query = input.value.trim();
     final SearchResult searchResult;
     try {
-      searchResult = await dbManager.searchByJieba(query);
+      searchResult = await dbManager.search(query);
     } catch (e) {
       result.showMessage('查询失败：$e');
       return;

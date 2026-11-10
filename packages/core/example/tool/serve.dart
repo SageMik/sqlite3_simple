@@ -26,7 +26,8 @@ Future<void> main() async {
   final bases = {
     '': Directory('$root/web').resolveSymbolicLinksSync(),
     for (final MapEntry(key: mount, value: target) in _mounts.entries)
-      mount: Directory('$root/$target').resolveSymbolicLinksSync(),
+      if (Directory('$root/$target').existsSync())
+        mount: Directory('$root/$target').resolveSymbolicLinksSync(),
   };
   final server = await _bind();
   stdout.writeln('  http://localhost:${server.port}');
@@ -68,7 +69,9 @@ Future<void> _serve(HttpRequest request, Map<String, String> bases) async {
   }
 
   // 首段命中挂载表时从挂载目录取文件，其余从 web 根取
-  final mount = segments.isNotEmpty && _mounts.containsKey(segments.first) ? segments.first : '';
+  final mount = segments.isNotEmpty && bases.containsKey(segments.first)
+      ? segments.first
+      : '';
   final rest = mount.isEmpty ? segments : segments.sublist(1);
   final file = File([
     bases[mount]!,

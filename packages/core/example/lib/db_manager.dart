@@ -9,13 +9,15 @@ const content = 'content';
 
 class DbManager {
   final CommonDatabase _db;
+  final bool useJieba;
 
-  DbManager._(this._db);
+  DbManager._(this._db, {required this.useJieba});
 
   static Future<DbManager> create(
-    Future<CommonDatabase> Function() buildDatabase,
-  ) async {
-    final dbManager = DbManager._(await buildDatabase());
+    Future<CommonDatabase> Function() buildDatabase, {
+    required bool useJieba,
+  }) async {
+    final dbManager = DbManager._(await buildDatabase(), useJieba: useJieba);
     await dbManager._onCreate();
     return dbManager;
   }
@@ -100,11 +102,12 @@ class DbManager {
     _db.execute('PRAGMA user_version = 1;');
   }
 
-  Future<SearchResult> searchByJieba(String query) async {
+  Future<SearchResult> search(String query) async {
     const wrapperSql = "'${ZeroWidth.start}', '${ZeroWidth.end}'";
+    final queryFn = useJieba ? 'jieba_query' : 'simple_query';
     final tokens = query.isEmpty
         ? ''
-        : '${_db.select('SELECT jieba_query(?) AS q', [query]).first['q']}';
+        : '${_db.select('SELECT $queryFn(?) AS q', [query]).first['q']}';
     final resultSet = query.isEmpty
         ? _db.select('SELECT $title, $content FROM $mainTable')
         : _db.select(
@@ -114,7 +117,7 @@ class DbManager {
                 simple_highlight($fts5Table, 0, $wrapperSql) AS $title, 
                 simple_highlight($fts5Table, 1, $wrapperSql) AS $content 
               FROM $fts5Table 
-              WHERE $fts5Table MATCH jieba_query(?);
+              WHERE $fts5Table MATCH $queryFn(?);
             ''',
             [query],
           );

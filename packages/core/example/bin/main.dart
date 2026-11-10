@@ -13,20 +13,22 @@ import 'marked_text.dart';
 /// dart run bin/main.dart
 /// ```
 Future<void> main() async {
+  const jiebaDictDir = '../../flutter/assets/cpp_jieba_dict';
+  final useJieba = Directory(jiebaDictDir).existsSync();
+
   final DbManager dbManager;
   try {
     dbManager = await DbManager.create(() async {
       sqlite3.loadSimpleExtension();
       final db = sqlite3.openInMemory();
 
-      const jiebaDictDir = '../../flutter/assets/cpp_jieba_dict';
-      db.execute("SELECT jieba_dict(?)", [jiebaDictDir]);
-      db.execute(
-        "SELECT jieba_query('Jieba分词初始化（提前加载避免后续等待）')",
-      );
+      if (useJieba) {
+        db.execute("SELECT jieba_dict(?)", [jiebaDictDir]);
+        db.execute("SELECT jieba_query('Jieba分词初始化（提前加载避免后续等待）')");
+      }
 
       return db;
-    });
+    }, useJieba: useJieba);
   } catch (e) {
     stderr.writeln('加载失败：$e');
     return;
@@ -101,9 +103,7 @@ class _SearchViewState extends State<SearchView> {
 
   Future<void> _search() async {
     try {
-      final result = await widget.dbManager.searchByJieba(
-        _controller.text.trim(),
-      );
+      final result = await widget.dbManager.search(_controller.text.trim());
       if (!mounted) return;
       widget.scrollController.scrollOffset = 0;
       setState(() => _state = (result: result, error: null));
