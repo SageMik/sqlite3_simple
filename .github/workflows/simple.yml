@@ -295,7 +295,7 @@ jobs:
 
           # 版本信息
           cat > full/VERSION.txt <<EOF
-          Version:     ${GITHUB_REF_NAME#N}
+          Version:     ${GITHUB_REF_NAME#Nv}
           Commit:      ${GITHUB_SHA}
           Built at:    $(TZ=Asia/Shanghai date '+%Y-%m-%dT%H:%M:%S%:z')
           Run:         ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
