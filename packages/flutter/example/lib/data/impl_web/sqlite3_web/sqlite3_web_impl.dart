@@ -64,7 +64,7 @@ final class Sqlite3WebDbManager extends DbManager<Sqlite3WebDao, Database> {
       for (final statement in createMainAndFts5Statements) {
         await db.execute(statement);
       }
-      db.execute("PRAGMA user_version = 1");
+      await db.execute("PRAGMA user_version = 1");
     }
   }
 

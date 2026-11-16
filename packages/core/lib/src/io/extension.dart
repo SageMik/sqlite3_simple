@@ -44,7 +44,7 @@ extension Sqlite3SimpleCoreEx on Sqlite3 {
 
   /// 将结巴分词字典文件保存到指定目录 [dir] 。
   ///
-  /// 当字典文件存在时，通过 [overwriteWhenExist] 控制是否覆盖，默认不覆盖。
+  /// 若字典文件已存在，可通过 [overwriteWhenExist] 控制是否覆盖，默认不覆盖。
   ///
   /// 使用结巴分词功能需要执行本方法返回的 SQL 语句，或自行实现相似逻辑。
   Future<String> saveJiebaDictFromBytes(

@@ -19,8 +19,8 @@ final tokenizerProvider = mutable<Tokenizer>(Tokenizer.jieba);
 const tokenizer2uiLabel = {Tokenizer.jieba: UiLabel("结巴"), Tokenizer.simple: UiLabel("Simple")};
 
 /// [DbManager] 具体实现。
-///  - 非 Web 平台： `data\impl\kind.dart`；
-///  - Web 平台：`data\impl_web\kind.dart`。
+///  - 非 Web 平台： `data/impl/kind.dart`；
+///  - Web 平台：`data/impl_web/kind.dart`。
 final dbManagerKindProvider = mutable(dbManagerKind2uiLabel.keys.first);
 final dbManagerKind2uiLabel = {for (final t in DbManagerKind.values) t: UiLabel(t.name)};
 

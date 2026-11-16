@@ -10,7 +10,7 @@ extension Sqlite3SimpleEx on Sqlite3 {
   ///
   /// 由于涉及访问 [AssetBundle] 的资源，该方法需要在 **主隔离 (Main Isolate)** 中调用。
   ///
-  /// 当字典文件存在时，通过 [overwriteWhenExist] 控制是否覆盖，默认不覆盖。
+  /// 若字典文件已存在，可通过 [overwriteWhenExist] 控制是否覆盖，默认不覆盖。
   ///
   /// 使用结巴分词功能需要执行本方法返回的 SQL 语句，或自行实现相似逻辑。
   ///

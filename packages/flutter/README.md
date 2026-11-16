@@ -8,7 +8,7 @@
 
 在线演示：[Simple 分词器 示例](https://sagemik.github.io/sqlite3_simple) 。
 
-| Android ([apk](https://github.com/SageMik/sqlite3_simple/releases/download/v3.0.0/example.apk)), iOS | Windows, MacOS, Linux, Web |
+| Android ([apk](https://github.com/SageMik/sqlite3_simple/releases/download/v3.0.0/example.apk)), iOS | Windows, macOS, Linux, Web |
 |------------------------------------------------------------------------------------------------------|----------------------------|
 |                                                                                                      |                            |
 

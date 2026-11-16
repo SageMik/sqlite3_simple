@@ -23,7 +23,7 @@ part 'sqlite3_wasm.worker.g.dart';
 /// 调整代码后，在 `example` 目录下执行如下命令重新生成：
 /// ```shell
 /// dart run build_runner build -d
-/// dart compile js lib\data\impl_web\sqlite3_wasm\sqlite3_wasm.web.g.dart -o web\sqlite3_wasm.web.g.dart.js
+/// dart compile js lib/data/impl_web/sqlite3_wasm/sqlite3_wasm.web.g.dart -o web/sqlite3_wasm.web.g.dart.js
 /// ```
 /// 建议最终发布时使用 `-O4` 编译优化等级。
 @SquadronService(baseUrl: "~", targetPlatform: TargetPlatform.js)

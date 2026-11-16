@@ -1,10 +1,10 @@
-# sqlite3_simple - Web 
+# sqlite3_simple - Web
 
-在线演示：[Simple 分词器 示例](https://sagemik.github.io/sqlite3_simple) 。代码请参考 [`example/lib/data/impl_web`](../example/lib/data/impl_web) 。
+在线演示：[Simple 分词器 示例](https://sagemik.github.io/sqlite3_simple)。代码请参考 [`example/lib/data/impl_web`](../example/lib/data/impl_web) 。
 
 ## 快速开始
 
-### 1. 添加 `sqlite3` 、`sqlite3_web` 依赖
+### 1. 添加 `sqlite3`、`sqlite3_web` 等依赖
 
 在 Web 上使用 Simple 分词器，**需要 [`sqlite3: ^3.3.0`](https://github.com/simolus3/sqlite3.dart/tree/sqlite3-3.3.0/sqlite3) 或以上版本（原因见<a href="#wasm-module-loader-requirement">此处</a>）**，[`sqlite3_web`](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3_web) 理论上不受限制但还是建议使用最新版本：
 
@@ -12,6 +12,7 @@
 dependencies:
   sqlite3: ^3.3.0
   sqlite3_web: ^0.7.0
+  web: ^1.1.1
 ```
 
 <details>
@@ -19,32 +20,40 @@ dependencies:
 
 <br />
 
-SQLite 是基于文件的嵌入式数据库，但在 Web 环境中无法直接访问文件系统，因此需要 `sqlite3_web` 提供的基于 [Web Worker](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Workers_API/Using_web_workers)（属于后台线程，支持[文件系统 API](https://developer.mozilla.org/zh-CN/docs/Web/API/File_System_API)）管理数据库的**异步 API** 。
+如 [`sqlite3_web`](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3_web) 的文档所述，SQLite 作为基于文件的嵌入式数据库，在 Web 上运行会受到 WebAssembly 沙箱、文件系统、各浏览器持久化 API 差异、主线程阻塞等诸多因素的限制，因此最可靠的方式是将 SQLite 实例移入 [Web Worker](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Workers_API/Using_web_workers) 中运行，由 Worker 侧代码管理数据库，并通过消息通道与主线程异步通信。`sqlite3_web` 正为此提供了对应的异步封装，既可替换 `sqlite3` 中不满足要求的同步 API，又省去了自行实现的繁琐。
 
-`sqlite3` 提供的同步 API 不满足 Web Worker 的异步通信需求，已有项目增加 Web 支持，可能涉及大量同步异步代码的调整。一种可以复用同步 API 的方法是通过 [`squadron`](https://github.com/d-markey/squadron) 或其他框架自行管理 Web Worker，例如示例中的 [`impl_web/sqlite3_wasm`](../example/lib/data/impl_web/sqlite3_wasm) 就复用了 `Sqlite3Dao` 。不过此类通用框架首屏加载速度会稍慢，需要根据实际项目需求选择。
+已有项目增加 Web 支持，可能涉及大量同步异步代码的调整。一种可以复用同步 API 的方法是通过 [`squadron`](https://github.com/d-markey/squadron) 或其他框架自行管理 Web Worker，例如示例 [`impl_web/sqlite3_wasm`](../example/lib/data/impl_web/sqlite3_wasm) 就复用了基于同步 API 的 `Sqlite3Dao` 。此类通用框架首屏加载速度会稍慢，需根据实际项目需求选择。
 
 </details>
 
 ### 2. 添加本库，下载 `sqlite3.wasm`
 
 ```shell
+# Dart 项目
+dart pub add sqlite3_simple_core
+
+# Flutter 项目
 flutter pub add sqlite3_simple
 ```
 
-随后到本仓库的 [Release](https://github.com/SageMik/sqlite3_simple/releases) 中下载 [`sqlite3.wasm`](https://github.com/SageMik/sqlite3_simple/releases/download/Nv2.3.0/sqlite3.wasm) 或 [`sqlite3mc.wasm`](https://github.com/SageMik/sqlite3_simple/releases/download/Nv2.3.0/sqlite3mc.wasm) (内置 [SQLite3 Multiple Ciphers](https://github.com/utelle/SQLite3MultipleCiphers) 扩展) ，置于项目的 `web` 或者资源等可访问目录下，以便后续加载使用。
+随后到本仓库的 [Release](https://github.com/SageMik/sqlite3_simple/releases) 中，找到 `simple-native vX.Y.Z` 下载 [`sqlite3.wasm`](https://github.com/SageMik/sqlite3_simple/releases/download/Nv3.0.0/sqlite3.wasm) 或 [`sqlite3mc.wasm`](https://github.com/SageMik/sqlite3_simple/releases/download/Nv3.0.0/sqlite3mc.wasm) (内置 [SQLite3 Multiple Ciphers](https://github.com/utelle/SQLite3MultipleCiphers) 扩展) ，置于项目的 `web` 或者资源等可访问目录下，以便后续加载使用。`simple-native` 的版本一般与主库保持一致，但主库升级而原生库未变时不会重复发版，此时取不大于当前主库版本的最近一个即可。
 
-> [!TIP]
-> `sqlite3` 使用 [WASI SDK](https://github.com/WebAssembly/wasi-sdk) 通过 [sqlite3_wasm_build](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3_wasm_build) 将 SQLite 编译为 WebAssembly 文件以在 Web 上使用。
->
-> 由于目前 [SQLite 不支持在 Web 上加载运行时扩展](https://sqlite.org/forum/forumpost/9273e6c9159502a1842287f4c20aec964a81c01057bdecf0e8137dd8b5c44dd1) ，本项目基于 [sqlite3_wasm_build](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3_wasm_build) 编译了内置 Simple 分词器的 `sqlite3.wasm` 和 `sqlite3mc.wasm` ，编译代码由 [simple-native 分支](https://github.com/SageMik/sqlite3_simple/tree/simple-native) 维护，若需自行编译请参考 [`src/web`](https://github.com/SageMik/sqlite3_simple/tree/simple-native/src/web) 。
+<details>
+<summary><b>&nbsp;📝 自行编译 Simple Wasm 模块</b></summary>
+
+<br />
+
+`sqlite3` 使用 [WASI SDK](https://github.com/WebAssembly/wasi-sdk) 通过 [`sqlite3_wasm_build`](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3_wasm_build) 将 SQLite 编译为 WebAssembly 以在 Web 上使用。由于目前 [SQLite 不支持在 Web 上加载运行时扩展](https://sqlite.org/forum/forumpost/9273e6c9159502a1842287f4c20aec964a81c01057bdecf0e8137dd8b5c44dd1) ，本项目在 [simple-native 分支](https://github.com/SageMik/sqlite3_simple/tree/simple-native) 上编译了「内置 Simple 分词器」的 `sqlite3.wasm` 和 `sqlite3mc.wasm` ，编译代码请参考 [`src/web`](https://github.com/SageMik/sqlite3_simple/tree/simple-native/src/web) 。
+
+</details>
 
 ### 3. 编写在 Web Worker 中的数据库管理逻辑
 
-根据 [`sqlite3_web` 的说明](https://github.com/simolus3/sqlite3.dart/tree/sqlite3-3.3.0/sqlite3_web#getting-started) 进行编写，例如 [`impl_web/sqlite3_web/sqlite3_web_worker.dart`](../example/lib/data/impl_web/sqlite3_web/sqlite3_web_worker.dart) 。
+根据 [`sqlite3_web` 的说明](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3_web#getting-started) 编写在 Web Worker 中的数据库管理逻辑，例如 [`impl_web/sqlite3_web/sqlite3_web_worker.dart`](../example/lib/data/impl_web/sqlite3_web/sqlite3_web_worker.dart) 。
 
 #### Web Worker 启动入口
 
-```
+```dart
 void main() {
   WebSqlite.workerEntrypoint(controller: Sqlite3WebDbController());
 }
@@ -91,21 +100,28 @@ final class Sqlite3WebDbController extends DatabaseController {
 
 > [!TIP]
 >
-> 用于自定义 Wasm 模块加载的 `WasmModuleLoader` 在 `sqlite3: 3.3.0` 才[被引入](https://github.com/simolus3/sqlite3.dart/issues/359)，因此 `3.3.0` 是在 Web 上使用 Simple 的最低版本要求。
+> 用于自定义 Wasm 模块加载的 `WasmModuleLoader` 在 `sqlite3: 3.3.0` 才[被引入](https://github.com/simolus3/sqlite3.dart/issues/359)，因此 `3.3.0` 是最低版本要求。
 
 <details>
 <summary><b> 📝 <code>DefaultSimpleWasmModuleLoader</code></b> 实现</summary>
 
 <br />
 
-由于 Simple 涉及文件读写（`fopen`、`read`、`write` ...）等在 Web 环境中不可用的系统调用，WASI 会将其统一为抽象为 `wasi_snapshot_preview1` 模块的 API（`path_open`、`fd_read`、`fd_write` 等）并要求宿主侧提供实现。`DefaultSimpleWasmModuleLoader` 通过 [`wasd`](https://github.com/medz/wasd) 实现了这些 API，为 Simple 提供了 Web 环境支持。
+由于 Simple 涉及文件读写（`fopen`、`read`、`write` ...）等在 Web 环境中不可用的系统调用，WASI 会将其统一抽象为 `wasi_snapshot_preview1` 模块的 API（`path_open`、`fd_read`、`fd_write` 等）并要求宿主侧提供实现。`DefaultSimpleWasmModuleLoader` 通过 [`wasd`](https://github.com/medz/wasd) 实现了这些 API，为 Simple 提供了 Web 环境支持。
 
-如果默认实现不满足要求，可以自行继承 [`SimpleBridgeCallbacks`](../lib/src/web/bridge_callbacks.dart) 和 `WasmModuleLoader` 进行扩展。
+如果默认实现不满足要求，可以自行继承 [`SimpleBridgeCallbacks`](../../core/lib/src/web/bridge_callbacks.dart)（重写后仍需要写 `@JSExport()` ） 和 `WasmModuleLoader` 进行扩展。
 
 </details>
 
 #### 通过主线程传递自定义消息，加载结巴分词字典文件
-本库内置了结巴分词所需的字典文件，可通过 [`JiebaDictAssets.loadPaths()`](../lib/src/common/jieba_dict_assets.dart) 获取其路径。**由于涉及对 Flutter 资源的访问，该方法需要在主线程中调用。** 因此，使用结巴分词，需要自定义消息将路径传递到 Worker 中，然后使用 JS 的 `fetch` 函数进行加载，例如：
+
+如需启用结巴分词，需要通过 `DefaultSimpleWasmModuleLoader.updateFiles()` 传入结巴分词字典的 `Uint8List` 字节内容，具体而言：
+
+1. 对于 Dart 项目，`sqlite3_simple_core` 不包含字典文件，需要自行提供，可从 [此处](https://github.com/yanyiwu/cppjieba/tree/master/dict) 下载，并将其放置到 Web 可访问的路径；
+
+2. 对于 Flutter 项目，`sqlite3_simple` 内置了结巴分词所需的字典文件，**在主线程调用** [`JiebaDictAssets.loadPaths()`](../lib/jieba_dict_assets.dart) 即可获取其在 Flutter 资源中的路径。
+
+获取路径后，建议直接将其从主线程传递给 Worker ，由后者读取字节内容，避免不必要的跨线程复制开销。为此，主线程发送端与 Worker 接收端各需一段自定义消息处理。接收端通过 JS 函数 `fetch` 读取字节内容并调用 `_loader.updateFiles()`，示例如下：
 
 ```dart
 final class Sqlite3WebDb extends WorkerDatabase {
@@ -122,20 +138,17 @@ final class Sqlite3WebDb extends WorkerDatabase {
     CustomClientDatabaseRequest request,
   ) async {
     // 将内置的结巴分词文件传递给 Wasm 模块以供运行时读取，不需要结巴分词直接 `return null` 即可
-    try {
-      final requestJO = request.request as JSObject;
-      final type = (requestJO['type'] as JSString).toDart;
-      switch(type) {
-        case 'updateJiebaDict': // 自定义消息 { 'type': 'updateJiebaDict', 'path2url': 虚拟路径 → 文件内容 }
-          final path2url = (requestJO['path2url'].dartify() as Map).cast<String, String>();
-          final jiebaDictFiles = {
-            for (final e in path2url.entries)
-              e.key: await fetchFromBase(e.value),
-          };
-          _loader.updateFiles((it) => it..addAll(jiebaDictFiles)); // 更新结巴分词文件，其他已有文件继续保留
-      }
-    } catch (e) {
-      rethrow;
+    final requestJO = request.request as JSObject;
+    final type = (requestJO['type'] as JSString).toDart;
+    switch(type) {
+      case 'updateJiebaDict': // 自定义消息 { 'type': 'updateJiebaDict', 'path2url': 虚拟路径 → 资源 URL }
+        final path2url = (requestJO['path2url'].dartify() as Map).cast<String, String>();
+        final jiebaDictFiles = {
+          for (final e in path2url.entries)
+            e.key: await fetchFromBase(e.value),
+        };
+        _loader.updateFiles((it) => it..addAll(jiebaDictFiles)); // 更新结巴分词文件，其他已有文件继续保留
+        break;
     }
     return null;
   }
@@ -162,25 +175,23 @@ Future<Uint8List> fetch(String url, [String? base]) async {
 Future<Uint8List> fetchFromBase(String url) => fetch(url, Uri.base.toString());
 ```
 
-`_loader.updateFiles` 用于更新提供给 Wasm 模块读取的文件。在 `DefaultSimpleWasmModuleLoader` 的实现中，文件读写通过内存中的「虚拟路径 → 文件内容 `Uint8List`」映射关系来模拟实现。
-
 #### 编译为 JavaScript
 
-上述代码通过 `dart compile js` 编译为 JavaScript 后才能使用。参考示例代码在 `example` 目录下执行如下命令，即可编译成 `sqlite3_web_worker.dart.js` 供后续使用：
+在 `example` 目录下执行如下命令，编译成 `sqlite3_web_worker.dart.js` 以供后续使用：
 
-```dart
-dart compile js lib\data\impl_web\sqlite3_web\sqlite3_web_worker.dart -o web\sqlite3_web_worker.dart.js -O4
+```shell
+dart compile js lib/data/impl_web/sqlite3_web/sqlite3_web_worker.dart -o web/sqlite3_web_worker.dart.js -O4
 ```
 
 > [!IMPORTANT]
 >
-> Flutter 相关的依赖不支持编译为 JS，注意不要被直接或间接依赖。
+> `package:flutter/*`、`dart:ui` 等 Flutter 专属库不支持编译为 JS，注意不要被直接或间接依赖。
 
 调试阶段建议省略 `-O4` 优化选项，以保留更清晰的错误信息和调用栈，方便问题定位。
 
 ### 4. 打开数据库
 
-根据 [`sqlite3_web` 的说明](https://github.com/simolus3/sqlite3.dart/tree/sqlite3-3.3.0/sqlite3_web#getting-started)，以及前面下载的 `sqlite3.wasm` 和编译的 `sqlite3_web_worker.dart.js` 的位置，打开数据库：
+根据 [`sqlite3_web` 的说明](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3_web#getting-started)，以及前面下载的 `sqlite3.wasm` 和编译的 `sqlite3_web_worker.dart.js`，参考 [`impl_web/sqlite3_web/sqlite3_web_impl.dart`](../example/lib/data/impl_web/sqlite3_web/sqlite3_web_impl.dart)，调用 `connectToRecommended()` 或 `connect()` 打开数据库：
 
 ```dart
 final webSqlite3 = WebSqlite.open(
@@ -189,10 +200,10 @@ final webSqlite3 = WebSqlite.open(
   ),
   wasmModule: Uri.parse('sqlite3.wasm'),
 );
-final db = await webSqlite3.connectToRecommended('database');
+final db = (await webSqlite3.connectToRecommended('database')).database;
 ```
 
-如需启用结巴分词，根据前面自定义的消息，调用 `db.customRequest()` 进行传递：
+如需启用结巴分词，对应前文 Worker 接收端的处理，编写主线程发送端的逻辑，即调用 `db.customRequest()` 传递路径：
 
 ```dart
 final Map<JiebaDictType, String> jiebaDictPaths = await JiebaDictAssets.loadPaths();
@@ -206,18 +217,16 @@ await db.customRequest(
     }
   }.jsify(),
 );
-await db.execute("SELECT jieba_dict(?)", parameters: [jiebaDictDir]);
+await db.execute("SELECT jieba_dict(?)", parameters: [jiebaDictDir]); // 修改 Simple 扩展读取字典的路径
 final init = await db.select( // 推荐在正式查询前执行一次查询，提前加载
   "SELECT jieba_query('Jieba分词初始化（提前加载避免后续等待）')",
 );
 if (kDebugMode) print(init.result);
 ```
 
-[`JiebaDictType`](../lib/src/common/jieba_dict_type.dart) 枚举定义了结巴分词所需的所有字典类型，如 `jiebaDict("jieba.dict.utf8")` 等。
-
 ### 5. 创建主表、FTS5 虚表和触发器
 
-根据 [SQLite FTS5 Extension](https://sqlite.org/fts5.html) 的说明和实际项目需求创表，例如 [`impl_web/sqlite3_web/sqlite3_web_impl.dart`](../example/lib/data/impl_web/sqlite3_web/sqlite3_web_impl.dart) ：
+根据 [SQLite FTS5 Extension](https://sqlite.org/fts5.html) 和实际项目需求创表，例如 [`main_table_schema.dart`](../example/lib/data/main_table_schema.dart) ：
 
 ```dart
 // final fts5Tokenizer = "simple 0";  // 关闭拼音搜索
@@ -229,63 +238,86 @@ const id = "id",
     insertDate = "insert_date";
 const fts5Table = "t1";
 
-@override
-@protected
-Future<void> createMainAndFts5(Database db) async {
+/// 主表、FTS5 虚表及其触发器的建表语句，供各原始 SQL 实现共用。
+/// 官方说明：https://sqlite.org/fts5.html
+const createMainAndFts5Statements = <String>[
   /// 主表
-  await db.execute('''
+  '''
     CREATE TABLE $mainTable (
       $id INTEGER PRIMARY KEY AUTOINCREMENT, 
       $title TEXT, 
       $content TEXT, 
       $insertDate INTEGER
     );
-  ''');
+  ''',
 
-  /// FTS5虚表
-  await db.execute('''
+  /// FTS5 虚表
+  '''
     CREATE VIRTUAL TABLE $fts5Table USING fts5(
       $title, $content, $insertDate UNINDEXED, 
       tokenize = '$fts5Tokenizer', 
       content = '$mainTable', 
       content_rowid = '$id'
     );
-  ''');
+  ''',
 
-  const newInsert = '''
-    INSERT INTO $fts5Table(rowid, $title, $content, $insertDate)
-      VALUES (new.$id, new.$title, new.$content, new.$insertDate);
-  ''';
-  const deleteInsert = '''
-    INSERT INTO $fts5Table($fts5Table, rowid, $title, $content, $insertDate)
-      VALUES ('delete', old.$id, old.$title, old.$content, old.$insertDate);
-  ''';
-  await db.execute('''
+  /// 触发器
+  '''
     CREATE TRIGGER ${mainTable}_insert AFTER INSERT ON $mainTable BEGIN 
-      $newInsert
+      $_newInsert
     END;
-  ''');
-  await db.execute('''
+  ''',
+  '''
     CREATE TRIGGER ${mainTable}_delete AFTER DELETE ON $mainTable BEGIN 
-      $deleteInsert
+      $_deleteInsert
     END;
-  ''');
-  await db.execute('''
+  ''',
+  '''
     CREATE TRIGGER ${mainTable}_update AFTER UPDATE ON $mainTable BEGIN 
-      $deleteInsert
-      $newInsert
+      $_deleteInsert
+      $_newInsert
     END;
-  ''');
+  ''',
+];
+
+const _newInsert = '''
+  INSERT INTO $fts5Table(rowid, $title, $content, $insertDate) 
+    VALUES (new.$id, new.$title, new.$content, new.$insertDate);
+''';
+
+const _deleteInsert = '''
+  INSERT INTO $fts5Table($fts5Table, rowid, $title, $content, $insertDate) 
+    VALUES ('delete', old.$id, old.$title, old.$content, old.$insertDate);
+''';
+```
+
+在 [`impl_web/sqlite3_web/sqlite3_web_impl.dart`](../example/lib/data/impl_web/sqlite3_web/sqlite3_web_impl.dart) 中执行：
+
+```dart
+final version = (await db.select(
+  "PRAGMA user_version",
+)).result.first['user_version'];
+if (version == 0) {
+  for (final statement in createMainAndFts5Statements) {
+    await db.execute(statement);
+  }
+  await db.execute("PRAGMA user_version = 1");
 }
 ```
 
 ### 6. 查询
 
-参阅 [Simple](https://github.com/wangfenjin/simple) 的说明，根据需要调用 `jieba_query`、`simple_query`、`highlight`、  `simple_highlight` 进行查询，例如 [`impl_web/sqlite3_web/sqlite3_web_impl.dart`](../example/lib/data/impl_web/sqlite3_web/sqlite3_web_impl.dart) ：
+参阅 [SQLite FTS5 Extension](https://sqlite.org/fts5.html) 和 [Simple](https://github.com/wangfenjin/simple) 的说明，根据需要调用 `jieba_query`、`simple_query`、`simple_highlight`、`highlight` 进行查询，例如 [`impl_web/sqlite3_web/sqlite3_web_impl.dart`](../example/lib/data/impl_web/sqlite3_web/sqlite3_web_impl.dart) ：
 
 ```dart
 @override
-Future<List<MainTableRow>> search(String value, Tokenizer tokenizer) async {
+Future<SearchResult> search(String value, Tokenizer tokenizer) async {
+  final stopwatch = Stopwatch()..start();
+  final tokenResult = await db.select(
+    'SELECT ${tokenizer.queryFunctionName}(?) AS q',
+    parameters: [value],
+  );
+  final tokens = '${tokenResult.result.first['q']}';
   const wrapperSql = "'${ZeroWidth.start}', '${ZeroWidth.end}'";
   final resultSet = await db.select(
     '''
@@ -295,10 +327,15 @@ Future<List<MainTableRow>> search(String value, Tokenizer tokenizer) async {
       simple_highlight($fts5Table, 1, $wrapperSql) AS $content, 
       $insertDate 
     FROM $fts5Table 
-    WHERE $fts5Table MATCH ${tokenizer.name}_query(?);
+    WHERE $fts5Table MATCH ${tokenizer.queryFunctionName}(?);
   ''',
     parameters: [value],
   );
-  return _toMainTableRows(resultSet.result);
+  stopwatch.stop();
+  return SearchResult(
+    rows: _toMainTableRows(resultSet.result),
+    tokens: tokens,
+    elapsed: stopwatch.elapsed,
+  );
 }
 ```

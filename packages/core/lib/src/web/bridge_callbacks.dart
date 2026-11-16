@@ -3,7 +3,7 @@ import 'dart:js_interop';
 import 'bridge_callbacks_default.dart';
 import 'loader_default.dart';
 
-/// 宿主侧对 `wasm_snapshot_preview1` 导入模块的部分实现（与 [DartBridgeCallbacks](https://github.com/simolus3/sqlite3.dart/blob/e008b3295673955d4d83bd3bc2c99f22d9e6015c/sqlite3/lib/src/wasm/injected_values.dart#L18) 相似），Simple 扩展需要依赖这些实现才能在 Web 上正常运行。
+/// 宿主侧对 `wasi_snapshot_preview1` 导入模块的部分实现（与 [DartBridgeCallbacks](https://github.com/simolus3/sqlite3.dart/blob/e008b3295673955d4d83bd3bc2c99f22d9e6015c/sqlite3/lib/src/wasm/injected_values.dart) 相似），Simple 扩展需要依赖这些实现才能在 Web 上正常运行。
 ///
 /// 若需要自定义实现，重写这些方法并标记为 [JSExport]，再通过加载器挂载到 `wasi_snapshot_preview1` 上，具体可参考 [DefaultSimpleBridgeCallbacks] 和 [DefaultSimpleWasmModuleLoader]。
 abstract class SimpleBridgeCallbacks {
