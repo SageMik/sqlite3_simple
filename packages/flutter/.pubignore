@@ -1,7 +1,7 @@
-/example/
 /pubspec.lock
 **/doc/api/
 .dart_tool/
 build/
 
-*.psd
+/example/*
+!/example/lib/

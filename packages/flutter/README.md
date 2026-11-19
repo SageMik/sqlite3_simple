@@ -12,10 +12,6 @@
 |------------------------------------------------------------------------------------------------------|----------------------------|
 |                                                                                                      |                            |
 
-> [!TIP]
->
-> Web 平台使用步骤与其他平台存在差异，具体请参阅 [`doc/web.md`](doc/web.md)。
-
 ## 目录
 
 - [前置说明](#前置说明)
@@ -28,13 +24,14 @@
   - [6. 自定义 Simple 原生库来源](#6-自定义-simple-原生库来源)
     - [构建期配置](#构建期配置)
     - [运行时加载](#运行时加载)
+- [从 2.x 升级](#从-2x-升级)
 - [致谢](#致谢)
 
 ## 前置说明
 
 SQLite 通过 [SQLite FTS5 Extension](https://sqlite.org/fts5.html) 提供全文搜索 (Full-Text Search) 功能；
 
-Dart 通过 [`dart:ffi`](https://dart.cn/interop/c-interop/) 调用 SQLite、Simple 等 C/C++ 库；通过 [Hooks](https://dart.dev/tools/hooks) 统一管理各平台原生库；
+Dart 在非 Web 平台通过 [`dart:ffi`](https://dart.cn/interop/c-interop/) 调用 SQLite、Simple 等 C/C++ 库，通过 [Hooks](https://dart.dev/tools/hooks) 统一管理原生库；在 Web 平台则通过 [WebAssembly](https://developer.mozilla.org/zh-CN/docs/WebAssembly) (WASM) 加载由这些 C/C++ 代码编译而成的模块。
 
 请参阅相关文档或下述具体示例，以完成数据库全文搜索的功能接入：
 
@@ -44,7 +41,9 @@ Dart 通过 [`dart:ffi`](https://dart.cn/interop/c-interop/) 调用 SQLite、Sim
 
 > [!TIP]
 >
-> 本库通过 [`sqlite3`](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 管理数据库，因此理论上任何依赖于 `sqlite3` 的 Flutter 库，均可通过本库实现中文和拼音全文搜索，例如 [`drift`](https://github.com/simolus3/drift)、[`sqflite_common_ffi`](https://github.com/tekartik/sqflite/tree/master/sqflite_common_ffi)，可在 [`example/lib/data/impl`](example/lib/data/impl) 查看具体示例。
+> 1. Web 平台使用步骤与其他平台存在差异，具体请参阅 [`doc/web.md`](doc/web.md)。
+> 2. `2.x` 升级到 `3.x` 存在破坏性变更，请阅读 [从 2.x 升级](#从-2x-升级) ；
+> 3. 本库通过 [`sqlite3`](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 管理数据库，因此理论上任何依赖于 `sqlite3` 的 Flutter 库，均可通过本库实现中文和拼音全文搜索，例如 [`drift`](https://github.com/simolus3/drift)、[`sqflite_common_ffi`](https://github.com/tekartik/sqflite/tree/master/sqflite_common_ffi)，可在 [`example/lib/data/impl`](example/lib/data/impl) 查看具体示例。
 
 ## 快速开始
 
@@ -106,7 +105,7 @@ final jiebaDictSql = await sqlite3.saveJiebaDict(jiebaDictPath); // 返回值即
 
 参阅 [`sqlite3`](https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3) 的说明，通过 `sqlite3.open()` 或 `sqlite3.openInMemory()` 打开数据库。
 
-``dart
+```dart
 final db = sqlite.open('$filename');
 ```
 
@@ -210,7 +209,17 @@ if (version == 0) {
 参阅 [Simple](https://github.com/wangfenjin/simple) 的说明，根据需要调用 `jieba_query`、`simple_query`、`highlight`、`simple_highlight` 进行查询，例如 [`Sqlite3Dao.search()`](./example/lib/data/impl/sqlite3/sqlite3_dao.dart)：
 
 ```dart
-/// 根据 [value] 和 指定分词器 [tokenizer] 搜索， [tokenizer] 取值：[Tokenizer.jieba], [Tokenizer.simple]
+enum Tokenizer {
+  jieba("jieba_query"),
+  simple("simple_query");
+
+  /// FTS5 `MATCH` 时使用的查询函数名
+  final String queryFunctionName;
+
+  const Tokenizer(this.queryFunctionName);
+}
+
+/// 根据 [value] 和 指定分词器 [tokenizer] 搜索
 Future<SearchResult> search(String value, Tokenizer tokenizer) async {
   final stopwatch = Stopwatch()..start();
   final tokens =
@@ -227,9 +236,9 @@ Future<SearchResult> search(String value, Tokenizer tokenizer) async {
   ''', [value]);
   stopwatch.stop();
   return SearchResult(
-    rows: _toMainTableRows(resultSet),
-    tokens: tokens,
-    elapsed: stopwatch.elapsed,
+    rows: _toMainTableRows(resultSet), // 搜索结果
+    tokens: tokens,                    // 分词结果
+    elapsed: stopwatch.elapsed,        // 耗时
   );
 }
 ```
@@ -244,7 +253,7 @@ Future<SearchResult> search(String value, Tokenizer tokenizer) async {
 
 #### 构建期配置
 
-基于 Dart Hooks 的配置机制，可在 `pubspec.yaml` 的 `hooks.user_defines` 下为 `sqlite3_simple_core` 指定原生库来源，例如 [`../core/example/pubspec.yaml`](../core/example/pubspec.yaml) ：
+基于 Dart Hooks 的配置机制，可在 `pubspec.yaml` 的 `hooks.user_defines.sqlite3_simple_core` 下指定原生库来源，例如 [`../core/example/pubspec.yaml`](../core/example/pubspec.yaml) ：
 
 ```yaml
 hooks:
@@ -332,6 +341,42 @@ sqlite3.loadSimpleExtension(override: simpleExtension);
 ```
 
 如此，Android 就会使用由 `simple-native-android` 提供的原生库，其他平台继续使用 Dart Hooks 打包的原生库，`skip_targets` 使 Dart Hooks 跳过 Android 的打包避免出现多份原生库。
+
+## 从 2.x 升级
+
+### `loadSimpleExtension()` 参数变更
+
+```dart
+import 'dart:ffi';
+
+// 2.x
+sqlite3.loadSimpleExtension(
+  overrideOpen: () => DynamicLibrary.open('libsimple.so'),
+);
+
+// 3.0.0
+sqlite3.loadSimpleExtension(
+  override: SqliteExtension.inLibrary(
+    DynamicLibrary.open('libsimple.so'),
+    simpleInitSymbol,
+  ),
+);
+```
+
+其中 `simpleInitSymbol` 为常量，值为 `sqlite3_simple_init` ，即 Simple 扩展提供的初始化函数符号。
+
+### `JiebaDictAssets` 导入路径变更
+
+```dart
+// 2.x
+import 'package:sqlite3_simple/assets.dart';
+
+// 3.0.0
+import 'package:sqlite3_simple/jieba_dict_assets.dart';
+
+
+final paths = await JiebaDictAssets.loadPaths();
+```
 
 ## 致谢
 

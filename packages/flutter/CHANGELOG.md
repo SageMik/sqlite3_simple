@@ -1,6 +1,12 @@
 ## 3.0.0
 
-- **[新增]** 拆分 `sqlite3_simple_core`
+- **[原生库版本]** 更新至 [最新提交](https://github.com/wangfenjin/simple/tree/45db071ba8043ffe8a2e5dfe41f9d68fb477576c) ，以支持 iOS 动态库编译。
+- **[变更]** 将纯 Dart 逻辑独立为 [`sqlite3_simple_core`](https://pub.dev/packages/sqlite3_simple_core)，原生库也随之改由 [Dart Hooks](https://dart.dev/tools/hooks) 统一管理。
+- **[新增]** 新增 `hooks.user_defines.sqlite3_simple_core` 构建期配置，可用于定义原生库来源。
+- **[变更]** `sqlite3.loadSimpleExtension()` 的参数由 `overrideOpen: DynamicLibrary? Function()` 调整为 `override: SqliteExtension?` 。
+- **[变更]** `JiebaDictAssets` 导入路径由 `package:sqlite3_simple/assets.dart` 调整为 `package:sqlite3_simple/jieba_dict_assets.dart`。
+- **[新增]** 新增 `sqlite3.saveJiebaDictFromBytes()` ，可将内存中的结巴字典字节写入本地目录。
+- **[优化]** 优化示例代码与界面。
 
 ## 2.3.0
 

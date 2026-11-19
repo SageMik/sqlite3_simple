@@ -1,5 +1,6 @@
-/example/
 /pubspec.lock
 **/doc/api/
 .dart_tool/
 build/
+
+/example/web/*.wasm

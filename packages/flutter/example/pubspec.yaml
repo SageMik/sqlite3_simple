@@ -55,8 +55,8 @@ flutter:
     - assets/pinyin_dict/
     - assets/font/HarmonyOS_Sans_SC_Regular.subset.ttf
 
-hooks:
-  user_defines:
-    sqlite3_simple_core:
-      source: local
-      path: ../../core/example/libsimple.dart.zip
+#hooks:
+#  user_defines:
+#    sqlite3_simple_core:
+#      source: local
+#      path: ../../core/example/libsimple.dart.zip
