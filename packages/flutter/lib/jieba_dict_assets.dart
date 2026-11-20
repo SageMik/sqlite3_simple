@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
 import 'package:sqlite3_simple_core/jieba_dict_type.dart';
 
-import 'src/io/assets_path.dart' if (dart.library.html) 'src/web/assets_path.dart';
+import 'src/io/assets_path.dart' if (dart.library.js_interop) 'src/web/assets_path.dart';
 
 class JiebaDictAssets {
   JiebaDictAssets._();

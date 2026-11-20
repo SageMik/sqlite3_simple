@@ -2,7 +2,7 @@ import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'data/impl/kind.dart';
+import 'data/db_manager_kind.dart';
 import 'data/main_table_dao.dart';
 import 'data/main_table_row.dart';
 import 'data/pinyin_dict_kind.dart';
