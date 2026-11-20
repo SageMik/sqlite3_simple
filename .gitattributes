@@ -1,3 +1,4 @@
 * text=auto
 
-*.podspec text eol=lf # 强制换行符号，避免 MacOS/iOS 编译报错
+# 强制换行符号，避免 MacOS/iOS 编译报错
+*.podspec text eol=lf

@@ -5,29 +5,19 @@ on:
     tags:
       - 'core-v*'
 
-permissions:
-  contents: write
-
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: 提取 CHANGELOG
-        id: changelog
-        run: |
-          echo "release_notes<<EOF" >> "$GITHUB_OUTPUT"
-          python scripts/extract_changelog.py packages/core/CHANGELOG.md "${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
-        shell: bash
-
-      - name: 发布 Release
-        uses: softprops/action-gh-release@v2
+      - uses: ./.github/actions/release-package
         with:
-          tag_name: ${{ github.ref_name }}
-          name: ${{ github.ref_name }}
-          body: ${{ steps.changelog.outputs.release_notes }}
-          draft: true
+          package-dir: packages/core
+          # 新包首版只能本地手动发布
+          skip-publish-version: '3.0.0'

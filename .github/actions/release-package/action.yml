@@ -1,0 +1,61 @@
+name: 发布包
+description: 发布 Dart/Flutter 包到 pub.dev 并创建 GitHub Release
+
+inputs:
+  package-dir:
+    description: 包所在目录
+    required: true
+  skip-publish-version:
+    description: 跳过 pub.dev 发布的版本号，用于新包首版需手动发布等特殊情况
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        flutter-version: '3.47.0'
+        cache: true
+
+    - name: 提取 CHANGELOG
+      id: changelog
+      shell: bash
+      run: |
+        echo "release_notes<<EOF" >> "$GITHUB_OUTPUT"
+        python scripts/extract_changelog.py "${{ inputs.package-dir }}/CHANGELOG.md" "${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+        echo "EOF" >> "$GITHUB_OUTPUT"
+
+    - name: 解析依赖
+      shell: bash
+      run: flutter pub get
+
+    - name: 检查是否跳过发布
+      id: check
+      shell: bash
+      working-directory: ${{ inputs.package-dir }}
+      env:
+        SKIP_VERSION: ${{ inputs.skip-publish-version }}
+      run: |
+        version=$(sed -n 's/^version: *//p' pubspec.yaml | head -n1)
+        if [ -n "$SKIP_VERSION" ] && [ "$SKIP_VERSION" = "$version" ]; then
+          echo "publish=false" >> "$GITHUB_OUTPUT"
+          echo "::notice::按 skip-publish-version 配置跳过 $version 的 pub.dev 发布"
+        else
+          echo "publish=true" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: 发布到 pub.dev
+      if: steps.check.outputs.publish == 'true'
+      shell: bash
+      working-directory: ${{ inputs.package-dir }}
+      run: flutter pub publish --force
+
+    - name: 发布 Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: ${{ github.ref_name }}
+        body: ${{ steps.changelog.outputs.release_notes }}
+        draft: true
