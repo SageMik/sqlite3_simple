@@ -2,3 +2,11 @@
 
 # 强制换行符号，避免 MacOS/iOS 编译报错
 *.podspec text eol=lf
+
+# Flutter / Dart 工具链生成的文件一律写 LF，固定工作区换行，避免 Windows 下重新生成出现行尾差异
+generated_plugin_registrant.* text eol=lf
+generated_plugins.cmake text eol=lf
+GeneratedPluginRegistrant.swift text eol=lf
+*.g.dart text eol=lf
+pubspec.lock text eol=lf
+.metadata text eol=lf
